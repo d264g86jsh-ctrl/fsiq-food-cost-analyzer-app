@@ -1,0 +1,11 @@
+// Prisma schema — Phase 0 placeholder
+// Phase 1 will add the full Submission model per docs/build-phases.md
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
