@@ -28,6 +28,9 @@ test-results/
 # Prisma
 prisma/migrations/**/migration_lock.toml
 
+# Claude Code local user config (machine-specific, not shared)
+.claude/settings.local.json
+
 # TypeScript build cache
 tsconfig.tsbuildinfo
 *.tsbuildinfo

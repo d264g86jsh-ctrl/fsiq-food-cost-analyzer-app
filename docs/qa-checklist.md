@@ -26,15 +26,25 @@ SOP reference: `docs/FSIQ_SOP_v3.3.md` §23 (archive: `docs/FSIQ_SOP_v3.3.pdf`).
 
 ---
 
+## Submission Behavior (All Paths)
+
+- [ ] Form submission is **never blocked by business eligibility decisions** (`clear_non_fit`, `national_chain`, `invalid_website`, `below_threshold`, `non_us`)
+- [ ] Form submission IS blocked for: missing required fields, invalid email format, malformed ZIP
+- [ ] Every completed submission is saved to the DB regardless of outcome
+- [ ] Every completed submission is synced to GHL regardless of outcome
+- [ ] DQ routing, PDF generation, and email delivery all happen server-side after submission
+
+---
+
 ## Disqualified Path Tests (run all 3)
 
-| Input | Expected decision | Expected email subject |
-|---|---|---|
-| Restaurant name: `McDonalds`, normal spend | `national_chain` | "About your FoodServiceIQ submission" |
-| Website: nonexistent URL returning 404, normal spend | `invalid_website` | "Quick check on your FoodServiceIQ submission" |
-| Annual spend: `200` (parses to $200K) | `below_threshold` | "Thanks for using FoodServiceIQ's Food Cost Analyzer" |
+| Input | Expected decision | Expected email subject | DB saved | GHL synced |
+|---|---|---|---|---|
+| Restaurant name: `McDonalds`, normal spend | `national_chain` | "About your FoodServiceIQ submission" | ✓ | ✓ |
+| Website: nonexistent URL returning 404, normal spend | `invalid_website` | "Quick check on your FoodServiceIQ submission" | ✓ | ✓ |
+| Annual spend: `200` (parses to $200K) | `below_threshold` | "Thanks for using FoodServiceIQ's Food Cost Analyzer" | ✓ | ✓ |
 
-For each: confirm no Claude steps fire, no PDF generated, correct DQ email arrives.
+For each: confirm no Claude steps fire, no PDF generated, correct DQ email arrives, submission saved to DB, GHL tag applied.
 
 ---
 

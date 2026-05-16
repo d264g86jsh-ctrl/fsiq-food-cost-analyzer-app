@@ -100,8 +100,10 @@ UX spec: `docs/analyzer-ux-flow.md` (overrides SOP field order)
 - **Step 1 (qualification fields first):** `restaurant_name`, `website`, `zip_code`, `concept_type`, `locations`, `annual_food_spend`, `distributor_type`, `procurement_strategy` — dropdowns; `top_skus` — free text (label: "What are your biggest food spend categories or key items?"; qualification engine parses for protein/commodity keywords per `docs/savings-formula.md`)
 - **Step 2 (contact fields last):** `full_name`, `email`, `phone`
 - Wire real-time website+ZIP validation on field blur (Phase 2 endpoint)
-- Block final submission if `finalDecision` is `clear_non_fit`, `national_chain`, or `invalid_website`
-- Show conservative-mode notice (not a block) for `plausible_unverified`
+- **Never block submission based on business eligibility** — only block on missing/malformed required fields
+- Show inline validation state for `clear_non_fit`, `national_chain`, `invalid_website` — inform the user but allow submission
+- Show conservative-mode notice for `plausible_unverified` — informational only, not a block
+- Every submission is saved to DB and synced to GHL; PDF/DQ routing happens server-side in `submitAnalysis.ts`
 - Server actions: `src/actions/validateWebsite.ts`, `src/actions/submitAnalysis.ts`
 
 ---
@@ -138,7 +140,8 @@ PDF generation is its own phase — separate from the AI pipeline. The app backe
 ## Phase 7 — Email Delivery
 SOP reference: `docs/FSIQ_SOP_v3.3.md` §12, §21
 
-- `src/lib/email.ts` — 4 email variants
+- `src/lib/email/send-email.ts` — email dispatch
+- `src/lib/email/templates/` — one file per variant: `qualified.ts`, `qualified-conservative.ts`, `dq-invalid-website.ts`, `dq-below-threshold.ts`, `dq-national-chain.ts`, `dq-clear-non-fit.ts`
 
 | Condition | Email |
 |---|---|

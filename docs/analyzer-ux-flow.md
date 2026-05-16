@@ -45,8 +45,10 @@ Contact information is collected **at the end**, after the user has completed al
 - **Prefer multiple-choice / dropdown** for: `concept_type`, `locations`, `annual_food_spend`, `distributor_type`, `procurement_strategy`. Do not use free text where a bounded set of options exists.
 - **`top_skus` is always free text** — no dropdown, no multi-select, no predefined categories in v1. The qualification engine parses it for protein/commodity keywords.
 - **Contact info is required** before final submission and PDF delivery. The form cannot submit without `full_name` and `email`.
-- **Block final submission** if `finalDecision` is `clear_non_fit`, `national_chain`, or `invalid_website`.
-- **Show conservative-mode notice** (not a block) if `finalDecision` is `plausible_unverified`.
+- **Never block submission based on business eligibility decisions.** Every completed form submission is saved to the database and synced to GHL. DQ routing happens server-side after submission.
+- **Block only on missing or malformed required fields** (empty required field, invalid email format, malformed ZIP).
+- **Show inline validation state** for `clear_non_fit`, `national_chain`, `invalid_website`, or `plausible_unverified` — inform the user, but do not prevent them from submitting.
+- **Show conservative-mode notice** for `plausible_unverified` — informational only, not a block.
 - **Progress indicator** — show step progress so users know how far they are in the quiz.
 
 ---

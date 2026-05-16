@@ -72,7 +72,9 @@ src/
     pdf/
       build-pdf-payload.ts           # Assemble 26-variable payload
       pdfmonkey.ts                   # Direct PDFMonkey API call (no Zapier)
-    email.ts                         # 4 email variants
+    email/
+      send-email.ts                  # dispatch
+      templates/                     # qualified, qualified-conservative, dq-* variants
 prisma/
   schema.prisma
 docs/

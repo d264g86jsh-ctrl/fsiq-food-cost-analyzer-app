@@ -36,7 +36,9 @@ src/lib/
   relevance/      # classify-restaurant.ts, google-places.ts, location-eligibility.ts, claude-classifier.ts
   pdf/            # pdfmonkey.ts, build-pdf-payload.ts
   ai/             # aiResearcher.ts, aiNarrative.ts
-  email.ts
+  email/
+    send-email.ts
+    templates/         # qualified, qualified-conservative, dq-* variants
 prisma/           # schema + migrations
 docs/             # SOP and project docs
 .claude/          # Hooks and settings
