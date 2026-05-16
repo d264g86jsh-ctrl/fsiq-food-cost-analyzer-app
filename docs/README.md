@@ -12,6 +12,7 @@ Focused project specs override the historical SOP when they document approved pr
 | `analyzer-ux-flow.md` | Form field order and UX flow | Overrides SOP field order |
 | `website-validation-spec.md` | Website validation rules, reachability, country eligibility | Source of truth for validation |
 | `savings-formula.md` | Savings math — `finalPct`, `dollarEstimate`, projections | Source of truth for savings formula |
+| `brand-guidelines.md` | Brand colors, logo assets, component styling, voice and tone | Source of truth for UI design |
 | `qa-checklist.md` | QA test cases, run after every phase | |
 | `FSIQ_SOP_v3.3.md` | Full SOP converted to Markdown | Historical baseline / reference |
 | `FSIQ_SOP_v3.3.pdf` | Original PDF SOP | Archive / internal reference only |

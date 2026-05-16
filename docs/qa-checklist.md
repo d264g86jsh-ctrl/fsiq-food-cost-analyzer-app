@@ -4,9 +4,32 @@ SOP reference: `docs/FSIQ_SOP_v3.3.md` §23 (archive: `docs/FSIQ_SOP_v3.3.pdf`).
 
 ---
 
+## Branding and UI Consistency
+
+Brand source of truth: `docs/brand-guidelines.md`
+
+- [ ] Header background is dark green (`#143225`), white wordmark logo displayed
+- [ ] White logo (`/brand/fsiq-logo-white-transparent.png`) used on dark green header — not the black logo
+- [ ] Logo files exist in `public/brand/` and serve correctly (no 404)
+- [ ] No base64 logo strings embedded in components, CSS, or config files
+- [ ] Primary buttons use dark green background with white text
+- [ ] Accent green (`#52C275`) used for progress bar fill and verified status
+- [ ] `invalid_website` state shows red text; all other validation states show gray/informational
+- [ ] `national_chain` and `non_us` states show soft gray informational text — never red or hostile
+- [ ] Step progress indicator visible at all steps
+- [ ] Contact fields (`full_name`, `email`, `phone`) appear only on Step 4
+- [ ] `top_skus` is a free-text textarea — no dropdown or multi-select
+- [ ] All inputs have adequate tap target height (min 44px) for mobile
+- [ ] Form renders correctly on mobile viewport (375px width)
+- [ ] No harsh/rejecting language in validation messages
+- [ ] Footer shows "FoodServiceIQ — Confidential"
+- [ ] Success state shown after submission with soft confirmation message
+
+---
+
 ## Qualified Path
 
-- [ ] Complete quiz flow: Step 1 (qualification fields) → Step 2 (contact fields) → submit
+- [ ] Complete quiz flow: Step 1 → Step 2 → Step 3 → Step 4 → submit
 - [ ] Submit form: real restaurant website, valid ZIP, spend `$1M - $3M`, non-chain
 - [ ] `websiteStatus` is 200 or 403 (not 404)
 - [ ] `qualified = true`, `finalPct` in 4–8% range, `dqReason = null`

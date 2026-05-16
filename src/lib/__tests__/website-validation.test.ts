@@ -33,7 +33,7 @@ vi.mock('../website/headless-fetch', () => ({
   headlessFetch: vi.fn().mockResolvedValue(null),
 }));
 
-import { runValidation } from '../../app/api/validate-website/route';
+import { runValidation } from '../website/run-validation';
 import { queryGooglePlaces } from '../relevance/google-places';
 import { classifyWithClaude, isAmbiguous } from '../relevance/claude-classifier';
 

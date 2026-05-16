@@ -1,10 +1,10 @@
 'use server';
 
 // Server action wrapper for website validation.
-// Used on form submit and as the pre-PDF gate inside submitAnalysis.ts (Phase 8).
+// Used by AnalyzerForm on field blur and as the pre-PDF gate inside submitAnalysis.ts (Phase 8).
 // Does not write to the database — that is Phase 8's responsibility.
 
-import { runValidation } from '@/app/api/validate-website/route';
+import { runValidation } from '@/lib/website/run-validation';
 import type { ValidationResult, ValidateWebsiteRequest } from '@/lib/website/types';
 
 export interface ValidateWebsiteActionResult {

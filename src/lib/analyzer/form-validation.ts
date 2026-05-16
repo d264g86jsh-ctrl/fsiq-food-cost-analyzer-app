@@ -1,0 +1,87 @@
+// Client-side form validation for the Phase 4 Analyzer Quiz.
+// Rules: block only on missing required fields, malformed required inputs,
+// invalid_website, and active checking state.
+// Never block on eligibility decisions (national_chain, clear_non_fit, non_us, below_threshold).
+
+import type { AnalyzerFormPayload } from './form-types';
+import type { ValidationUIState } from '@/components/analyzer/WebsiteValidationStatus';
+
+// ── Field format validators ───────────────────────────────────────────────────
+
+// U.S. 5-digit or ZIP+4 only (docs/website-validation-spec.md)
+export function isValidUsZip(zip: string): boolean {
+  return /^\d{5}(-\d{4})?$/.test(zip.trim());
+}
+
+export function isValidEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+// ── Step advancement gates ────────────────────────────────────────────────────
+
+export function canAdvanceFromStep1(
+  formData: Partial<AnalyzerFormPayload>,
+  validationState: ValidationUIState,
+): boolean {
+  if (!formData.restaurant_name?.trim()) return false;
+  if (!formData.website?.trim()) return false;
+  if (!formData.zip_code?.trim() || !isValidUsZip(formData.zip_code)) return false;
+  // Block on active check (race condition guard) and confirmed invalid website
+  if (validationState === 'checking') return false;
+  if (validationState === 'invalid_website') return false;
+  return true;
+}
+
+export function canAdvanceFromStep2(formData: Partial<AnalyzerFormPayload>): boolean {
+  return !!(formData.concept_type && formData.locations && formData.annual_food_spend);
+}
+
+export function canAdvanceFromStep3(formData: Partial<AnalyzerFormPayload>): boolean {
+  return !!(
+    formData.distributor_type &&
+    formData.procurement_strategy &&
+    formData.top_skus?.trim()
+  );
+}
+
+export function canSubmitStep4(formData: Partial<AnalyzerFormPayload>): boolean {
+  if (!formData.full_name?.trim()) return false;
+  if (!formData.email?.trim() || !isValidEmail(formData.email)) return false;
+  return true;
+}
+
+// ── Error message generators ──────────────────────────────────────────────────
+
+export function getStep1Errors(
+  formData: Partial<AnalyzerFormPayload>,
+  validationState: ValidationUIState,
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!formData.restaurant_name?.trim()) {
+    errors.restaurant_name = 'Restaurant name is required.';
+  }
+  if (!formData.website?.trim()) {
+    errors.website = 'Website is required.';
+  } else if (validationState === 'invalid_website') {
+    errors.website = 'Please check the website URL and try again.';
+  }
+  if (!formData.zip_code?.trim()) {
+    errors.zip_code = 'ZIP code is required.';
+  } else if (!isValidUsZip(formData.zip_code)) {
+    errors.zip_code = 'Please enter a valid U.S. ZIP code (e.g. 78704 or 78704-1234).';
+  }
+  return errors;
+}
+
+export function getStep4Errors(formData: Partial<AnalyzerFormPayload>): Record<string, string> {
+  const errors: Record<string, string> = {};
+  if (!formData.full_name?.trim()) {
+    errors.full_name = 'Full name is required.';
+  }
+  if (!formData.email?.trim()) {
+    errors.email = 'Email address is required.';
+  } else if (!isValidEmail(formData.email)) {
+    errors.email = 'Please enter a valid email address.';
+  }
+  return errors;
+}

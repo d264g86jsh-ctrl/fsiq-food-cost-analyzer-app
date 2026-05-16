@@ -96,17 +96,22 @@ Required unit tests (`src/lib/__tests__/savings-formula.test.ts`):
 ---
 
 ## Phase 4 — Analyzer Quiz / Calculator Flow
-UX spec: `docs/analyzer-ux-flow.md` (overrides SOP field order)
+UX spec: `docs/analyzer-ux-flow.md` (overrides SOP field order)  
+Brand spec: `docs/brand-guidelines.md` (colors, logo assets, component styling)
 
-- `src/components/AnalyzerForm.tsx` — multi-step quiz wrapper
-- **Step 1 (qualification fields first):** `restaurant_name`, `website`, `zip_code`, `concept_type`, `locations`, `annual_food_spend`, `distributor_type`, `procurement_strategy` — dropdowns; `top_skus` — free text (label: "What are your biggest food spend categories or key items?"; qualification engine parses for protein/commodity keywords per `docs/savings-formula.md`)
-- **Step 2 (contact fields last):** `full_name`, `email`, `phone`
+- `src/components/analyzer/AnalyzerForm.tsx` — 4-step quiz wrapper
+- **Step 1 — Restaurant basics/validation:** `restaurant_name`, `website`, `zip_code` — real-time validation triggers on blur
+- **Step 2 — Restaurant profile:** `concept_type`, `locations`, `annual_food_spend` — dropdowns
+- **Step 3 — Purchasing profile:** `distributor_type`, `procurement_strategy` — dropdowns; `top_skus` — free text (label: "What are your biggest food spend categories or key items?"; qualification engine parses for protein/commodity keywords per `docs/savings-formula.md`)
+- **Step 4 — Contact fields last:** `full_name`, `email`, `phone`
 - Wire real-time website+ZIP validation on field blur (Phase 2 endpoint)
-- **Never block submission based on business eligibility** — only block on missing/malformed required fields
-- Show inline validation state for `clear_non_fit`, `national_chain`, `invalid_website` — inform the user but allow submission
-- Show conservative-mode notice for `plausible_unverified` — informational only, not a block
-- Every submission is saved to DB and synced to GHL; PDF/DQ routing happens server-side in `submitAnalysis.ts`
-- Server actions: `src/actions/validateWebsite.ts`, `src/actions/submitAnalysis.ts`
+- **Never block submission based on business eligibility** — only block on missing/malformed required fields, active `checking` state, or `invalid_website`
+- Show inline validation state for all 9 UI states including `non_us` — inform the user but allow submission unless `invalid_website`
+- Capture hidden tracking fields (UTM, fbclid, gclid, referrer, landing_page_url, fbp, fbc) into the typed payload — do not display, do not block on missing
+- `src/lib/analyzer/form-types.ts` — `AnalyzerFormPayload` type and dropdown option constants
+- `src/lib/analyzer/form-validation.ts` — ZIP/email validators, step advancement gates
+- Server actions: `src/actions/validateWebsite.ts`, `src/actions/submitAnalysis.ts` (stub in Phase 4)
+- Logo assets decoded into `public/brand/` — see `docs/brand-guidelines.md`
 
 ---
 

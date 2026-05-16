@@ -16,6 +16,7 @@ Each entry takes precedence over the one above it when there is a conflict:
    - `docs/analyzer-ux-flow.md` — analyzer field order and UX source of truth (overrides SOP field order)
    - `docs/build-phases.md` — implementation order source of truth
    - `docs/architecture.md` — app architecture source of truth
+   - `docs/brand-guidelines.md` — branding, colors, typography, component styling source of truth
 
 **Override examples:**
 - SOP says `finalPct` 5.0%–8.0% → `docs/savings-formula.md` says 4.0%–8.0% → **savings-formula.md wins**
