@@ -75,7 +75,9 @@ src/
       ai-narrative.ts                # generateAiNarrative() — 3 narrative blocks
       fallback-narrative.ts          # Deterministic fallback when AI is unavailable
     pdf/
-      build-pdf-payload.ts           # Assemble 26-variable payload
+      pdf-types.ts                   # PdfPayload, GeneratePdfInput, GeneratePdfResult
+      pdf-mode.ts                    # determinePdfMode() — full / conservative / skip
+      build-pdf-payload.ts           # Assemble 27-variable payload (26 SOP vars + reportDate)
       pdfmonkey.ts                   # Direct PDFMonkey API call (no Zapier)
     email/
       send-email.ts                  # dispatch

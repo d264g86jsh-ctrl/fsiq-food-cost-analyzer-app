@@ -205,13 +205,19 @@ Source of truth: `docs/savings-formula.md`. Run after Phase 3 and after any chan
 
 ---
 
-## PDF Generation (PDFMonkey Direct API)
+## PDF Generation (PDFMonkey Direct API) — Phase 6
 
 - [ ] PDFMonkey API called directly from app backend — no Zapier
 - [ ] `PDFMONKEY_API_KEY` and `PDFMONKEY_TEMPLATE_ID` env vars present
+- [ ] Missing credentials → `pdfStatus = "skipped"`, app does not throw
 - [ ] Successful call: `pdfStatus = "complete"`, `pdfDownloadUrl` populated
 - [ ] Failed call: `pdfStatus = "error"`, `pdfError` populated, `pdfRetryCount` incremented
-- [ ] 26-variable payload assembled correctly (verify variable names match template)
+- [ ] 27-variable payload assembled correctly (26 SOP vars + approved `reportDate`)
+- [ ] `reportDate` format: "Month YYYY" (e.g., "May 2026")
+- [ ] `conceptBenchmark` uses correct lookup value for concept type; defaults to "28%–32%"
+- [ ] `conceptBenchmark` en-dashes are intentional — do not strip
+- [ ] Conservative PDF: `logoUrl=""`, `hasLogo=false`, `businessSummary=""`, savings unchanged
+- [ ] `determinePdfMode()` returns `full`, `conservative`, or `skip` correctly for all routing cases
 - [ ] Client logo from validated URL; `onerror` fallback loads FSIQ IQ icon
 - [ ] Visual PDF review (all 6 pages):
   - P1 Cover: client logo (or IQ fallback), FSIQ wordmark, 4 metadata columns, name properly capitalized

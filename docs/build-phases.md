@@ -139,14 +139,18 @@ SOP reference: `docs/FSIQ_SOP_v3.3.md` §19, §22
 
 PDF generation is its own phase — separate from the AI pipeline. The app backend calls PDFMonkey directly.
 
-- `src/lib/pdf/build-pdf-payload.ts` — assemble 26-variable payload from qualification + AI outputs
+- `src/lib/pdf/pdf-types.ts` — `PdfPayload`, `PdfModeDecision`, `GeneratePdfInput`, `GeneratePdfResult`
+- `src/lib/pdf/pdf-mode.ts` — `determinePdfMode()` — `full` / `conservative` / `skip` routing
+- `src/lib/pdf/build-pdf-payload.ts` — assemble 27-variable payload (26 from SOP §19 + approved `reportDate`)
 - `src/lib/pdf/pdfmonkey.ts` — direct PDFMonkey API call using `PDFMONKEY_API_KEY` and `PDFMONKEY_TEMPLATE_ID`
 - **No Zapier.** The app backend owns this call.
 - **Full personalized PDF:** `verified_restaurant` + `countryEligibility` `us_verified`/`likely_us` + qualified
-- **Conservative profile-based PDF:** `plausible_unverified` + `countryEligibility` `likely_us`/`unknown` + qualified; no website-specific claims
+- **Conservative profile-based PDF:** `plausible_unverified` + `countryEligibility` `likely_us`/`unknown` + qualified; no website-specific claims (`logoUrl=""`, `hasLogo=false`, `businessSummary=""`)
 - **No PDF:** `clear_non_fit` (any reason, including `non_us`), `national_chain`, `invalid_website`, `below_threshold`
+- `reportDate` is the approved 27th variable (e.g., "May 2026") — PDF/report presentation only, not business logic
 - Persist: `pdfStatus`, `pdfMonkeyDocumentId`, `pdfDownloadUrl`, `pdfError`, `pdfRetryCount`
 - Retry-safe: PDFMonkey call can fail and retry independently from AI pipeline
+- Missing credentials → `pdfStatus: "skipped"` (safe dev/staging behavior, no throw)
 
 ---
 
