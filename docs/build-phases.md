@@ -154,31 +154,53 @@ PDF generation is its own phase — separate from the AI pipeline. The app backe
 
 ---
 
-## Phase 7 — Email Delivery
-SOP reference: `docs/FSIQ_SOP_v3.3.md` §12, §21
+## Phase 7 — Lead Status + GHL/Zapier Email Handoff Contract
+Contract doc: `docs/ghl-email-handoff.md`
 
-- `src/lib/email/send-email.ts` — email dispatch
-- `src/lib/email/templates/` — one file per variant: `qualified.ts`, `qualified-conservative.ts`, `dq-invalid-website.ts`, `dq-below-threshold.ts`, `dq-national-chain.ts`, `dq-clear-non-fit.ts`
+The app does not send customer-facing email in v1. The app outputs a final lead record
+to GHL after all processing is complete. GHL/Zapier sends emails based on
+`fsiq_communication_route` and the applied tags.
 
-| Condition | Email |
-|---|---|
-| Qualified (full or conservative PDF) | PDF link + Calendly CTA |
-| `invalid_website` | "Quick check on your submission" |
-| `below_threshold` | "Thanks for using…" |
-| `national_chain` | "About your submission" |
-| `manual_review` | No email (manual follow-up only) |
-| `clear_non_fit` (`non_us`) | Polite ineligible message — no harsh country language |
+**v1 handoff rule: single final GHL sync after processing.**
 
-No PDF link in DQ emails.
+- `src/lib/crm/lead-status.ts` — `LeadStatus` + `CommunicationRoute` constants/types
+- `src/lib/crm/ghl-tags.ts` — GHL tag string constants
+- `src/lib/crm/ghl-types.ts` — `GhlHandoffPayload` type (all custom fields + tags)
+
+Lead status and communication route mapping:
+
+| Condition | `fsiq_lead_status` | `fsiq_communication_route` |
+|---|---|---|
+| Qualified full PDF, `pdfDownloadUrl` confirmed | `qualified_full_pdf_ready` | `send_full_report` |
+| Qualified conservative PDF, `pdfDownloadUrl` confirmed | `qualified_conservative_pdf_ready` | `send_conservative_report` |
+| Qualified, PDF started but URL not yet confirmed | `qualified_pdf_pending` | *(GHL sync deferred)* |
+| `invalid_website` | `disqualified_invalid_website` | `send_dq_invalid_website` |
+| `below_threshold` / `below_minimum` | `disqualified_below_threshold` | `send_dq_below_threshold` |
+| `national_chain` | `disqualified_national_chain` | `send_dq_national_chain` |
+| `clear_non_fit` (non-US) | `disqualified_non_us` | `send_dq_non_us` |
+| `clear_non_fit` (other) | `disqualified_clear_non_fit` | `send_dq_clear_non_fit` |
+| `manualReviewRequired = true` | `manual_review_required` | `manual_review_hold` |
+| Qualified, `pdfStatus = error` | `pdf_failed` | `pdf_failure_hold` |
+| Pipeline error | `workflow_failed` | `no_email_hold` |
+
+**PDF-ready tags (`FSIQ Full PDF Ready`, `FSIQ Conservative PDF Ready`) are never sent
+until `pdfDownloadUrl` is non-null and confirmed usable.**
 
 ---
 
-## Phase 8 — Pipeline Orchestration
+## Phase 8 — App Workflow Orchestration + GHL Sync
 - `src/actions/submitAnalysis.ts` — orchestrate Phases 2–7 in sequence
-- Persist submission to DB at each stage (validation → qualification → AI → PDF → email)
+- `src/lib/crm/ghl.ts` — GHL API sync; assembles `GhlHandoffPayload` and calls GHL API
+- Persist submission to DB at each stage (validation → qualification → AI → PDF → GHL sync)
 - Route to correct PDF mode (full vs conservative) based on `finalDecision` and `countryEligibility`
-- Route `manualReviewRequired` submissions without sending email; flag in DB
+- **Single final GHL handoff after all processing is complete:**
+  - DQ leads: sync immediately after DQ route is known — no PDF required
+  - Qualified PDF leads: defer GHL sync until `pdfDownloadUrl` is non-null and confirmed
+  - Manual review leads: sync with `manual_review_hold` — no PDF-ready tag, no email fires
+  - PDF failure: sync with `pdf_failure_hold` — no report email until PDF is retried and URL confirmed
+  - `qualified_pdf_pending` status defers GHL sync — do not sync with PDF-ready tag prematurely
 - Handle errors gracefully: log, persist error state, do not throw to user
+- Two-stage sync (early "submitted" tag + final routing sync) is optional/future — not in v1
 
 ---
 
@@ -190,23 +212,12 @@ No PDF link in DQ emails.
 
 ---
 
-## Phase 10 — CRM Sync (GoHighLevel)
-- `src/lib/crm/ghl.ts` — sync **every form submission** to GoHighLevel (GHL), regardless of outcome
-- Env vars: `GHL_API_KEY`, `GHL_LOCATION_ID`, `GHL_PIPELINE_ID`
-- **No submissions excluded** — DQ leads, non-U.S. leads, manual review, and all other outcomes all sync
-- App database is source of truth; GHL is the sync destination
-- Use GHL tags to segment quality and outcome:
-  - `FSIQ Analyzer Submitted` — all submissions
-  - `Verified Restaurant` / `Plausible Unverified` — by `finalDecision`
-  - `Full PDF Sent` / `Conservative PDF Sent` — by PDF mode delivered
-  - `Manual Review Required` — `manualReviewRequired === true`
-  - `DQ National Chain` / `DQ Invalid Website` / `DQ Below Threshold` / `DQ Clear Non Fit` — by `dqReason`
-  - `Non US Ineligible` — `internalFlags` includes `non_us_ineligible`
-  - `PDF Failed` / `Email Failed` — by error state
-  - `Possible Test Submission` / `Possible Spam Submission` — heuristic flags
-- Persist `crmSyncStatus`, `crmSyncError`, `crmContactId` on submission record
-- CRM sync failure does not block email delivery; log error and retry separately
-- Admin dashboard (Phase 11) can trigger manual CRM retry for failed syncs
+## Phase 10 — Admin / QA / Manual Review Dashboard
+- Admin-only route: view all submissions
+- Filter by status, date, `manualReviewRequired`, `crmSyncStatus`
+- Manually approve / reject / retry PDF for flagged submissions
+- Trigger GHL re-sync for failed or manual-review submissions
+- Trigger retry for failed PDFMonkey jobs
 
 ---
 

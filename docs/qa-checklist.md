@@ -70,8 +70,9 @@ Brand source of truth: `docs/brand-guidelines.md`
 - [ ] Form submission is **never blocked by business eligibility decisions** (`clear_non_fit`, `national_chain`, `invalid_website`, `below_threshold`, `non_us`)
 - [ ] Form submission IS blocked for: missing required fields, invalid email format, malformed ZIP
 - [ ] Every completed submission is saved to the DB regardless of outcome
-- [ ] Every completed submission is synced to GHL regardless of outcome
-- [ ] DQ routing, PDF generation, and email delivery all happen server-side after submission
+- [ ] Every completed submission receives a final GHL handoff after processing
+- [ ] DQ routing and PDF generation happen server-side after submission
+- [ ] GHL/Zapier owns all customer-facing email — app does not send email directly
 
 ---
 
@@ -79,11 +80,11 @@ Brand source of truth: `docs/brand-guidelines.md`
 
 | Input | Expected decision | Expected email subject | DB saved | GHL synced |
 |---|---|---|---|---|
-| Restaurant name: `McDonalds`, normal spend | `national_chain` | "About your FoodServiceIQ submission" | ✓ | ✓ |
-| Website: nonexistent URL returning 404, normal spend | `invalid_website` | "Quick check on your FoodServiceIQ submission" | ✓ | ✓ |
-| Annual spend: `200` (parses to $200K) | `below_threshold` | "Thanks for using FoodServiceIQ's Food Cost Analyzer" | ✓ | ✓ |
+| Restaurant name: `McDonalds`, normal spend | `national_chain` | `send_dq_national_chain` | ✓ | ✓ |
+| Website: nonexistent URL returning 404, normal spend | `invalid_website` | `send_dq_invalid_website` | ✓ | ✓ |
+| Annual spend: `200` (parses to $200K) | `below_threshold` | `send_dq_below_threshold` | ✓ | ✓ |
 
-For each: confirm no Claude steps fire, no PDF generated, correct DQ email arrives, submission saved to DB, GHL tag applied.
+For each: confirm no Claude steps fire, no PDF generated, correct `fsiq_communication_route` set, submission saved to DB, DQ tag applied in GHL. GHL/Zapier sends DQ email based on route — not the app.
 
 ---
 
@@ -264,16 +265,40 @@ Run after Phase 1 and after any schema migration.
 
 ---
 
-## CRM Sync (GoHighLevel)
+## GHL Handoff + Email Routing (Phase 7/8)
 
-- [ ] **Every submission syncs to GHL** — verified, DQ, manual review, non-U.S., and all other outcomes
-- [ ] `crmSyncStatus` persisted (`"pending"` / `"synced"` / `"error"`); `crmContactId` stored on success
+Contract: `docs/ghl-email-handoff.md`. App does not send email — GHL/Zapier does.
+
+### GHL sync rules
+
+- [ ] Every completed submission eventually receives a final GHL handoff after processing
+- [ ] `crmSyncStatus` persisted (`"pending"` / `"synced"` / `"error"`); `ghlContactId` stored on success
 - [ ] GHL contact created with correct `GHL_LOCATION_ID` and `GHL_PIPELINE_ID`
-- [ ] Tag `FSIQ Analyzer Submitted` applied to every submission
-- [ ] Outcome tags applied correctly: `Full PDF Sent`, `Conservative PDF Sent`, `DQ National Chain`, `DQ Invalid Website`, `DQ Below Threshold`, `DQ Clear Non Fit`, `Non US Ineligible`, `Manual Review Required`, `PDF Failed`, `Email Failed`
-- [ ] Heuristic tags applied where appropriate: `Possible Test Submission`, `Possible Spam Submission`
-- [ ] CRM sync failure does not block email delivery; error logged to `crmSyncError`
-- [ ] Admin dashboard shows CRM sync status per submission; can trigger manual retry
+- [ ] `FSIQ Analyzer Submitted` tag applied to every synced submission
+- [ ] `fsiq_lead_status` and `fsiq_communication_route` correctly set before GHL sync
+- [ ] All 28 GHL custom fields (`fsiq_*`) populated correctly in the handoff payload
+- [ ] Heuristic tags applied where appropriate: `FSIQ Possible Test Submission`, `FSIQ Possible Spam Submission`
+- [ ] CRM sync failure does not block other pipeline steps; error logged to `crmSyncError`
+
+### PDF URL gate (non-negotiable)
+
+- [ ] `FSIQ Full PDF Ready` tag is **not sent** until `pdfDownloadUrl` is non-null and usable
+- [ ] `FSIQ Conservative PDF Ready` tag is **not sent** until `pdfDownloadUrl` is non-null and usable
+- [ ] `fsiq_pdf_url` field is empty/null in GHL until PDF is confirmed complete
+- [ ] `fsiq_lead_status = qualified_pdf_pending` while PDF URL is not yet confirmed — GHL sync deferred
+
+### DQ routing
+
+- [ ] DQ leads sync to GHL as soon as DQ route is known — no PDF URL required
+- [ ] `fsiq_communication_route` starts with `send_dq_` for all DQ leads
+- [ ] Correct DQ tag applied: `FSIQ DQ Invalid Website` / `FSIQ DQ Below Threshold` / `FSIQ DQ National Chain` / `FSIQ DQ Clear Non Fit` / `FSIQ Non US`
+- [ ] Non-US leads use `send_dq_non_us` route and `FSIQ Non US` tag — distinct from other `clear_non_fit` cases
+
+### Hold routes (no email automation fires)
+
+- [ ] `manualReviewRequired = true` → `fsiq_communication_route = manual_review_hold` — `FSIQ Manual Review` tag applied, no PDF-ready tag
+- [ ] PDF failure on qualified lead → `fsiq_communication_route = pdf_failure_hold` — `FSIQ PDF Failed` tag applied, no PDF-ready tag
+- [ ] GHL/Zapier does not send report email when route is `manual_review_hold` or `pdf_failure_hold`
 
 ---
 

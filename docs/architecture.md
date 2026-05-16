@@ -8,14 +8,20 @@ SOP reference: `docs/FSIQ_SOP_v3.3.md` (primary) / `docs/FSIQ_SOP_v3.3.pdf` (arc
 
 ```
 Form submit
+  → DB save
   → Website validation (real-time on blur + server-side on submit)
   → Qualification engine (DQ priority: national_chain → invalid_website → below_threshold)
-      → Disqualified: one of 3–4 DQ emails (no PDF); manual_review: no email
+      → DQ path:
+          → Assign fsiq_lead_status (disqualified_*) + fsiq_communication_route (send_dq_*)
+          → Final GHL handoff — DQ tags applied, no PDF URL required
+      → Manual review path:
+          → Assign fsiq_communication_route = manual_review_hold
+          → Final GHL handoff — FSIQ Manual Review tag, no PDF-ready tag, no email fires
       → Qualified ($500K+):
           → Determine PDF mode:
               verified_restaurant + us_verified/likely_us → full personalized PDF
               plausible_unverified + likely_us/unknown    → conservative profile-based PDF
-              clear_non_fit (any reason, incl. non_us)    → no PDF
+              clear_non_fit (any reason, incl. non_us)    → no PDF (DQ path above)
           → [If PDF eligible]:
               → Website crawl (logo hints + text)
               → Claude: AI Researcher (logo URL + business summary)  ← AI pipeline start
@@ -23,14 +29,23 @@ Form submit
               → Claude: AI Narrative Builder (3 blocks, no em/en-dashes)
               → Strip dashes (safety net)                             ← AI pipeline end
               → PDFMonkey: generate 6-page PDF (app backend, direct API — no Zapier)
-              → Persist pdfStatus, pdfDownloadUrl, pdfRetryCount
-          → Outlook: email with PDF link (if PDF) + Calendly CTA
+              → Confirm pdfDownloadUrl is non-null and usable
+              → Assign fsiq_lead_status (qualified_*_pdf_ready) + PDF-ready tags
+              → Final GHL handoff — PDF URL included
           → Meta Conversions API: server-side event (qualified leads)
-      → GHL CRM sync (async, non-blocking) — ALL submissions, tagged by outcome
 ```
 
+**The app is the workflow brain. GHL/Zapier owns customer-facing emails.**
+The app never sends email directly. It outputs a complete lead record (PDF URL + lead
+status + communication route + CRM fields/tags) to GHL after all processing is done.
+GHL/Zapier sends emails based on `fsiq_communication_route` and the applied tags.
+
+**PDF-ready tags are sent only after `pdfDownloadUrl` is confirmed. Never before.**
+
+See `docs/ghl-email-handoff.md` for the full handoff contract.
+
 **AI pipeline = Claude Researcher + Claude Narrative Builder only.**  
-Savings math, PDF generation, email, Meta, and CRM are separate pipeline steps.
+Savings math, PDF generation, Meta, and GHL sync are separate pipeline steps.
 
 ---
 
@@ -79,9 +94,11 @@ src/
       pdf-mode.ts                    # determinePdfMode() — full / conservative / skip
       build-pdf-payload.ts           # Assemble 27-variable payload (26 SOP vars + reportDate)
       pdfmonkey.ts                   # Direct PDFMonkey API call (no Zapier)
-    email/
-      send-email.ts                  # dispatch
-      templates/                     # qualified, qualified-conservative, dq-* variants
+    crm/
+      lead-status.ts                 # LeadStatus + CommunicationRoute constants/types
+      ghl-tags.ts                    # GHL tag constants
+      ghl-types.ts                   # GhlHandoffPayload type
+      ghl.ts                         # GHL API sync (Phase 8)
 prisma/
   schema.prisma
 docs/
@@ -168,15 +185,27 @@ Logo URL must be verbatim from `websiteLogoHints` — never fabricated. 1s delay
 
 ---
 
-## Emails (SOP §12, §21)
+## GHL / Zapier Email Routing
 
-| Condition | Email |
-|---|---|
-| Qualified | PDF link + Calendly CTA |
-| `invalid_website` | "Quick check on your submission" |
-| `below_threshold` | "Thanks for using…" |
-| `national_chain` | "About your submission" |
-| `manual_review` | No email (manual follow-up) |
+The app does not send customer-facing email in v1. The app outputs a final lead record
+to GHL after processing. GHL/Zapier sends emails based on `fsiq_communication_route` and
+the applied tags. Email copy, subject lines, and funnel automation are owned by GHL/Zapier
+and can be updated without code changes.
+
+Full contract: `docs/ghl-email-handoff.md`
+
+| `fsiq_communication_route` | GHL/Zapier action | PDF URL required |
+|---|---|---|
+| `send_full_report` | Full report email + Calendly CTA | Yes |
+| `send_conservative_report` | Conservative report email + Calendly CTA | Yes |
+| `send_dq_invalid_website` | "Quick check" DQ email | No |
+| `send_dq_below_threshold` | "Below threshold" DQ email | No |
+| `send_dq_national_chain` | "National chain" DQ email | No |
+| `send_dq_clear_non_fit` | Polite ineligible message | No |
+| `send_dq_non_us` | Polite non-US message | No |
+| `manual_review_hold` | No email — human reviews first | No |
+| `pdf_failure_hold` | No email — PDF retry required | No |
+| `no_email_hold` | No email — test/internal/spam | No |
 
 ---
 
@@ -220,7 +249,7 @@ Key field groups:
 - **Qualification** — `qualified`, `dqReason`, `spendBucket`, `bucketMidpoint`, `finalPct`, `dollarEstimate`, `caseStudy`, `year1`–`year5`, `projectionHeights`
 - **AI** — `logoUrl`, `businessSummary`, `conceptSignals`, `narrativeDistributor`, `narrativeProcurement`, `narrativeSku`
 - **PDF** — `pdfMode`, `pdfStatus`, `pdfMonkeyDocumentId`, `pdfDownloadUrl`, `pdfError`, `pdfRetryCount`
-- **Email** — `emailStatus`, `emailVariant`, `emailSentAt`, `emailError`, `emailRetryCount`
+- **Email** — `emailStatus`, `emailVariant`, `emailSentAt`, `emailError`, `emailRetryCount` *(reserved — email delivery is GHL/Zapier-owned in v1; these fields may be repurposed or deprecated in a future phase)*
 - **Meta** — `metaStatus`, `metaEventIds`, `metaError`
 - **GHL** — `crmSyncStatus`, `ghlContactId`, `crmTags` (JSON), `crmSyncError`, `crmSyncRetryCount`
 - **Manual review** — `manualReviewRequired`, `manualReviewStatus`, `manualReviewNotes`, `manualReviewedAt`
@@ -229,12 +258,20 @@ Key field groups:
 
 Enums: `FinalDecision`, `CountryEligibility`, `DqReason`, `PdfMode`, `PdfStatus`, `EmailStatus`, `CrmSyncStatus`, `WorkflowStatus`, `ManualReviewStatus`
 
-## CRM
-
-GoHighLevel (GHL). **Every form submission syncs to GHL** — no exclusions. Tags are used to segment quality and outcome (e.g. `FSIQ Analyzer Submitted`, `DQ Below Threshold`, `Full PDF Sent`, `Non US Ineligible`, `Possible Spam Submission`). See `docs/build-phases.md` §Phase 10 for the full tag list.
+## CRM (GoHighLevel)
 
 App database is the source of truth. GHL is the sync destination.
 
-Implementation: `src/lib/crm/ghl.ts`  
+**v1 handoff model:** single final sync after all processing is complete.
+- Qualified leads sync only after `pdfDownloadUrl` is confirmed.
+- DQ leads sync immediately once DQ route is known.
+- Manual review and PDF failure leads sync with hold routes — no email automation fires.
+
+The app assembles `fsiq_lead_status`, `fsiq_communication_route`, all custom fields,
+and the tag list before calling the GHL API. GHL/Zapier then sends emails based on
+those values. See `docs/ghl-email-handoff.md` for the full contract.
+
+Implementation: `src/lib/crm/ghl.ts` (Phase 8)  
+Types/constants: `src/lib/crm/lead-status.ts`, `src/lib/crm/ghl-tags.ts`, `src/lib/crm/ghl-types.ts`  
 Env vars: `GHL_API_KEY`, `GHL_LOCATION_ID`, `GHL_PIPELINE_ID`  
 Persists: `crmSyncStatus`, `crmSyncError`, `crmContactId`
