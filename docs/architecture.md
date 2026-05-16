@@ -204,8 +204,23 @@ Field definitions and dropdown values: `docs/FSIQ_SOP_v3.3.md` §5.
 
 ## Database (Prisma)
 
-Single `Submission` model. Full field list in `docs/build-phases.md` §Phase 1.  
-Key outputs stored: all form inputs, validation result, DQ reason, scoring outputs (`finalPct`, `dollarEstimate`, projections), `logoUrl`, `businessSummary`, PDF fields, email fields, `metaEventFired`, `crmSyncStatus` (GoHighLevel), `manualReviewRequired`.
+Single `Submission` model in `prisma/schema.prisma`. Source of truth for all submission data.
+
+Key field groups:
+- **Form inputs** — all 12 fields including `zipCode`, `topSkus` (free text)
+- **Traffic attribution** — `utmSource`, `utmMedium`, `utmCampaign`, `utmContent`, `utmTerm`, `ipAddress` (Meta CAPI matching + campaign ROAS)
+- **Validation** — `finalDecision`, `countryEligibility`, `locationConfidenceScore`, `internalFlags` (JSON), `websiteValidationResult` (JSON)
+- **Qualification** — `qualified`, `dqReason`, `spendBucket`, `bucketMidpoint`, `finalPct`, `dollarEstimate`, `caseStudy`, `year1`–`year5`, `projectionHeights`
+- **AI** — `logoUrl`, `businessSummary`, `conceptSignals`, `narrativeDistributor`, `narrativeProcurement`, `narrativeSku`
+- **PDF** — `pdfMode`, `pdfStatus`, `pdfMonkeyDocumentId`, `pdfDownloadUrl`, `pdfError`, `pdfRetryCount`
+- **Email** — `emailStatus`, `emailVariant`, `emailSentAt`, `emailError`, `emailRetryCount`
+- **Meta** — `metaStatus`, `metaEventIds`, `metaError`
+- **GHL** — `crmSyncStatus`, `ghlContactId`, `crmTags` (JSON), `crmSyncError`, `crmSyncRetryCount`
+- **Manual review** — `manualReviewRequired`, `manualReviewStatus`, `manualReviewNotes`, `manualReviewedAt`
+- **Workflow** — `workflowStage`, `workflowStatus`, `workflowErrors` (JSON)
+- **Timestamps** — `createdAt`, `updatedAt`
+
+Enums: `FinalDecision`, `CountryEligibility`, `DqReason`, `PdfMode`, `PdfStatus`, `EmailStatus`, `CrmSyncStatus`, `WorkflowStatus`, `ManualReviewStatus`
 
 ## CRM
 

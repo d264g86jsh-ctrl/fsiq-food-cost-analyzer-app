@@ -42,7 +42,9 @@ Required fields:
 - `pdfStatus`, `pdfMonkeyDocumentId`, `pdfDownloadUrl`, `pdfError`, `pdfRetryCount`
 - `emailSentAt`, `emailVariant`, `emailError`
 - `manualReviewRequired`, `manualReviewNotes`, `manualReviewedAt`
-- `metaEventFired`, `crmSyncStatus`, `crmSyncError`, `crmContactId`
+- Traffic attribution: `utmSource`, `utmMedium`, `utmCampaign`, `utmContent`, `utmTerm`, `ipAddress`
+- Meta: `metaStatus`, `metaEventIds` (JSON), `metaError`
+- GHL: `crmSyncStatus`, `ghlContactId`, `crmTags` (JSON), `crmSyncError`, `crmSyncRetryCount`
 - `createdAt`, `updatedAt`
 
 ---

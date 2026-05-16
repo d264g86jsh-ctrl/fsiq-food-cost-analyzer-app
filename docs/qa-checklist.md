@@ -193,12 +193,29 @@ Source of truth: `docs/savings-formula.md`. Run after Phase 3 and after any chan
 
 ---
 
+## Database / Schema
+
+Run after Phase 1 and after any schema migration.
+
+- [ ] `pnpm prisma validate` passes
+- [ ] `pnpm prisma:generate` succeeds
+- [ ] All enum types present: `FinalDecision`, `CountryEligibility`, `DqReason`, `PdfMode`, `PdfStatus`, `EmailStatus`, `CrmSyncStatus`, `WorkflowStatus`, `ManualReviewStatus`
+- [ ] Submission record created on every form submission regardless of outcome
+- [ ] UTM fields (`utmSource`, `utmMedium`, `utmCampaign`, `utmContent`, `utmTerm`) populated from query params
+- [ ] `ipAddress` captured at submission time
+- [ ] `workflowStage` updates at each pipeline step
+- [ ] All retry counters (`pdfRetryCount`, `emailRetryCount`, `crmSyncRetryCount`) default to 0
+- [ ] `manualReviewStatus` defaults to `not_required`; updated to `pending` when `manualReviewRequired = true`
+- [ ] `crmTags` JSON field populated before GHL sync
+
+---
+
 ## Meta Tracking
 
 - [ ] Meta Pixel fires page view on form load
 - [ ] Meta Pixel fires form submit event on submission
-- [ ] Meta Conversions API server-side event fires for qualified leads
-- [ ] `metaEventFired = true` persisted on submission record
+- [ ] Meta Conversions API server-side event fires for qualified leads; `ipAddress` and UTM passed for matching
+- [ ] `metaStatus` updated to `"fired"` on success; `metaError` populated on failure
 
 ---
 

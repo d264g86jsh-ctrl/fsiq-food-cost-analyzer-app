@@ -1,5 +1,5 @@
-// Prisma schema — Phase 0 placeholder
-// Phase 1 will add the full Submission model per docs/build-phases.md
+// Phase 1 — Full Submission model
+// Source of truth: docs/build-phases.md §Phase 1, docs/savings-formula.md, docs/website-validation-spec.md
 
 generator client {
   provider = "prisma-client-js"
@@ -8,4 +8,200 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+// Values use lowercase_underscore to match validation/qualification layer output strings directly.
+
+enum FinalDecision {
+  verified_restaurant
+  plausible_unverified
+  clear_non_fit
+  national_chain
+  invalid_website
+}
+
+enum CountryEligibility {
+  us_verified
+  likely_us
+  non_us
+  unknown
+}
+
+// DQ priority: national_chain → invalid_website → below_threshold → below_minimum → clear_non_fit
+enum DqReason {
+  national_chain
+  invalid_website
+  below_threshold
+  below_minimum
+  clear_non_fit
+}
+
+// full = verified_restaurant + us_verified/likely_us + qualified spend
+// conservative = plausible_unverified + likely_us/unknown + qualified spend
+enum PdfMode {
+  full
+  conservative
+}
+
+enum PdfStatus {
+  pending
+  generating
+  complete
+  error
+  skipped
+}
+
+enum EmailStatus {
+  pending
+  sent
+  error
+  skipped
+}
+
+enum CrmSyncStatus {
+  pending
+  synced
+  error
+}
+
+// Represents the overall pipeline completion state
+enum WorkflowStatus {
+  pending
+  in_progress
+  complete
+  failed
+  partial
+}
+
+enum ManualReviewStatus {
+  not_required
+  pending
+  approved
+  rejected
+}
+
+// ─── Submission ───────────────────────────────────────────────────────────────
+
+model Submission {
+  id String @id @default(cuid())
+
+  // ── Form inputs (Step 1 — qualification fields) ──────────────────────────
+  restaurantName      String
+  website             String
+  zipCode             String
+  conceptType         String
+  locations           String
+  annualFoodSpend     String  // raw dropdown value, e.g. "$1M–$3M"
+  distributorType     String
+  procurementStrategy String
+  topSkus             String  // free text; parsed for protein/commodity keywords
+
+  // ── Form inputs (Step 2 — contact fields) ────────────────────────────────
+  fullName String
+  email    String
+  phone    String?
+
+  // ── Traffic attribution ───────────────────────────────────────────────────
+  // Captured at submission time for Meta CAPI matching and campaign ROAS.
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+  utmTerm     String?
+  ipAddress   String? // Meta CAPI matching, GHL dedup, spam detection
+
+  // ── Website validation ────────────────────────────────────────────────────
+  // Full validator response stored as JSON for debugging and Phase 8 QA.
+  websiteValidationResult Json?
+  finalDecision           FinalDecision?
+  countryEligibility      CountryEligibility?
+  locationConfidenceScore Float?              // 0–100
+  internalFlags           Json?               // string[], e.g. ["us_zip_valid", "non_us_ineligible"]
+  manualReviewRequired    Boolean             @default(false)
+
+  // ── Qualification / savings formula ──────────────────────────────────────
+  // All computed deterministically by the qualification engine. AI must not influence these.
+  qualified    Boolean?
+  dqReason     DqReason?
+  spendBucket  String?   // "$1M–$3M", "$500K–$800K", etc.
+  bucketMidpoint Int?    // in whole dollars, e.g. 2000000
+  finalPct     Float?    // 4.0–8.0 (approved clamp)
+  dollarEstimate Int?    // round(finalPct / 100 × bucketMidpoint)
+  caseStudy    String?   // "Black's BBQ", "MaryAnn's Diner", etc.
+
+  // 5-year cumulative projections (3.9% USDA inflation, integers in whole dollars)
+  year1             Int?
+  year2             Int?
+  year3             Int?
+  year4             Int?
+  year5             Int?
+  projectionHeights Json? // { year1: number, year2: number, ... } bar heights as % of year5
+
+  // ── AI outputs ────────────────────────────────────────────────────────────
+  // AI Researcher and Narrative Builder outputs. Logo URL must be verbatim from websiteLogoHints.
+  logoUrl              String?
+  businessSummary      String?
+  conceptSignals       Json?   // string[]
+  narrativeDistributor String?
+  narrativeProcurement String?
+  narrativeSku         String?
+
+  // ── PDF generation ────────────────────────────────────────────────────────
+  // App backend calls PDFMonkey directly. No Zapier.
+  pdfMode             PdfMode?
+  pdfStatus           PdfStatus?
+  pdfMonkeyDocumentId String?
+  pdfDownloadUrl      String?
+  pdfError            String?
+  pdfRetryCount       Int      @default(0)
+
+  // ── Email delivery ────────────────────────────────────────────────────────
+  emailStatus     EmailStatus?
+  emailVariant    String?      // "qualified" | "qualified-conservative" | "dq-national-chain" | etc.
+  emailSentAt     DateTime?
+  emailError      String?
+  emailRetryCount Int          @default(0)
+
+  // ── Meta tracking ─────────────────────────────────────────────────────────
+  metaStatus   String?  // "pending" | "fired" | "error" | "skipped"
+  metaEventIds Json?    // IDs returned by Meta CAPI for deduplication
+  metaError    String?
+
+  // ── GHL CRM sync ─────────────────────────────────────────────────────────
+  // Every submission syncs to GHL regardless of outcome. Tags used for segmentation.
+  crmSyncStatus    CrmSyncStatus?
+  ghlContactId     String?
+  crmSyncError     String?
+  crmSyncRetryCount Int           @default(0)
+  crmTags          Json?          // string[] of applied GHL tags
+
+  // ── Manual review ─────────────────────────────────────────────────────────
+  manualReviewStatus ManualReviewStatus @default(not_required)
+  manualReviewNotes  String?
+  manualReviewedAt   DateTime?
+
+  // ── Workflow orchestration ────────────────────────────────────────────────
+  // workflowStage tracks current pipeline position for retry and debugging.
+  // Values: "submitted" | "validated" | "qualified" | "ai_research" | "ai_narrative"
+  //       | "pdf_generation" | "email" | "crm_sync" | "complete"
+  workflowStage  String?
+  workflowStatus WorkflowStatus?
+  workflowErrors Json?           // Array of { stage, error, timestamp } for debugging
+
+  // ── Timestamps ────────────────────────────────────────────────────────────
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // ── Indexes ───────────────────────────────────────────────────────────────
+  @@index([email])
+  @@index([restaurantName])
+  @@index([finalDecision])
+  @@index([countryEligibility])
+  @@index([qualified])
+  @@index([manualReviewRequired])
+  @@index([pdfStatus])
+  @@index([emailStatus])
+  @@index([crmSyncStatus])
+  @@index([createdAt])
 }
