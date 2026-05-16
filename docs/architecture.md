@@ -67,8 +67,13 @@ src/
       spend-parser.ts
       qualify-lead.ts
     ai/
-      aiResearcher.ts                # Claude Researcher prompt
-      aiNarrative.ts                 # Claude Narrative Builder prompt
+      ai-types.ts                    # Shared Phase 5 types (AiResearchInput, AiResearchResult, AiNarrativeResult)
+      ai-client.ts                   # Anthropic SDK singleton wrapper (server-only)
+      research-input.ts              # buildResearchInput() — shapes form+validation+qualification for AI
+      prompts.ts                     # Prompt builders for researcher and narrative
+      ai-researcher.ts               # runAiResearch() — logo URL + business summary
+      ai-narrative.ts                # generateAiNarrative() — 3 narrative blocks
+      fallback-narrative.ts          # Deterministic fallback when AI is unavailable
     pdf/
       build-pdf-payload.ts           # Assemble 26-variable payload
       pdfmonkey.ts                   # Direct PDFMonkey API call (no Zapier)

@@ -27,6 +27,22 @@ Brand source of truth: `docs/brand-guidelines.md`
 
 ---
 
+## AI Pipeline (Phase 5)
+
+- [ ] `ANTHROPIC_API_KEY` missing → `aiFallbackUsed = true`, fallback narratives used, app does not throw
+- [ ] Claude call timeout/error → `aiFallbackUsed = true`, fallback narratives used, app does not throw
+- [ ] Claude returns invalid JSON → `aiFallbackUsed = true`, fallback narratives used
+- [ ] `logoUrl` is verbatim from `websiteLogoHints` or null — never a fabricated URL
+- [ ] `businessSummary` max 500 chars, `narrativeDistributor/Procurement/Sku` each max 600 chars
+- [ ] No em-dashes or en-dashes in any AI or fallback narrative output
+- [ ] `finalPct`, `dollarEstimate`, `spendBucket`, `caseStudy` are unchanged by AI calls
+- [ ] `qualified` status is unchanged by AI calls
+- [ ] `topSkus` referenced naturally in `narrativeSku` when provided
+- [ ] `narrativeSku` uses generic category copy when `topSkus` is empty
+- [ ] AI functions are stateless — Phase 8 decides whether to call AI for DQ leads
+
+---
+
 ## Qualified Path
 
 - [ ] Complete quiz flow: Step 1 → Step 2 → Step 3 → Step 4 → submit

@@ -120,11 +120,17 @@ SOP reference: `docs/FSIQ_SOP_v3.3.md` §14, §17
 
 The AI pipeline generates research and narrative content only. It does **not** compute savings math or make DQ decisions.
 
-- `src/lib/ai/aiResearcher.ts` — Claude researcher prompt; outputs `logo_url` (verbatim from `websiteLogoHints`), `business_summary`, `concept_signals`, `scrape_status`
-- `src/lib/ai/aiNarrative.ts` — Claude narrative prompt; outputs `narrative_distributor`, `narrative_procurement`, `narrative_sku` (50–80 words each, no em/en-dashes)
-- 1-second delay between Claude calls
+- `src/lib/ai/ai-types.ts` — shared types: `FormContext`, `AiResearchInput`, `AiResearchResult`, `AiNarrativeResult`
+- `src/lib/ai/ai-client.ts` — server-only Anthropic SDK singleton; graceful null return when key is missing
+- `src/lib/ai/research-input.ts` — `buildResearchInput()` — shapes form + Phase 2 + Phase 3 outputs into safe AI context (no raw HTML)
+- `src/lib/ai/prompts.ts` — prompt builders for researcher and narrative (JSON output only, savings fields labeled read-only)
+- `src/lib/ai/ai-researcher.ts` — `runAiResearch()` — outputs `logoUrl` (verbatim from `websiteLogoHints` or null), `businessSummary` (max 500 chars), `conceptSignals` (max 10 items), `scrapeStatus`
+- `src/lib/ai/ai-narrative.ts` — `generateAiNarrative()` — outputs `narrativeDistributor`, `narrativeProcurement`, `narrativeSku` (max 600 chars each, em/en-dashes stripped post-processing)
+- `src/lib/ai/fallback-narrative.ts` — `buildFallbackResearch()` + `buildFallbackNarrative()` — deterministic fallback when AI is unavailable, times out, or returns invalid JSON
 - Model: `claude-sonnet-4-6`, max 1000 tokens per call
-- Strip em/en-dashes from narrative output as a safety net
+- 1-second delay between Claude calls is the **Phase 8 orchestrator's** responsibility
+- Phase 5 functions are stateless — Phase 8 decides whether to invoke AI for qualified, DQ, or conservative cases
+- Strip em/en-dashes from narrative output as a safety net (enforced in `ai-narrative.ts`, not Phase 8)
 
 ---
 
