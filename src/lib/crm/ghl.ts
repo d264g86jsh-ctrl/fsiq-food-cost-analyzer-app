@@ -23,6 +23,40 @@ function getConfig() {
   return { token, locationId, apiBase };
 }
 
+// Shared contact body — no locationId (PUT only).
+type ContactBody = {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  tags: string[];
+  customFields: Array<{ key: string; field_value: string }>;
+};
+
+// Parse the matchingField from a GHL 400 duplicate response body.
+function parseDuplicateResponse(detail: string): { dedupId: string | null; matchingField: string | null } {
+  try {
+    const parsed = JSON.parse(detail) as { meta?: { contactId?: string; matchingField?: string } };
+    return {
+      dedupId:       parsed?.meta?.contactId   ?? null,
+      matchingField: parsed?.meta?.matchingField ?? null,
+    };
+  } catch {
+    return { dedupId: null, matchingField: null };
+  }
+}
+
+// Strip a conflicting field from a contact body so a blocked PUT can be retried.
+// GHL deduplicates on: email, phone (and potentially firstName+lastName combos).
+// Stripping the conflicting field lets the PUT proceed without violating the constraint.
+function stripField(body: ContactBody, field: string | null): ContactBody {
+  if (!field) return body;
+  const stripped = { ...body };
+  if (field === 'email')  delete stripped.email;
+  if (field === 'phone')  delete stripped.phone;
+  return stripped;
+}
+
 export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResult> {
   const { token, locationId, apiBase } = getConfig();
 
@@ -64,7 +98,7 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
     const customFields = buildCustomFields(payload);
 
     // locationId is required for POST (create) but not accepted on PUT (update).
-    const sharedFields = {
+    const sharedFields: ContactBody = {
       firstName,
       lastName,
       email: payload.fsiq_email,
@@ -76,42 +110,15 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
     // Step 3: create or update
     let contactId: string;
     if (existingId) {
-      const updateRes = await fetch(`${apiBase}/contacts/${existingId}`, {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify(sharedFields),
-        signal: AbortSignal.timeout(10_000),
-      });
-      if (!updateRes.ok) {
-        const detail = await updateRes.text().catch(() => '');
-
-        // GHL blocks an update when it would create a phone/name duplicate with
-        // another contact. Fall back to updating the canonical contact in meta.contactId.
-        let dedupId: string | null = null;
-        try {
-          const parsed = JSON.parse(detail) as { meta?: { contactId?: string } };
-          dedupId = parsed?.meta?.contactId ?? null;
-        } catch { /* not JSON — fall through to throw */ }
-
-        if (dedupId) {
-          const dedupRes = await fetch(`${apiBase}/contacts/${dedupId}`, {
-            method: 'PUT',
-            headers,
-            body: JSON.stringify(sharedFields),
-            signal: AbortSignal.timeout(10_000),
-          });
-          if (!dedupRes.ok) {
-            const dedupDetail = await dedupRes.text().catch(() => '');
-            throw new Error(`GHL dedup-update failed: ${dedupRes.status} ${dedupRes.statusText}${dedupDetail ? ` — ${dedupDetail.slice(0, 300)}` : ''}`);
-          }
-          const dedupData = await dedupRes.json() as { contact?: { id: string } };
-          contactId = dedupData.contact?.id ?? dedupId;
-        } else {
-          throw new Error(`GHL update failed: ${updateRes.status} ${updateRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
-        }
-      } else {
-        const updateData = await updateRes.json() as { contact?: { id: string } };
-        contactId = updateData.contact?.id ?? existingId;
+      const result = await upsertContact(apiBase, existingId, sharedFields, headers);
+      contactId = result.contactId;
+      if (result.warning) {
+        return {
+          crmSyncStatus: 'synced',
+          ghlContactId: contactId,
+          crmSyncError: result.warning,
+          crmTags: payload.tags as string[],
+        };
       }
     } else {
       const createRes = await fetch(`${apiBase}/contacts`, {
@@ -123,29 +130,20 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
 
       if (!createRes.ok) {
         const detail = await createRes.text().catch(() => '');
-
-        // GHL returns the duplicate contact's ID in meta.contactId when the
-        // location blocks duplicate contacts (matched on phone, name, etc.).
-        // Fall back to updating that contact instead of failing.
-        let dedupId: string | null = null;
-        try {
-          const parsed = JSON.parse(detail) as { meta?: { contactId?: string } };
-          dedupId = parsed?.meta?.contactId ?? null;
-        } catch { /* not JSON — fall through to throw */ }
+        const { dedupId, matchingField } = parseDuplicateResponse(detail);
 
         if (dedupId) {
-          const dedupRes = await fetch(`${apiBase}/contacts/${dedupId}`, {
-            method: 'PUT',
-            headers,
-            body: JSON.stringify(sharedFields),
-            signal: AbortSignal.timeout(10_000),
-          });
-          if (!dedupRes.ok) {
-            const dedupDetail = await dedupRes.text().catch(() => '');
-            throw new Error(`GHL dedup-update failed: ${dedupRes.status} ${dedupRes.statusText}${dedupDetail ? ` — ${dedupDetail.slice(0, 300)}` : ''}`);
+          // GHL blocked create due to duplicate — update the canonical contact instead.
+          const result = await upsertContact(apiBase, dedupId, sharedFields, headers, matchingField);
+          contactId = result.contactId;
+          if (result.warning) {
+            return {
+              crmSyncStatus: 'synced',
+              ghlContactId: contactId,
+              crmSyncError: result.warning,
+              crmTags: payload.tags as string[],
+            };
           }
-          const dedupData = await dedupRes.json() as { contact?: { id: string } };
-          contactId = dedupData.contact?.id ?? dedupId;
         } else {
           throw new Error(`GHL create failed: ${createRes.status} ${createRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
         }
@@ -173,6 +171,87 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
       crmTags: [],
     };
   }
+}
+
+// ── upsertContact ─────────────────────────────────────────────────────────────
+// PUT a contact. On 400 duplicate:
+//   1. Try updating the conflicting contact (dedupId from meta).
+//   2. If that also 400s (circular conflict), strip the conflicting field and
+//      retry the original contact once more.
+//   3. If the stripped retry still fails, accept it as a partial sync — the
+//      contact exists in GHL, tags are applied, workflow fires.
+// Returns contactId and an optional warning string (never throws for duplicates).
+
+async function upsertContact(
+  apiBase: string,
+  contactId: string,
+  body: ContactBody,
+  headers: Record<string, string>,
+  // When called from the create dedup path, we already know one conflicting field.
+  knownConflictField: string | null = null,
+): Promise<{ contactId: string; warning: string | null }> {
+  const res = await fetch(`${apiBase}/contacts/${contactId}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(10_000),
+  });
+
+  if (res.ok) {
+    const data = await res.json() as { contact?: { id: string } };
+    return { contactId: data.contact?.id ?? contactId, warning: null };
+  }
+
+  const detail = await res.text().catch(() => '');
+  const { dedupId, matchingField } = parseDuplicateResponse(detail);
+
+  if (!dedupId) {
+    // Non-duplicate 400 — throw so the outer catch records it as a real error.
+    throw new Error(`GHL update failed: ${res.status} ${res.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
+  }
+
+  // First dedup: try updating the conflicting contact (dedupId).
+  // Pass the conflicting field so we know what to strip if this also fails.
+  const conflictField = matchingField ?? knownConflictField;
+
+  const dedupRes = await fetch(`${apiBase}/contacts/${dedupId}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(10_000),
+  });
+
+  if (dedupRes.ok) {
+    const dedupData = await dedupRes.json() as { contact?: { id: string } };
+    return { contactId: dedupData.contact?.id ?? dedupId, warning: null };
+  }
+
+  // Second dedup 400: circular conflict — Contact A↔B both block each other.
+  // Strip the conflicting field and retry the original contact once more.
+  const strippedBody = stripField(body, conflictField);
+  const retryRes = await fetch(`${apiBase}/contacts/${contactId}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(strippedBody),
+    signal: AbortSignal.timeout(10_000),
+  });
+
+  if (retryRes.ok) {
+    const retryData = await retryRes.json() as { contact?: { id: string } };
+    const resolvedId = retryData.contact?.id ?? contactId;
+    return {
+      contactId: resolvedId,
+      warning: `GHL circular dedup: ${conflictField ?? 'unknown field'} stripped from update — contact synced without that field`,
+    };
+  }
+
+  // Stripped retry also failed — accept partial sync. Contact is in GHL,
+  // tags are applied (included in body), workflow will fire.
+  const retryDetail = await retryRes.text().catch(() => '');
+  return {
+    contactId,
+    warning: `GHL dedup conflict unresolved after stripping ${conflictField ?? 'unknown field'} — partial sync (tags applied): ${retryDetail.slice(0, 200)}`,
+  };
 }
 
 function buildCustomFields(payload: GhlHandoffPayload): Array<{ key: string; field_value: string }> {

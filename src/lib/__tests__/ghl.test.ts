@@ -39,6 +39,15 @@ const basePayload: GhlHandoffPayload = {
   tags: [GHL_TAG.ANALYZER_SUBMITTED, GHL_TAG.QUALIFIED, GHL_TAG.FULL_PDF_READY],
 };
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function dupResponse(contactId: string, matchingField: string) {
+  return new Response(
+    JSON.stringify({ statusCode: 400, message: 'This location does not allow duplicated contacts.', meta: { contactId, matchingField }, succeded: false }),
+    { status: 400 },
+  );
+}
+
 // ── Env helpers ───────────────────────────────────────────────────────────────
 
 beforeEach(() => {
@@ -93,7 +102,6 @@ describe('syncToGhl — create new contact', () => {
     expect(result.crmSyncError).toBeNull();
     expect(result.crmTags).toContain(GHL_TAG.FULL_PDF_READY);
 
-    // Verify POST was called for create
     const calls = fetchSpy.mock.calls;
     const createCall = calls.find(([url]) => typeof url === 'string' && url.endsWith('/contacts') && !url.includes('search'));
     expect(createCall).toBeDefined();
@@ -123,13 +131,137 @@ describe('syncToGhl — update existing contact', () => {
     expect(result.crmSyncStatus).toBe('synced');
     expect(result.ghlContactId).toBe('existing_456');
 
-    // Verify PUT was called for update
     const calls = fetchSpy.mock.calls;
     const updateCall = calls.find(([url]) => typeof url === 'string' && url.includes('/contacts/existing_456'));
     expect(updateCall).toBeDefined();
     const [, init] = updateCall!;
     expect((init as RequestInit).method).toBe('PUT');
     fetchSpy.mockRestore();
+  });
+});
+
+// ── Dedup fallback — first level (one hop) ────────────────────────────────────
+
+describe('syncToGhl — dedup fallback (one hop)', () => {
+  it('updates dedup contact when update returns 400 with meta.contactId', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.includes('/search/duplicate')) {
+        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
+      }
+      if (url.includes('/contacts/contact_a')) {
+        return dupResponse('contact_b', 'phone');
+      }
+      if (url.includes('/contacts/contact_b')) {
+        return new Response(JSON.stringify({ contact: { id: 'contact_b' } }), { status: 200 });
+      }
+      return new Response('not found', { status: 404 });
+    });
+
+    const result = await syncToGhl(basePayload);
+    expect(result.crmSyncStatus).toBe('synced');
+    expect(result.ghlContactId).toBe('contact_b');
+    expect(result.crmSyncError).toBeNull();
+  });
+
+  it('updates dedup contact when create returns 400 with meta.contactId', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.includes('/search/duplicate')) {
+        return new Response(JSON.stringify({ contact: null }), { status: 200 });
+      }
+      if (url.endsWith('/contacts')) {
+        return dupResponse('contact_b', 'phone');
+      }
+      if (url.includes('/contacts/contact_b')) {
+        return new Response(JSON.stringify({ contact: { id: 'contact_b' } }), { status: 200 });
+      }
+      return new Response('not found', { status: 404 });
+    });
+
+    const result = await syncToGhl(basePayload);
+    expect(result.crmSyncStatus).toBe('synced');
+    expect(result.ghlContactId).toBe('contact_b');
+  });
+});
+
+// ── Circular dedup — strip field and retry ────────────────────────────────────
+
+describe('syncToGhl — circular dedup (A↔B conflict)', () => {
+  it('strips conflicting field and retries when dedup PUT also returns 400', async () => {
+    let contactACallCount = 0;
+    let retryCallBody: string | null = null;
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.includes('/search/duplicate')) {
+        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
+      }
+      if (url.includes('/contacts/contact_a')) {
+        contactACallCount++;
+        if (contactACallCount === 1) {
+          // First attempt: blocked on phone, points to contact_b
+          return dupResponse('contact_b', 'phone');
+        }
+        // Second attempt: stripped retry — succeed
+        retryCallBody = (init as RequestInit)?.body as string;
+        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
+      }
+      // contact_b blocked on email, points back to contact_a
+      if (url.includes('/contacts/contact_b')) {
+        return dupResponse('contact_a', 'email');
+      }
+      return new Response('not found', { status: 404 });
+    });
+
+    const result = await syncToGhl(basePayload);
+    expect(result.crmSyncStatus).toBe('synced');
+    expect(result.ghlContactId).toBe('contact_a');
+    expect(result.crmSyncError).toMatch(/circular dedup/i);
+    // Verify the retry body does not contain the stripped field
+    const body = JSON.parse(retryCallBody!);
+    expect(body).not.toHaveProperty('phone');
+  });
+
+  it('returns synced with warning when all retries fail (partial sync)', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.includes('/search/duplicate')) {
+        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
+      }
+      // All PUT attempts to contact_a blocked on phone
+      if (url.includes('/contacts/contact_a')) {
+        return dupResponse('contact_b', 'phone');
+      }
+      // contact_b blocked on email
+      if (url.includes('/contacts/contact_b')) {
+        return dupResponse('contact_a', 'email');
+      }
+      return new Response('not found', { status: 404 });
+    });
+
+    const result = await syncToGhl(basePayload);
+    expect(result.crmSyncStatus).toBe('synced');
+    expect(result.crmSyncError).toMatch(/partial sync/i);
+  });
+
+  it('never returns crmSyncStatus error for a circular dedup conflict', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.includes('/search/duplicate')) {
+        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
+      }
+      if (url.includes('/contacts/contact_a')) {
+        return dupResponse('contact_b', 'phone');
+      }
+      if (url.includes('/contacts/contact_b')) {
+        return dupResponse('contact_a', 'email');
+      }
+      return new Response('not found', { status: 404 });
+    });
+
+    const result = await syncToGhl(basePayload);
+    expect(result.crmSyncStatus).toBe('synced');
   });
 });
 
@@ -150,5 +282,19 @@ describe('syncToGhl — API errors', () => {
     const result = await syncToGhl(basePayload);
     expect(result.crmSyncStatus).toBe('error');
     expect(result.crmSyncError).toContain('Network error');
+  });
+
+  it('returns error on non-duplicate update 400', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.includes('/search/duplicate')) {
+        return new Response(JSON.stringify({ contact: { id: 'existing_456' } }), { status: 200 });
+      }
+      return new Response(JSON.stringify({ message: 'Validation failed' }), { status: 400 });
+    });
+
+    const result = await syncToGhl(basePayload);
+    expect(result.crmSyncStatus).toBe('error');
+    expect(result.crmSyncError).toMatch(/update failed/i);
   });
 });
