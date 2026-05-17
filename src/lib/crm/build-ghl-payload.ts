@@ -25,7 +25,7 @@ export function buildGhlPayload(
     // Restaurant profile
     fsiq_restaurant_name:       submission.restaurantName,
     fsiq_website:               submission.website,
-    fsiq_zip_code:              submission.zipCode,
+    fsiq_state:                 submission.state,
     fsiq_concept_type:          submission.conceptType,
     fsiq_locations:             submission.locations,
     fsiq_annual_food_spend:     submission.annualFoodSpend,

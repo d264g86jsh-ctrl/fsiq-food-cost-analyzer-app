@@ -18,7 +18,7 @@ export interface GhlHandoffPayload {
   // Restaurant profile (all visible form answers — available for GHL email personalization)
   fsiq_restaurant_name:       string;
   fsiq_website:               string;
-  fsiq_zip_code:              string;
+  fsiq_state:                 string;
   fsiq_concept_type:          string;
   fsiq_locations:             string;
   fsiq_annual_food_spend:     string; // raw dropdown value e.g. "$1M–$3M"

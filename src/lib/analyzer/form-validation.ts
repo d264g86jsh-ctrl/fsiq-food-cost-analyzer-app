@@ -4,13 +4,13 @@
 // Never block on eligibility decisions (national_chain, clear_non_fit, non_us, below_threshold).
 
 import type { AnalyzerFormPayload } from './form-types';
+import { STATE_OPTIONS } from './form-types';
 import type { ValidationUIState } from '@/components/analyzer/WebsiteValidationStatus';
 
 // ── Field format validators ───────────────────────────────────────────────────
 
-// U.S. 5-digit or ZIP+4 only (docs/website-validation-spec.md)
-export function isValidUsZip(zip: string): boolean {
-  return /^\d{5}(-\d{4})?$/.test(zip.trim());
+export function isValidUsState(state: string): boolean {
+  return STATE_OPTIONS.includes(state.trim().toUpperCase() as typeof STATE_OPTIONS[number]);
 }
 
 export function isValidEmail(email: string): boolean {
@@ -25,7 +25,7 @@ export function canAdvanceFromStep1(
 ): boolean {
   if (!formData.restaurant_name?.trim()) return false;
   if (!formData.website?.trim()) return false;
-  if (!formData.zip_code?.trim() || !isValidUsZip(formData.zip_code)) return false;
+  if (!formData.state?.trim() || !isValidUsState(formData.state)) return false;
   // Block on active check (race condition guard) and confirmed invalid website
   if (validationState === 'checking') return false;
   if (validationState === 'invalid_website') return false;
@@ -65,10 +65,8 @@ export function getStep1Errors(
   } else if (validationState === 'invalid_website') {
     errors.website = 'Please check the website URL and try again.';
   }
-  if (!formData.zip_code?.trim()) {
-    errors.zip_code = 'ZIP code is required.';
-  } else if (!isValidUsZip(formData.zip_code)) {
-    errors.zip_code = 'Please enter a valid U.S. ZIP code (e.g. 78704 or 78704-1234).';
+  if (!formData.state?.trim() || !isValidUsState(formData.state)) {
+    errors.state = 'Please select your state.';
   }
   return errors;
 }

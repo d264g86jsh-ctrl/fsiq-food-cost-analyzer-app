@@ -8,7 +8,7 @@ import type { MetaUserData } from './meta-types';
 interface UserDataInput {
   email: string;
   phone?: string | null;
-  zipCode?: string | null;
+  state?: string | null;
   fbp?: string | null;
   fbc?: string | null;
   clientIpAddress?: string | null;
@@ -31,8 +31,8 @@ export function buildUserData(input: UserDataInput): MetaUserData {
     const digits = input.phone.replace(/\D/g, '');
     if (digits) result.ph = sha256(digits);
   }
-  if (input.zipCode) {
-    result.zp = sha256(input.zipCode.trim());
+  if (input.state) {
+    result.zp = sha256(input.state.trim());
   }
 
   if (input.fbp) result.fbp = input.fbp;

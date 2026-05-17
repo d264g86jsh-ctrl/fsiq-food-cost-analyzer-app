@@ -1,3 +1,4 @@
+// DEPRECATED: Google Places removed. State dropdown guarantees US eligibility. File kept for reference only.
 // Google Places Text Search + Place Details.
 // Degrades gracefully when GOOGLE_PLACES_API_KEY is missing or the API errors.
 

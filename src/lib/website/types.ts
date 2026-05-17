@@ -55,6 +55,6 @@ export interface ValidationResult {
 export interface ValidateWebsiteRequest {
   website: string;
   restaurantName: string;
-  zipCode: string;
+  state: string;
   conceptType?: string;
 }

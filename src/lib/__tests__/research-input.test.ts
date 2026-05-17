@@ -9,7 +9,7 @@ import type { QualifyLeadResult } from '../qualification/qualify-lead';
 const baseForm: FormContext = {
   restaurantName: 'Casa Roberto',
   website: 'https://casaroberto.com',
-  zipCode: '78704',
+  state: 'TX',
   conceptType: 'Casual dining',
   locations: '2 – 4 locations',
   annualFoodSpend: '$1M–$3M',
@@ -23,12 +23,12 @@ const baseValidation: ValidationResult = {
   negativeSignalScore: 10,
   nationalChainScore: 0,
   websiteRelationshipScore: 80,
-  googlePlacesScore: 90,
+  googlePlacesScore: 0,
   locationConfidenceScore: 85,
   countryEligibility: 'us_verified',
-  locationReasons: ['us_zip_valid', 'google_place_us_confirmed'],
+  locationReasons: ['state_selection_us_confirmed'],
   headlessBrowserUsed: false,
-  googlePlacesQueried: true,
+  googlePlacesQueried: false,
   claudeAiUsed: false,
   websiteReachabilityStatus: 'reachable',
   finalDecision: 'verified_restaurant',
@@ -37,7 +37,7 @@ const baseValidation: ValidationResult = {
   httpStatus: 200,
   reasons: ['verified_restaurant'],
   userFacingMessage: null,
-  internalFlags: ['us_zip_valid'],
+  internalFlags: ['us_state_selected'],
   manualReviewRequired: false,
   websiteLogoHints: ['https://casaroberto.com/logo.png', 'https://casaroberto.com/images/logo.svg'],
 };
@@ -68,7 +68,7 @@ const baseQualification: QualifyLeadResult = {
   caseStudy: "MaryAnn's Diner",
   locationCategory: '2-4',
   reasons: ['qualified'],
-  internalFlags: ['us_zip_valid'],
+  internalFlags: ['us_state_selected'],
 };
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

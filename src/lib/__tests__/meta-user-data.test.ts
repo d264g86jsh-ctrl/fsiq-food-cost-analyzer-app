@@ -8,32 +8,32 @@ function sha256(val: string): string {
 
 describe('buildUserData — PII hashing', () => {
   it('hashes email as lowercase+trimmed SHA-256', () => {
-    const result = buildUserData({ email: '  Test@Example.COM  ', phone: null, zipCode: null });
+    const result = buildUserData({ email: '  Test@Example.COM  ', phone: null, state: null });
     expect(result.em).toBe(sha256('test@example.com'));
   });
 
   it('hashes phone as digits-only SHA-256', () => {
-    const result = buildUserData({ email: 'a@b.com', phone: '(512) 555-0100', zipCode: null });
+    const result = buildUserData({ email: 'a@b.com', phone: '(512) 555-0100', state: null });
     expect(result.ph).toBe(sha256('5125550100'));
   });
 
-  it('hashes zipCode as trimmed SHA-256', () => {
-    const result = buildUserData({ email: 'a@b.com', phone: null, zipCode: ' 78701 ' });
-    expect(result.zp).toBe(sha256('78701'));
+  it('hashes state as trimmed SHA-256', () => {
+    const result = buildUserData({ email: 'a@b.com', phone: null, state: ' TX ' });
+    expect(result.zp).toBe(sha256('TX'));
   });
 
   it('omits em when email is empty string', () => {
-    const result = buildUserData({ email: '', phone: null, zipCode: null });
+    const result = buildUserData({ email: '', phone: null, state: null });
     expect(result.em).toBeUndefined();
   });
 
   it('omits ph when phone has no digits', () => {
-    const result = buildUserData({ email: 'a@b.com', phone: '---', zipCode: null });
+    const result = buildUserData({ email: 'a@b.com', phone: '---', state: null });
     expect(result.ph).toBeUndefined();
   });
 
-  it('omits zp when zipCode is null', () => {
-    const result = buildUserData({ email: 'a@b.com', phone: null, zipCode: null });
+  it('omits zp when state is null', () => {
+    const result = buildUserData({ email: 'a@b.com', phone: null, state: null });
     expect(result.zp).toBeUndefined();
   });
 
@@ -41,7 +41,7 @@ describe('buildUserData — PII hashing', () => {
     const result = buildUserData({
       email: 'a@b.com',
       phone: null,
-      zipCode: null,
+      state: null,
       fbp: 'fb.1.123.abc',
       fbc: 'fb.1.456.def',
     });
@@ -53,7 +53,7 @@ describe('buildUserData — PII hashing', () => {
     const result = buildUserData({
       email: 'a@b.com',
       phone: null,
-      zipCode: null,
+      state: null,
       clientIpAddress: '1.2.3.4',
       clientUserAgent: 'Mozilla/5.0',
     });
@@ -62,7 +62,7 @@ describe('buildUserData — PII hashing', () => {
   });
 
   it('does not include undefined fields in result', () => {
-    const result = buildUserData({ email: 'a@b.com', phone: null, zipCode: null });
+    const result = buildUserData({ email: 'a@b.com', phone: null, state: null });
     expect(Object.keys(result)).toEqual(['em']);
   });
 });

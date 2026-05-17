@@ -8,54 +8,24 @@ import { headlessFetch } from '@/lib/website/headless-fetch';
 import { detectNationalChain } from '@/lib/qualification/national-chains';
 import { computeRestaurantScores } from '@/lib/relevance/classify-restaurant';
 import { computeWebsiteRelationship } from '@/lib/relevance/website-relationship';
-import { queryGooglePlaces } from '@/lib/relevance/google-places';
-import { validateZipCode, computeCountryEligibility } from '@/lib/relevance/location-eligibility';
 import { classifyWithClaude, isAmbiguous } from '@/lib/relevance/claude-classifier';
+import { computeCountryEligibility } from '@/lib/relevance/location-eligibility';
 import type { ValidationResult, ValidateWebsiteRequest, FinalDecision } from '@/lib/website/types';
 
 export async function runValidation(input: ValidateWebsiteRequest): Promise<ValidationResult> {
-  const { website, restaurantName, zipCode, conceptType } = input;
+  const { website, restaurantName } = input;
   const internalFlags: string[] = [];
   const reasons: string[] = [];
   let headlessBrowserUsed = false;
 
-  // ── Step 1: ZIP validation ────────────────────────────────────────────────
-  const zipResult = validateZipCode(zipCode);
-  internalFlags.push(...zipResult.internalFlags);
+  // Hardcoded no-op Places result — Google Places removed; state dropdown guarantees US.
+  const placesResult = { googlePlacesScore: 0, placesCountry: null, googlePlacesQueried: false, internalFlags: [] as string[] };
 
-  if (zipResult.status === 'non_us_format') {
-    const eligibility = computeCountryEligibility({
-      zipStatus: zipResult.status,
-      googlePlacesQueried: false,
-    });
-    return buildResult({
-      finalDecision: 'clear_non_fit',
-      normalizedUrl: website,
-      finalUrl: website,
-      httpStatus: 0,
-      websiteReachabilityStatus: 'invalid',
-      restaurantSignalScore: 0,
-      negativeSignalScore: 0,
-      nationalChainScore: 0,
-      websiteRelationshipScore: 0,
-      googlePlacesScore: 0,
-      ...eligibility,
-      headlessBrowserUsed: false,
-      googlePlacesQueried: false,
-      claudeAiUsed: false,
-      websiteLogoHints: [],
-      internalFlags: [...internalFlags, ...eligibility.internalFlags],
-      reasons: ['non_us_postal_code'],
-      userFacingMessage: zipResult.userFacingMessage,
-      manualReviewRequired: false,
-    });
-  }
-
-  // ── Step 2: URL normalization ─────────────────────────────────────────────
+  // ── Step 1: URL normalization ─────────────────────────────────────────────────
   const normalized = normalizeUrl(website);
   if (!normalized.isValid) {
     internalFlags.push('malformed_url');
-    const eligibility = computeCountryEligibility({ zipStatus: zipResult.status, googlePlacesQueried: false });
+    const eligibility = computeCountryEligibility();
     return buildResult({
       finalDecision: 'invalid_website',
       normalizedUrl: website,
@@ -81,10 +51,10 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
 
   const normalizedUrl = normalized.normalizedUrl;
 
-  // ── Step 3: Chain detection — name-only pass ──────────────────────────────
+  // ── Step 2: Chain detection — name-only pass ──────────────────────────────
   const nameChainCheck = detectNationalChain({ restaurantName, domain: normalizedUrl });
   if (nameChainCheck.score >= 85) {
-    const eligibility = computeCountryEligibility({ zipStatus: zipResult.status, googlePlacesQueried: false });
+    const eligibility = computeCountryEligibility();
     return buildResult({
       finalDecision: 'national_chain',
       normalizedUrl,
@@ -109,14 +79,14 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     });
   }
 
-  // ── Step 4: Fetch website ─────────────────────────────────────────────────
+  // ── Step 3: Fetch website ─────────────────────────────────────────────────
   const fetchResult = await checkWebsite(normalizedUrl);
   let { signals } = fetchResult;
   let { finalUrl } = fetchResult;
   internalFlags.push(...fetchResult.reachability.internalFlags);
 
   if (fetchResult.reachability.status === 'invalid') {
-    const eligibility = computeCountryEligibility({ zipStatus: zipResult.status, googlePlacesQueried: false });
+    const eligibility = computeCountryEligibility();
     return buildResult({
       finalDecision: 'invalid_website',
       normalizedUrl,
@@ -140,7 +110,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     });
   }
 
-  // ── Step 5: Headless fallback ─────────────────────────────────────────────
+  // ── Step 4: Headless fallback ─────────────────────────────────────────────
   const needsHeadless =
     fetchResult.reachability.status === 'blocked' ||
     fetchResult.reachability.status === 'thin' ||
@@ -156,7 +126,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     }
   }
 
-  // ── Step 6: Chain detection — domain + page content pass ──────────────────
+  // ── Step 5: Chain detection — domain + page content pass ──────────────────
   const domain = extractDomain(finalUrl);
   const pageChainCheck = detectNationalChain({
     restaurantName,
@@ -168,7 +138,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   const nationalChainScore = Math.max(nameChainCheck.score, pageChainCheck.score);
 
   if (nationalChainScore >= 85) {
-    const eligibility = computeCountryEligibility({ zipStatus: zipResult.status, googlePlacesQueried: false });
+    const eligibility = computeCountryEligibility();
     return buildResult({
       finalDecision: 'national_chain',
       normalizedUrl,
@@ -193,7 +163,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     });
   }
 
-  // ── Step 7: Signal scoring ────────────────────────────────────────────────
+  // ── Step 6: Signal scoring ────────────────────────────────────────────────
   const scores = signals
     ? computeRestaurantScores(signals, domain)
     : { restaurantSignalScore: 0, negativeSignalScore: 0 };
@@ -202,7 +172,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   internalFlags.push(...relationship.internalFlags);
 
   if (relationship.isKnownVendorDomain) {
-    const eligibility = computeCountryEligibility({ zipStatus: zipResult.status, googlePlacesQueried: false });
+    const eligibility = computeCountryEligibility();
     return buildResult({
       finalDecision: 'clear_non_fit',
       normalizedUrl,
@@ -226,43 +196,11 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     });
   }
 
-  // ── Step 8: Google Places ─────────────────────────────────────────────────
-  const placesResult = await queryGooglePlaces({ restaurantName, zipCode, domain, conceptType });
-  internalFlags.push(...placesResult.internalFlags);
-
-  // ── Step 9: Country eligibility ───────────────────────────────────────────
-  const eligibility = computeCountryEligibility({
-    zipStatus: zipResult.status,
-    placesCountry: placesResult.placesCountry,
-    googlePlacesQueried: placesResult.googlePlacesQueried,
-  });
+  // ── Step 7: Country eligibility ───────────────────────────────────────────
+  const eligibility = computeCountryEligibility();
   internalFlags.push(...eligibility.internalFlags);
 
-  if (eligibility.countryEligibility === 'non_us') {
-    return buildResult({
-      finalDecision: 'clear_non_fit',
-      normalizedUrl,
-      finalUrl,
-      httpStatus: fetchResult.httpStatus,
-      websiteReachabilityStatus: fetchResult.reachability.status,
-      ...scores,
-      nationalChainScore,
-      websiteRelationshipScore: relationship.websiteRelationshipScore,
-      googlePlacesScore: placesResult.googlePlacesScore,
-      ...eligibility,
-      headlessBrowserUsed,
-      googlePlacesQueried: placesResult.googlePlacesQueried,
-      claudeAiUsed: false,
-      websiteLogoHints: signals?.logoHints ?? [],
-      internalFlags: [...internalFlags],
-      reasons: ['non_us_ineligible'],
-      userFacingMessage:
-        "We're currently only able to provide reports for U.S.-based restaurants. Thank you for your interest.",
-      manualReviewRequired: false,
-    });
-  }
-
-  // ── Step 10: Rule-based decision ──────────────────────────────────────────
+  // ── Step 8: Rule-based decision ──────────────────────────────────────────
   const ruleBased = applyDecisionRules({
     restaurantSignalScore: scores.restaurantSignalScore,
     negativeSignalScore: scores.negativeSignalScore,
@@ -287,7 +225,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
       googlePlacesScore: placesResult.googlePlacesScore,
       ...eligibility,
       headlessBrowserUsed,
-      googlePlacesQueried: placesResult.googlePlacesQueried,
+      googlePlacesQueried: false,
       claudeAiUsed: false,
       websiteLogoHints: signals?.logoHints ?? [],
       internalFlags: [...internalFlags],
@@ -297,14 +235,13 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     });
   }
 
-  // ── Step 11: Claude tiebreaker (ambiguous only) ───────────────────────────
+  // ── Step 9: Claude tiebreaker (ambiguous only) ───────────────────────────
   let finalDecision: FinalDecision = 'plausible_unverified';
   let claudeAiUsed = false;
 
   const ambiguous = isAmbiguous({
     restaurantSignalScore: scores.restaurantSignalScore,
     negativeSignalScore: scores.negativeSignalScore,
-    googlePlacesScore: placesResult.googlePlacesScore,
     nationalChainScore,
     reachabilityStatus: fetchResult.reachability.status,
   });
@@ -341,7 +278,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     googlePlacesScore: placesResult.googlePlacesScore,
     ...eligibility,
     headlessBrowserUsed,
-    googlePlacesQueried: placesResult.googlePlacesQueried,
+    googlePlacesQueried: false,
     claudeAiUsed,
     websiteLogoHints: signals?.logoHints ?? [],
     internalFlags: [...internalFlags],

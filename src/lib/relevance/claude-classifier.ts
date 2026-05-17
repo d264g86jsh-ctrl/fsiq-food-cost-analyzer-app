@@ -103,11 +103,12 @@ function parseClaudeResponse(text: string): { decision: TiebreakerDecision; reas
 export function isAmbiguous(options: {
   restaurantSignalScore: number;
   negativeSignalScore: number;
-  googlePlacesScore: number;
   nationalChainScore: number;
   reachabilityStatus: string;
 }): boolean {
-  const { restaurantSignalScore, negativeSignalScore, googlePlacesScore, nationalChainScore, reachabilityStatus } = options;
+  const { restaurantSignalScore, negativeSignalScore, nationalChainScore, reachabilityStatus } = options;
+  // googlePlacesScore hardcoded to 0 — Google Places removed; state dropdown guarantees US.
+  const googlePlacesScore = 0;
 
   // Already decided by rules — not ambiguous
   if (nationalChainScore >= 85) return false;

@@ -13,7 +13,7 @@ const basePayload: GhlHandoffPayload = {
   fsiq_phone:                 '5125550100',
   fsiq_restaurant_name:       'Test Bistro',
   fsiq_website:               'https://testbistro.com',
-  fsiq_zip_code:              '78704',
+  fsiq_state:                 'TX',
   fsiq_concept_type:          'Casual dining',
   fsiq_locations:             'Single location',
   fsiq_annual_food_spend:     '$1M–$3M',

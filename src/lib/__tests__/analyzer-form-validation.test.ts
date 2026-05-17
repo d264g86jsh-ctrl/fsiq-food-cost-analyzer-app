@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  isValidUsZip,
+  isValidUsState,
   isValidEmail,
   canAdvanceFromStep1,
   canAdvanceFromStep2,
@@ -16,19 +16,14 @@ import {
 import type { ValidationUIState } from '../../components/analyzer/WebsiteValidationStatus';
 import type { AnalyzerFormPayload } from '../analyzer/form-types';
 
-// ── isValidUsZip ──────────────────────────────────────────────────────────────
+// ── isValidUsState ────────────────────────────────────────────────────────────
 
-describe('isValidUsZip', () => {
-  it('5-digit ZIP is valid', () => expect(isValidUsZip('78701')).toBe(true));
-  it('ZIP+4 is valid', () => expect(isValidUsZip('78701-1234')).toBe(true));
-  it('trims whitespace', () => expect(isValidUsZip(' 78701 ')).toBe(true));
-  it('4-digit ZIP is invalid', () => expect(isValidUsZip('7870')).toBe(false));
-  it('6-digit ZIP is invalid', () => expect(isValidUsZip('787011')).toBe(false));
-  it('letters are invalid', () => expect(isValidUsZip('abc12')).toBe(false));
-  it('Canadian format H2X 1Y4 is invalid', () => expect(isValidUsZip('H2X 1Y4')).toBe(false));
-  it('empty string is invalid', () => expect(isValidUsZip('')).toBe(false));
-  it('ZIP+3 (too short) is invalid', () => expect(isValidUsZip('78701-123')).toBe(false));
-  it('ZIP+5 (too long) is invalid', () => expect(isValidUsZip('78701-12345')).toBe(false));
+describe('isValidUsState', () => {
+  it('valid state abbreviation → true', () => expect(isValidUsState('TX')).toBe(true));
+  it('lowercase accepted (normalized) → true', () => expect(isValidUsState('tx')).toBe(true));
+  it('DC accepted → true', () => expect(isValidUsState('DC')).toBe(true));
+  it('invalid abbreviation → false', () => expect(isValidUsState('XX')).toBe(false));
+  it('empty string → false', () => expect(isValidUsState('')).toBe(false));
 });
 
 // ── isValidEmail ──────────────────────────────────────────────────────────────
@@ -47,7 +42,7 @@ describe('isValidEmail', () => {
 const baseStep1: Partial<AnalyzerFormPayload> = {
   restaurant_name: 'Casa Roberto',
   website: 'casaroberto.com',
-  zip_code: '78701',
+  state: 'TX',
 };
 
 describe('canAdvanceFromStep1', () => {
@@ -95,16 +90,8 @@ describe('canAdvanceFromStep1', () => {
     expect(canAdvanceFromStep1({ ...baseStep1, website: '' }, 'idle')).toBe(false);
   });
 
-  it('missing zip_code → blocks', () => {
-    expect(canAdvanceFromStep1({ ...baseStep1, zip_code: '' }, 'idle')).toBe(false);
-  });
-
-  it('malformed ZIP → blocks', () => {
-    expect(canAdvanceFromStep1({ ...baseStep1, zip_code: 'abc' }, 'idle')).toBe(false);
-  });
-
-  it('Canadian ZIP format → blocks', () => {
-    expect(canAdvanceFromStep1({ ...baseStep1, zip_code: 'H2X 1Y4' }, 'idle')).toBe(false);
+  it('missing state → blocks', () => {
+    expect(canAdvanceFromStep1({ ...baseStep1, state: '' }, 'idle')).toBe(false);
   });
 });
 
@@ -204,9 +191,9 @@ describe('getStep1Errors', () => {
     expect(errors.restaurant_name).toBeTruthy();
   });
 
-  it('malformed ZIP → error', () => {
-    const errors = getStep1Errors({ ...baseStep1, zip_code: 'bad' }, 'idle');
-    expect(errors.zip_code).toBeTruthy();
+  it('missing state → error', () => {
+    const errors = getStep1Errors({ ...baseStep1, state: '' }, 'idle');
+    expect(errors.state).toBeTruthy();
   });
 
   it('invalid_website state → website error', () => {

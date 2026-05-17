@@ -5,7 +5,7 @@ export interface AnalyzerFormPayload {
   // Step 1 — Restaurant basics / validation
   restaurant_name: string;
   website: string;
-  zip_code: string;
+  state: string;
 
   // Step 2 — Restaurant profile
   concept_type: string;
@@ -45,6 +45,8 @@ export interface AnalyzerFormPayload {
 
 // ── Dropdown options (source of truth: docs/FSIQ_SOP_v3.3.md §5) ─────────────
 // Values must match the strings the qualification engine expects.
+
+export const STATE_OPTIONS = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY','DC'] as const;
 
 export const CONCEPT_TYPE_OPTIONS = [
   'Quick service',

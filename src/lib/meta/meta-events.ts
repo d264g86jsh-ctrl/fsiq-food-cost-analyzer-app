@@ -10,13 +10,13 @@ import type { MetaCapiEvent, TrackingContext } from './meta-types';
 // Fires for all final routes (qualified and DQ) when shouldSyncGhl is true.
 // The event_id should match the browser Lead event for Meta deduplication.
 export function buildLeadEvent(
-  submission: Pick<Submission, 'email' | 'phone' | 'zipCode' | 'qualified'> & { dqReason: string | null },
+  submission: Pick<Submission, 'email' | 'phone' | 'state' | 'qualified'> & { dqReason: string | null },
   tracking: TrackingContext,
 ): MetaCapiEvent {
   const userData = buildUserData({
     email:           submission.email,
     phone:           submission.phone,
-    zipCode:         submission.zipCode,
+    state:           submission.state,
     fbp:             tracking.fbp,
     fbc:             tracking.fbc,
     clientIpAddress: tracking.clientIpAddress,
@@ -42,13 +42,13 @@ export function buildLeadEvent(
 // Server-only, fires only for qualified_full_pdf_ready and qualified_conservative_pdf_ready.
 // Uses a prefixed event_id so it never accidentally deduplicates against the Lead event.
 export function buildQualifiedLeadEvent(
-  submission: Pick<Submission, 'email' | 'phone' | 'zipCode' | 'dollarEstimate'>,
+  submission: Pick<Submission, 'email' | 'phone' | 'state' | 'dollarEstimate'>,
   tracking: TrackingContext,
 ): MetaCapiEvent {
   const userData = buildUserData({
     email:           submission.email,
     phone:           submission.phone,
-    zipCode:         submission.zipCode,
+    state:           submission.state,
     fbp:             tracking.fbp,
     fbc:             tracking.fbc,
     clientIpAddress: tracking.clientIpAddress,

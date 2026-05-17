@@ -17,6 +17,7 @@ import type { ValidationResult } from '@/lib/website/types';
 import { SuccessState } from '@/components/analyzer/SuccessState';
 import {
   type AnalyzerFormPayload,
+  STATE_OPTIONS,
   CONCEPT_TYPE_OPTIONS,
   LOCATIONS_OPTIONS,
   ANNUAL_FOOD_SPEND_OPTIONS,
@@ -117,9 +118,9 @@ export function AnalyzerForm() {
   // ── Website validation ────────────────────────────────────────────────────────
 
   const triggerValidation = useCallback(
-    async (websiteOverride?: string, zipOverride?: string) => {
+    async (websiteOverride?: string, stateOverride?: string) => {
       const website = websiteOverride ?? formData.website ?? '';
-      const zip = zipOverride ?? formData.zip_code ?? '';
+      const stateValue = stateOverride ?? formData.state ?? '';
 
       if (!website.trim()) return;
 
@@ -130,7 +131,7 @@ export function AnalyzerForm() {
         const action = await validateWebsite({
           website,
           restaurantName: formData.restaurant_name ?? '',
-          zipCode: zip,
+          state: stateValue,
         });
 
         if (!action.success || !action.result) {
@@ -162,7 +163,7 @@ export function AnalyzerForm() {
         setIsValidating(false);
       }
     },
-    [formData.website, formData.zip_code, formData.restaurant_name, fieldErrors.website],
+    [formData.website, formData.state, formData.restaurant_name, fieldErrors.website],
   );
 
   function handleWebsiteBlur() {
@@ -170,10 +171,9 @@ export function AnalyzerForm() {
     if (website) triggerValidation(website);
   }
 
-  function handleZipBlur() {
+  function handleStateChange(selectedState: string) {
     const website = formData.website?.trim();
-    const zip = formData.zip_code?.trim();
-    if (website && zip) triggerValidation(website, zip);
+    if (website && selectedState) triggerValidation(website, selectedState);
   }
 
   // ── Step navigation ───────────────────────────────────────────────────────────
@@ -321,21 +321,23 @@ export function AnalyzerForm() {
               </FormField>
 
               <FormField
-                label="ZIP code"
-                error={fieldErrors.zip_code}
-                hint="U.S. only"
+                label="State"
+                error={fieldErrors.state}
                 required
               >
-                <input
-                  type="text"
-                  value={formData.zip_code ?? ''}
-                  onChange={(e) => update('zip_code', e.target.value)}
-                  onBlur={handleZipBlur}
-                  placeholder="e.g. 78701"
-                  maxLength={10}
-                  autoComplete="postal-code"
-                  className={inputCls(!!fieldErrors.zip_code)}
-                />
+                <select
+                  value={formData.state ?? ''}
+                  onChange={(e) => {
+                    update('state', e.target.value);
+                    handleStateChange(e.target.value);
+                  }}
+                  className={`w-full px-3 py-2.5 border border-[#e2e8f0] rounded-lg text-sm bg-white text-[#143225] focus:outline-none focus:ring-2 focus:ring-[#52C275]/30 focus:border-[#52C275]${fieldErrors.state ? ' border-red-400 focus:ring-red-200' : ''}`}
+                >
+                  <option value="">Select your state</option>
+                  {STATE_OPTIONS.map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
               </FormField>
             </div>
           )}
@@ -583,4 +585,3 @@ function primaryBtnCls(disabled: boolean): string {
 
 const secondaryBtnCls =
   'px-6 py-2.5 rounded-lg text-sm font-medium text-[#475569] border border-[#e2e8f0] hover:bg-white transition-colors min-h-[44px]';
-

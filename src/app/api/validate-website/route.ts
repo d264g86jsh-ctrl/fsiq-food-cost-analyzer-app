@@ -17,11 +17,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ success: false, error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { website, restaurantName, zipCode } = body;
+  const { website, restaurantName, state } = body;
 
-  if (!website || !restaurantName || !zipCode) {
+  if (!website || !restaurantName || !state) {
     return NextResponse.json(
-      { success: false, error: 'website, restaurantName, and zipCode are required' },
+      { success: false, error: 'website, restaurantName, and state are required' },
       { status: 400 },
     );
   }

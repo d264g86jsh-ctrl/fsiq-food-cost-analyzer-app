@@ -124,7 +124,7 @@ function buildCustomFields(payload: GhlHandoffPayload): Array<{ key: string; fie
     { key: 'fsiq_submission_id',          field_value: payload.fsiq_submission_id },
     { key: 'fsiq_restaurant_name',        field_value: payload.fsiq_restaurant_name },
     { key: 'fsiq_website',                field_value: payload.fsiq_website },
-    { key: 'fsiq_zip_code',              field_value: payload.fsiq_zip_code },
+    { key: 'fsiq_state',                 field_value: payload.fsiq_state },
     { key: 'fsiq_concept_type',           field_value: payload.fsiq_concept_type },
     { key: 'fsiq_locations',              field_value: payload.fsiq_locations },
     { key: 'fsiq_annual_food_spend',      field_value: payload.fsiq_annual_food_spend },

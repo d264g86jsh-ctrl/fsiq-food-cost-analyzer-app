@@ -10,7 +10,7 @@
 export interface FormContext {
   restaurantName: string;
   website: string;
-  zipCode: string;
+  state: string;
   conceptType: string;
   locations: string;
   annualFoodSpend: string;   // raw dropdown value, e.g. "$1M–$3M"
@@ -26,7 +26,7 @@ export interface AiResearchInput {
   // Form context (see FormContext above)
   restaurantName: string;
   website: string;
-  zipCode: string;
+  state: string;
   conceptType: string;
   locations: string;
   annualFoodSpend: string;

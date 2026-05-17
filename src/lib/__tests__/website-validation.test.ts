@@ -1,22 +1,11 @@
 // Integration tests for the full validation pipeline.
-// External services (fetch, Google Places, Claude) are mocked.
+// External services (fetch, Claude) are mocked.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock external I/O before importing the orchestrator
 const mockFetch = vi.fn();
 vi.stubGlobal('fetch', mockFetch);
-
-vi.mock('../relevance/google-places', () => ({
-  queryGooglePlaces: vi.fn().mockResolvedValue({
-    googlePlacesScore: 0,
-    placesCountry: null,
-    placeTypes: [],
-    matchedPlaceId: null,
-    googlePlacesQueried: false,
-    internalFlags: [],
-  }),
-}));
 
 vi.mock('../relevance/claude-classifier', async (importOriginal) => {
   const original = await importOriginal<typeof import('../relevance/claude-classifier')>();
@@ -34,10 +23,8 @@ vi.mock('../website/headless-fetch', () => ({
 }));
 
 import { runValidation } from '../website/run-validation';
-import { queryGooglePlaces } from '../relevance/google-places';
 import { classifyWithClaude, isAmbiguous } from '../relevance/claude-classifier';
 
-const mockQueryGooglePlaces = vi.mocked(queryGooglePlaces);
 const mockClassifyWithClaude = vi.mocked(classifyWithClaude);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -85,21 +72,13 @@ const SAAS_HTML = `
 
 const baseInput = {
   restaurantName: 'Casa Roberto',
-  zipCode: '78704',
+  state: 'TX',
 };
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
   mockFetch.mockReset();
-  mockQueryGooglePlaces.mockResolvedValue({
-    googlePlacesScore: 0,
-    placesCountry: null,
-    placeTypes: [],
-    matchedPlaceId: null,
-    googlePlacesQueried: false,
-    internalFlags: [],
-  });
   mockClassifyWithClaude.mockResolvedValue({
     decision: 'plausible_unverified',
     claudeAiUsed: false,
@@ -110,47 +89,14 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-describe('runValidation — ZIP validation gate', () => {
-  it('non-US postal code → clear_non_fit before fetch', async () => {
-    const r = await runValidation({ ...baseInput, website: 'https://casaroberto.com', zipCode: 'H2X 1Y4' });
-    expect(r.finalDecision).toBe('clear_non_fit');
-    expect(r.countryEligibility).toBe('non_us');
-    expect(r.internalFlags).toContain('non_us_postal_code');
-    expect(mockFetch).not.toHaveBeenCalled(); // Should not hit the network
-  });
-
+describe('runValidation — invalid website', () => {
   it('malformed URL → invalid_website', async () => {
-    const r = await runValidation({ ...baseInput, website: 'notaurl', zipCode: '78704' });
+    const r = await runValidation({ ...baseInput, website: 'notaurl' });
     expect(r.finalDecision).toBe('invalid_website');
     expect(r.internalFlags).toContain('malformed_url');
     expect(mockFetch).not.toHaveBeenCalled();
   });
-});
 
-describe('runValidation — national chain detection', () => {
-  it("McDonald's by name → national_chain before fetch", async () => {
-    const r = await runValidation({
-      restaurantName: "McDonald's",
-      website: 'https://mycoolburger.com',
-      zipCode: '78704',
-    });
-    expect(r.finalDecision).toBe('national_chain');
-    expect(r.nationalChainScore).toBeGreaterThanOrEqual(85);
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
-
-  it('Chipotle domain → national_chain', async () => {
-    mockFetch.mockResolvedValue(makeHtmlResponse(RESTAURANT_HTML));
-    const r = await runValidation({
-      restaurantName: 'Chipotle',
-      website: 'https://chipotle.com',
-      zipCode: '78704',
-    });
-    expect(r.finalDecision).toBe('national_chain');
-  });
-});
-
-describe('runValidation — invalid website', () => {
   it('HTTP 404 → invalid_website', async () => {
     mockFetch.mockResolvedValue(makeHtmlResponse('Not Found', 404));
     const r = await runValidation({ ...baseInput, website: 'https://nonexistentsite.com' });
@@ -164,6 +110,29 @@ describe('runValidation — invalid website', () => {
     const r = await runValidation({ ...baseInput, website: 'https://nonexistentsite.com' });
     expect(r.finalDecision).toBe('invalid_website');
     expect(r.internalFlags).toContain('dns_nxdomain');
+  });
+});
+
+describe('runValidation — national chain detection', () => {
+  it("McDonald's by name → national_chain before fetch", async () => {
+    const r = await runValidation({
+      restaurantName: "McDonald's",
+      website: 'https://mycoolburger.com',
+      state: 'TX',
+    });
+    expect(r.finalDecision).toBe('national_chain');
+    expect(r.nationalChainScore).toBeGreaterThanOrEqual(85);
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('Chipotle domain → national_chain', async () => {
+    mockFetch.mockResolvedValue(makeHtmlResponse(RESTAURANT_HTML));
+    const r = await runValidation({
+      restaurantName: 'Chipotle',
+      website: 'https://chipotle.com',
+      state: 'TX',
+    });
+    expect(r.finalDecision).toBe('national_chain');
   });
 });
 
@@ -212,20 +181,10 @@ describe('runValidation — verified_restaurant', () => {
     expect(r.restaurantSignalScore).toBeGreaterThanOrEqual(50);
   });
 
-  it('Google Places confirms US restaurant → verified_restaurant', async () => {
-    mockFetch.mockResolvedValue(makeHtmlResponse('<html><body>Restaurant</body></html>'));
-    mockQueryGooglePlaces.mockResolvedValueOnce({
-      googlePlacesScore: 90,
-      placesCountry: 'US',
-      placeTypes: ['restaurant'],
-      matchedPlaceId: 'place123',
-      googlePlacesQueried: true,
-      internalFlags: ['google_place_us_confirmed'],
-    });
+  it('state dropdown guarantees us_verified country eligibility', async () => {
+    mockFetch.mockResolvedValue(makeHtmlResponse(RESTAURANT_HTML));
     const r = await runValidation({ ...baseInput, website: 'https://casaroberto.com' });
-    expect(r.finalDecision).toBe('verified_restaurant');
     expect(r.countryEligibility).toBe('us_verified');
-    expect(r.googlePlacesScore).toBeGreaterThanOrEqual(80);
   });
 });
 
@@ -242,24 +201,6 @@ describe('runValidation — clear_non_fit (vendor/SaaS)', () => {
     const r = await runValidation({ ...baseInput, website: 'https://foodtechpro.com' });
     expect(r.finalDecision).toBe('clear_non_fit');
     expect(r.negativeSignalScore).toBeGreaterThanOrEqual(60);
-  });
-});
-
-describe('runValidation — non-US via Google Places', () => {
-  it('Places returns non-US country → clear_non_fit + non_us_ineligible', async () => {
-    mockFetch.mockResolvedValue(makeHtmlResponse(RESTAURANT_HTML));
-    mockQueryGooglePlaces.mockResolvedValueOnce({
-      googlePlacesScore: 60,
-      placesCountry: 'CA',
-      placeTypes: ['restaurant'],
-      matchedPlaceId: 'place456',
-      googlePlacesQueried: true,
-      internalFlags: ['google_place_non_us'],
-    });
-    const r = await runValidation({ ...baseInput, website: 'https://casaroberto.ca' });
-    expect(r.finalDecision).toBe('clear_non_fit');
-    expect(r.countryEligibility).toBe('non_us');
-    expect(r.internalFlags).toContain('non_us_ineligible');
   });
 });
 
@@ -297,26 +238,22 @@ describe('runValidation — Claude tiebreaker', () => {
 
 describe('isAmbiguous helper', () => {
   it('nationalChainScore >= 85 → not ambiguous', () => {
-    expect(isAmbiguous({ restaurantSignalScore: 50, negativeSignalScore: 20, googlePlacesScore: 0, nationalChainScore: 90, reachabilityStatus: 'reachable' })).toBe(false);
+    expect(isAmbiguous({ restaurantSignalScore: 50, negativeSignalScore: 20, nationalChainScore: 90, reachabilityStatus: 'reachable' })).toBe(false);
   });
 
   it('reachabilityStatus = invalid → not ambiguous', () => {
-    expect(isAmbiguous({ restaurantSignalScore: 30, negativeSignalScore: 10, googlePlacesScore: 0, nationalChainScore: 0, reachabilityStatus: 'invalid' })).toBe(false);
+    expect(isAmbiguous({ restaurantSignalScore: 30, negativeSignalScore: 10, nationalChainScore: 0, reachabilityStatus: 'invalid' })).toBe(false);
   });
 
   it('clear non-fit threshold → not ambiguous', () => {
-    expect(isAmbiguous({ restaurantSignalScore: 10, negativeSignalScore: 80, googlePlacesScore: 5, nationalChainScore: 0, reachabilityStatus: 'reachable' })).toBe(false);
+    expect(isAmbiguous({ restaurantSignalScore: 10, negativeSignalScore: 80, nationalChainScore: 0, reachabilityStatus: 'reachable' })).toBe(false);
   });
 
   it('verified threshold met → not ambiguous', () => {
-    expect(isAmbiguous({ restaurantSignalScore: 70, negativeSignalScore: 20, googlePlacesScore: 0, nationalChainScore: 0, reachabilityStatus: 'reachable' })).toBe(false);
-  });
-
-  it('googlePlacesScore >= 80 → not ambiguous', () => {
-    expect(isAmbiguous({ restaurantSignalScore: 20, negativeSignalScore: 20, googlePlacesScore: 85, nationalChainScore: 0, reachabilityStatus: 'reachable' })).toBe(false);
+    expect(isAmbiguous({ restaurantSignalScore: 70, negativeSignalScore: 20, nationalChainScore: 0, reachabilityStatus: 'reachable' })).toBe(false);
   });
 
   it('mixed low scores → ambiguous', () => {
-    expect(isAmbiguous({ restaurantSignalScore: 35, negativeSignalScore: 30, googlePlacesScore: 20, nationalChainScore: 10, reachabilityStatus: 'reachable' })).toBe(true);
+    expect(isAmbiguous({ restaurantSignalScore: 35, negativeSignalScore: 30, nationalChainScore: 10, reachabilityStatus: 'reachable' })).toBe(true);
   });
 });

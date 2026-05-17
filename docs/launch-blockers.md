@@ -21,7 +21,6 @@ Last updated: Phase 11 (QA & Hardening)
 | `NEXT_PUBLIC_META_PIXEL_ID` | Meta Pixel (browser) | Client-side pixel does not fire; no browser-side Lead events |
 | `META_PIXEL_ID` | Meta CAPI (server) | Server-side CAPI skipped; `metaStatus = "skipped"` |
 | `META_CONVERSIONS_API_TOKEN` | Meta CAPI (server) | Same as above |
-| `GOOGLE_PLACES_API_KEY` | Website validation — Google Places | Country eligibility degrades to `unknown`; no `us_verified` signals; conservative PDF used more often |
 | `ADMIN_ACCESS_TOKEN` | Admin dashboard auth | Admin login always fails; dashboard inaccessible |
 | `CALENDLY_URL` | PDFMonkey template (not app code) | Calendly buttons in PDF have no URL |
 | `FSIQ_LOGO_DARK_URL` | PDFMonkey template (not app code) | FSIQ header logo missing on PDF pages 2–6 |

@@ -1,3 +1,4 @@
+// DEPRECATED: Google Places removed. Tests kept for reference only.
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { queryGooglePlaces } from '../relevance/google-places';
 
@@ -46,7 +47,7 @@ const US_PLACE_DETAILS = {
   ],
 };
 
-describe('queryGooglePlaces', () => {
+describe.skip('queryGooglePlaces', () => {
   it('returns no-query result when API key is missing', async () => {
     vi.stubEnv('GOOGLE_PLACES_API_KEY', '');
     const r = await queryGooglePlaces({ restaurantName: 'Casa Roberto', zipCode: '78704' });

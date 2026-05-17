@@ -4,13 +4,20 @@
 // Source of truth: docs/build-phases.md §Phase 8, docs/architecture.md §Request Flow.
 //
 // Pipeline: DB save → validation → qualification → [early exit if no AI/PDF needed] →
-//           AI research → 1s delay → AI narrative → PDF generation → GHL sync → return.
+//           assign preliminary lead status → return response to client immediately →
+//           [background via waitUntil] AI research → AI narrative → PDF generation →
+//           GHL sync → Meta CAPI → final DB update.
+//
+// DQ/non-fit path: steps 1–4 → early exit → syncAndReturn (GHL + Meta + complete).
+// Qualified path:  steps 1–4 → preliminary status → return to client →
+//                  background: steps 7–10.
 //
 // Routing decisions (DQ reason, lead status, tags, clear_non_fit handling) live
 // entirely in src/lib/crm/assign-lead-status.ts. This file is orchestration only.
 //
 // Security: never expose API keys to client; never throw unhandled errors to user.
 
+import { waitUntil } from '@vercel/functions';
 import { headers } from 'next/headers';
 import type { FinalDecision, CountryEligibility, DqReason, PdfMode, PdfStatus, CrmSyncStatus, WorkflowStatus, ManualReviewStatus, Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
@@ -78,7 +85,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       data: {
         restaurantName:      payload.restaurant_name,
         website:             payload.website,
-        zipCode:             payload.zip_code,
+        state:               payload.state,
         conceptType:         payload.concept_type,
         locations:           payload.locations,
         annualFoodSpend:     payload.annual_food_spend,
@@ -120,7 +127,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     validationResult = await runValidation({
       website:        payload.website,
       restaurantName: payload.restaurant_name,
-      zipCode:        payload.zip_code,
+      state:          payload.state,
       conceptType:    payload.concept_type,
     });
     await patch({
@@ -193,7 +200,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     return fail(submissionId, 'Analysis failed. Please try again.');
   }
 
-  // ── Steps 5-6: Early exit — DQ, manual review, and clear_non_fit ─────────────
+  // ── Steps 5–6: Early exit — DQ, manual review, and clear_non_fit ─────────────
   // needsAiAndPdf() is the authoritative routing predicate from the routing layer.
   // It returns false for any path that should skip AI + PDF (DQ, manual review, clear_non_fit).
   if (!needsAiAndPdf({
@@ -217,19 +224,19 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       submissionId,
       status,
       workflowErrors,
-      responseQualified:        effectiveQualified,
-      responseDqReason:         effectiveDqReason,
-      responseDollarEstimate:   null,
+      responseQualified:      effectiveQualified,
+      responseDqReason:       effectiveDqReason,
+      responseDollarEstimate: null,
       trackingContext,
     });
   }
 
-  // ── Qualified AI + PDF path ──────────────────────────────────────────────────
+  // ── Qualified path — return early, run AI + PDF + sync in background ──────────
 
   const formContext = {
     restaurantName:      payload.restaurant_name,
     website:             payload.website,
-    zipCode:             payload.zip_code,
+    state:               payload.state,
     conceptType:         payload.concept_type,
     locations:           payload.locations,
     annualFoodSpend:     payload.annual_food_spend,
@@ -239,116 +246,197 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
   };
   const aiInput = buildResearchInput(formContext, validationResult, qualResult);
 
-  // ── Step 7: AI Research ──────────────────────────────────────────────────────
-  let researchResult: AiResearchResult;
-  try {
-    researchResult = await runAiResearch(aiInput);
-  } catch (err) {
-    workflowErrors.push({ stage: 'ai_research', error: err instanceof Error ? err.message : String(err), timestamp: new Date().toISOString() });
-    researchResult = { ...buildFallbackResearch(aiInput), aiUsed: false, aiFallbackUsed: true, aiModel: null, aiError: err instanceof Error ? err.message : String(err), generatedAt: new Date().toISOString() };
-  }
-  await patch({
-    logoUrl:         researchResult.logoUrl,
-    businessSummary: researchResult.businessSummary,
-    conceptSignals:  researchResult.conceptSignals as Prisma.InputJsonValue,
-    workflowStage:   'ai_research',
-  });
-
-  // 1-second delay between Claude calls (Phase 5 spec: orchestrator's responsibility)
-  await new Promise((r) => setTimeout(r, 1000));
-
-  // ── Step 8: AI Narrative ─────────────────────────────────────────────────────
-  let narrativeResult: AiNarrativeResult;
-  try {
-    narrativeResult = await generateAiNarrative(aiInput);
-  } catch (err) {
-    workflowErrors.push({ stage: 'ai_narrative', error: err instanceof Error ? err.message : String(err), timestamp: new Date().toISOString() });
-    narrativeResult = { ...buildFallbackNarrative(aiInput), aiUsed: false, aiFallbackUsed: true, aiModel: null, aiError: err instanceof Error ? err.message : String(err), generatedAt: new Date().toISOString() };
-  }
-  await patch({
-    narrativeDistributor: narrativeResult.narrativeDistributor,
-    narrativeProcurement: narrativeResult.narrativeProcurement,
-    narrativeSku:         narrativeResult.narrativeSku,
-    workflowStage:        'ai_narrative',
-  });
-
-  // ── Step 9: PDF generation ───────────────────────────────────────────────────
-  const pdfModeDecision = determinePdfMode(
-    validationResult.finalDecision,
-    validationResult.countryEligibility,
-    true,
-  );
-
-  let pdfResult: GeneratePdfResult;
-  if (pdfModeDecision.mode === 'skip') {
-    pdfResult = { pdfStatus: 'skipped', pdfMode: null, pdfMonkeyDocumentId: null, pdfDownloadUrl: null, pdfError: `PDF skipped: ${pdfModeDecision.reason}`, pdfRetryCount: 0 };
-  } else {
-    try {
-      pdfResult = await generatePdf({
-        restaurantName:         payload.restaurant_name,
-        fullName:               payload.full_name,
-        conceptType:            payload.concept_type,
-        locations:              payload.locations,
-        annualSpend:            qualResult.annualSpend,
-        spendBucket:            qualResult.spendBucket,
-        finalPctDisplay:        qualResult.finalPctDisplay,
-        dollarEstimateDisplay:  qualResult.dollarEstimateDisplay,
-        dollarEstimate:         qualResult.dollarEstimate,
-        caseStudy:              qualResult.caseStudy,
-        year1:                  qualResult.year1,
-        year2:                  qualResult.year2,
-        year3:                  qualResult.year3,
-        year4:                  qualResult.year4,
-        year5:                  qualResult.year5,
-        projectionHeights:      qualResult.projectionHeights as GeneratePdfInput['projectionHeights'],
-        logoUrl:                researchResult.logoUrl,
-        businessSummary:        researchResult.businessSummary,
-        narrativeDistributor:   narrativeResult.narrativeDistributor,
-        narrativeProcurement:   narrativeResult.narrativeProcurement,
-        narrativeSku:           narrativeResult.narrativeSku,
-        mode:                   pdfModeDecision.mode,
-      });
-    } catch (err) {
-      workflowErrors.push({ stage: 'pdf_generation', error: err instanceof Error ? err.message : String(err), timestamp: new Date().toISOString() });
-      pdfResult = { pdfStatus: 'error', pdfMode: pdfModeDecision.mode, pdfMonkeyDocumentId: null, pdfDownloadUrl: null, pdfError: err instanceof Error ? err.message : String(err), pdfRetryCount: 0 };
-    }
-  }
-  await patch({
-    pdfMode:             pdfResult.pdfMode as PdfMode | null,
-    pdfStatus:           pdfResult.pdfStatus as PdfStatus,
-    pdfMonkeyDocumentId: pdfResult.pdfMonkeyDocumentId,
-    pdfDownloadUrl:      pdfResult.pdfDownloadUrl,
-    pdfError:            pdfResult.pdfError,
-    pdfRetryCount:       pdfResult.pdfRetryCount,
-    workflowStage:       'pdf_generation',
-  });
-
-  // ── Step 10: Assign lead status and GHL sync ─────────────────────────────────
-  const status = assignLeadStatus({
+  // Preliminary lead status — pdfMode/pdfStatus null until background completes.
+  // Returns QUALIFIED_PDF_PENDING from the routing layer.
+  const prelimStatus = assignLeadStatus({
     finalDecision:        validationResult.finalDecision,
     countryEligibility:   validationResult.countryEligibility,
     qualified:            true,
     dqReason:             null,
-    pdfMode:              pdfResult.pdfMode,
-    pdfStatus:            pdfResult.pdfStatus,
-    pdfDownloadUrl:       pdfResult.pdfDownloadUrl,
+    pdfMode:              null,
+    pdfStatus:            null,
+    pdfDownloadUrl:       null,
     manualReviewRequired: false,
     workflowFailed:       false,
   });
 
-  return syncAndReturn({
-    submissionId,
-    status,
-    workflowErrors,
-    responseQualified:      true,
-    responseDqReason:       null,
-    responseDollarEstimate: qualResult.dollarEstimateDisplay,
-    pdfDownloadUrl:         pdfResult.pdfDownloadUrl,
-    trackingContext,
+  await patch({
+    workflowStage:  'qualification_complete',
+    workflowStatus: 'in_progress' as WorkflowStatus,
   });
+
+  // ── Background: steps 7–10 via waitUntil (runs after response is sent) ────────
+  waitUntil((async () => {
+    // ── Step 7: AI Research ────────────────────────────────────────────────────
+    let researchResult: AiResearchResult;
+    try {
+      researchResult = await runAiResearch(aiInput);
+    } catch (err) {
+      workflowErrors.push({ stage: 'ai_research', error: err instanceof Error ? err.message : String(err), timestamp: new Date().toISOString() });
+      researchResult = { ...buildFallbackResearch(aiInput), aiUsed: false, aiFallbackUsed: true, aiModel: null, aiError: err instanceof Error ? err.message : String(err), generatedAt: new Date().toISOString() };
+    }
+    await patch({
+      logoUrl:         researchResult.logoUrl,
+      businessSummary: researchResult.businessSummary,
+      conceptSignals:  researchResult.conceptSignals as Prisma.InputJsonValue,
+      workflowStage:   'ai_research',
+    });
+
+    // 1-second delay between Claude calls (Phase 5 spec: orchestrator's responsibility)
+    await new Promise((r) => setTimeout(r, 1000));
+
+    // ── Step 8: AI Narrative ───────────────────────────────────────────────────
+    let narrativeResult: AiNarrativeResult;
+    try {
+      narrativeResult = await generateAiNarrative(aiInput);
+    } catch (err) {
+      workflowErrors.push({ stage: 'ai_narrative', error: err instanceof Error ? err.message : String(err), timestamp: new Date().toISOString() });
+      narrativeResult = { ...buildFallbackNarrative(aiInput), aiUsed: false, aiFallbackUsed: true, aiModel: null, aiError: err instanceof Error ? err.message : String(err), generatedAt: new Date().toISOString() };
+    }
+    await patch({
+      narrativeDistributor: narrativeResult.narrativeDistributor,
+      narrativeProcurement: narrativeResult.narrativeProcurement,
+      narrativeSku:         narrativeResult.narrativeSku,
+      workflowStage:        'ai_narrative',
+    });
+
+    // ── Step 9: PDF generation ─────────────────────────────────────────────────
+    const pdfModeDecision = determinePdfMode(
+      validationResult.finalDecision,
+      validationResult.countryEligibility,
+      true,
+    );
+
+    let pdfResult: GeneratePdfResult;
+    if (pdfModeDecision.mode === 'skip') {
+      pdfResult = { pdfStatus: 'skipped', pdfMode: null, pdfMonkeyDocumentId: null, pdfDownloadUrl: null, pdfError: `PDF skipped: ${pdfModeDecision.reason}`, pdfRetryCount: 0 };
+    } else {
+      try {
+        pdfResult = await generatePdf({
+          restaurantName:        payload.restaurant_name,
+          fullName:              payload.full_name,
+          conceptType:           payload.concept_type,
+          locations:             payload.locations,
+          annualSpend:           qualResult.annualSpend,
+          spendBucket:           qualResult.spendBucket,
+          finalPctDisplay:       qualResult.finalPctDisplay,
+          dollarEstimateDisplay: qualResult.dollarEstimateDisplay,
+          dollarEstimate:        qualResult.dollarEstimate,
+          caseStudy:             qualResult.caseStudy,
+          year1:                 qualResult.year1,
+          year2:                 qualResult.year2,
+          year3:                 qualResult.year3,
+          year4:                 qualResult.year4,
+          year5:                 qualResult.year5,
+          projectionHeights:     qualResult.projectionHeights as GeneratePdfInput['projectionHeights'],
+          logoUrl:               researchResult.logoUrl,
+          businessSummary:       researchResult.businessSummary,
+          narrativeDistributor:  narrativeResult.narrativeDistributor,
+          narrativeProcurement:  narrativeResult.narrativeProcurement,
+          narrativeSku:          narrativeResult.narrativeSku,
+          mode:                  pdfModeDecision.mode,
+        });
+      } catch (err) {
+        workflowErrors.push({ stage: 'pdf_generation', error: err instanceof Error ? err.message : String(err), timestamp: new Date().toISOString() });
+        pdfResult = { pdfStatus: 'error', pdfMode: pdfModeDecision.mode, pdfMonkeyDocumentId: null, pdfDownloadUrl: null, pdfError: err instanceof Error ? err.message : String(err), pdfRetryCount: 0 };
+      }
+    }
+    await patch({
+      pdfMode:             pdfResult.pdfMode as PdfMode | null,
+      pdfStatus:           pdfResult.pdfStatus as PdfStatus,
+      pdfMonkeyDocumentId: pdfResult.pdfMonkeyDocumentId,
+      pdfDownloadUrl:      pdfResult.pdfDownloadUrl,
+      pdfError:            pdfResult.pdfError,
+      pdfRetryCount:       pdfResult.pdfRetryCount,
+      workflowStage:       'pdf_generation',
+    });
+
+    // ── Step 10: Assign final lead status + GHL sync + Meta CAPI ───────────────
+    const finalStatus = assignLeadStatus({
+      finalDecision:        validationResult.finalDecision,
+      countryEligibility:   validationResult.countryEligibility,
+      qualified:            true,
+      dqReason:             null,
+      pdfMode:              pdfResult.pdfMode,
+      pdfStatus:            pdfResult.pdfStatus,
+      pdfDownloadUrl:       pdfResult.pdfDownloadUrl,
+      manualReviewRequired: false,
+      workflowFailed:       false,
+    });
+
+    // Re-fetch fresh record for GHL payload builder and CAPI user data
+    const fresh = await db.submission.findUnique({ where: { id: submissionId } }).catch(() => null);
+
+    let crmSyncStatus: 'synced' | 'error' = 'error';
+    let ghlContactId: string | null = null;
+    let crmSyncError: string | null = 'Record not found for GHL sync';
+
+    if (fresh) {
+      const ghlPayload = buildGhlPayload(fresh, finalStatus.leadStatus, finalStatus.communicationRoute, finalStatus.tags);
+      const crmResult = await syncToGhl(ghlPayload);
+      crmSyncStatus = crmResult.crmSyncStatus;
+      ghlContactId  = crmResult.ghlContactId;
+      crmSyncError  = crmResult.crmSyncError;
+    }
+
+    let metaResult: { metaStatus: 'fired' | 'error' | 'skipped'; metaEventIds: string[]; metaError: string | null } = {
+      metaStatus: 'skipped', metaEventIds: [], metaError: 'Record not found for CAPI',
+    };
+
+    if (fresh) {
+      const capiEvents = [buildLeadEvent(fresh, trackingContext)];
+
+      const isQualifiedPdfReady =
+        finalStatus.leadStatus === LEAD_STATUS.QUALIFIED_FULL_PDF_READY ||
+        finalStatus.leadStatus === LEAD_STATUS.QUALIFIED_CONSERVATIVE_PDF_READY;
+
+      if (isQualifiedPdfReady) {
+        capiEvents.push(buildQualifiedLeadEvent(fresh, trackingContext));
+      }
+
+      metaResult = await sendToMetaCapi(capiEvents).catch((err) => ({
+        metaStatus:   'error' as const,
+        metaEventIds: [],
+        metaError:    err instanceof Error ? err.message : String(err),
+      }));
+    }
+
+    await db.submission.update({
+      where: { id: submissionId },
+      data: {
+        crmSyncStatus:  crmSyncStatus as CrmSyncStatus,
+        ghlContactId,
+        crmSyncError,
+        crmTags:        finalStatus.tags as unknown as Prisma.InputJsonValue,
+        metaStatus:     metaResult.metaStatus,
+        metaEventIds:   metaResult.metaEventIds as unknown as Prisma.InputJsonValue,
+        metaError:      metaResult.metaError,
+        workflowStage:  'complete',
+        workflowStatus: (workflowErrors.length > 0 || crmSyncStatus === 'error')
+          ? 'partial' as WorkflowStatus
+          : 'complete' as WorkflowStatus,
+        workflowErrors: workflowErrors.length > 0
+          ? (workflowErrors as unknown as Prisma.InputJsonValue)
+          : undefined,
+      },
+    }).catch(() => {});
+  })());
+
+  // Return to client immediately — background continues via waitUntil
+  return {
+    success:               true,
+    submissionId,
+    error:                 null,
+    qualified:             true,
+    dqReason:              null,
+    leadStatus:            prelimStatus.leadStatus,
+    dollarEstimateDisplay: qualResult.dollarEstimateDisplay,
+    pdfDownloadUrl:        null,
+  };
 }
 
 // ── syncAndReturn: GHL sync + Meta CAPI + final DB update + client response ────
+// Used only by the DQ / manual-review early-exit path (steps 5–6 above).
 
 async function syncAndReturn({
   submissionId,
@@ -357,7 +445,6 @@ async function syncAndReturn({
   responseQualified,
   responseDqReason,
   responseDollarEstimate,
-  pdfDownloadUrl = null,
   trackingContext,
 }: {
   submissionId: string;
@@ -366,34 +453,8 @@ async function syncAndReturn({
   responseQualified: boolean;
   responseDqReason: string | null;
   responseDollarEstimate: string | null;
-  pdfDownloadUrl?: string | null;
   trackingContext: TrackingContext;
 }): Promise<SubmitAnalysisResult> {
-  if (!status.shouldSyncGhl) {
-    // qualified_pdf_pending — defer GHL and CAPI sync
-    await db.submission.update({
-      where: { id: submissionId },
-      data: {
-        workflowStage:  'complete',
-        workflowStatus: 'partial' as WorkflowStatus,
-        workflowErrors: workflowErrors.length > 0
-          ? (workflowErrors as unknown as Prisma.InputJsonValue)
-          : undefined,
-      },
-    }).catch(() => {});
-
-    return {
-      success: true,
-      submissionId,
-      error: null,
-      qualified: responseQualified,
-      dqReason: responseDqReason,
-      leadStatus: status.leadStatus,
-      dollarEstimateDisplay: responseDollarEstimate,
-      pdfDownloadUrl: null,
-    };
-  }
-
   // Fetch fresh record for GHL payload builder and CAPI user data
   const fresh = await db.submission.findUnique({ where: { id: submissionId } }).catch(() => null);
 
@@ -417,7 +478,7 @@ async function syncAndReturn({
   if (fresh) {
     const capiEvents = [buildLeadEvent(fresh, trackingContext)];
 
-    // QualifiedLead fires only for PDF-ready qualified leads
+    // QualifiedLead fires only for PDF-ready qualified leads — not on the DQ path
     const isQualifiedPdfReady =
       status.leadStatus === LEAD_STATUS.QUALIFIED_FULL_PDF_READY ||
       status.leadStatus === LEAD_STATUS.QUALIFIED_CONSERVATIVE_PDF_READY;
@@ -454,14 +515,14 @@ async function syncAndReturn({
   }).catch(() => {});
 
   return {
-    success: true,
+    success:               true,
     submissionId,
-    error: null,
-    qualified: responseQualified,
-    dqReason: responseDqReason,
-    leadStatus: status.leadStatus,
+    error:                 null,
+    qualified:             responseQualified,
+    dqReason:              responseDqReason,
+    leadStatus:            status.leadStatus,
     dollarEstimateDisplay: responseDollarEstimate,
-    pdfDownloadUrl,
+    pdfDownloadUrl:        null,
   };
 }
 
