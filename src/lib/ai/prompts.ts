@@ -59,7 +59,7 @@ export function buildNarrativeSystemPrompt(): string {
 
 export function buildNarrativeUserPrompt(input: AiResearchInput): string {
   const skuContext = input.topSkus
-    ? `User-identified spend categories / key items: "${input.topSkus}"`
+    ? `User-identified spend categories / key items: "${input.topSkus.slice(0, 200)}"`
     : 'User did not specify key items (use general food cost categories).';
 
   // Savings figures are read-only — AI sees them as context but must not alter them

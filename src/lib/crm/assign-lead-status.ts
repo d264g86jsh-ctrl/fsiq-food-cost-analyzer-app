@@ -190,11 +190,13 @@ function assignQualifiedStatus(
     };
   }
 
-  // PDF not yet confirmed (null — generation not yet run or deferred)
+  // PDF not yet confirmed (null — generation not yet run or deferred).
+  // Still syncs to GHL with a no-email hold so the contact exists in CRM.
+  // PDF-ready tag and report email fire only after pdfDownloadUrl is confirmed.
   return {
     leadStatus: LEAD_STATUS.QUALIFIED_PDF_PENDING,
     communicationRoute: COMMUNICATION_ROUTE.NO_EMAIL_HOLD,
-    tags: [],
-    shouldSyncGhl: false,
+    tags: [GHL_TAG.ANALYZER_SUBMITTED, GHL_TAG.PDF_FAILED],
+    shouldSyncGhl: true,
   };
 }

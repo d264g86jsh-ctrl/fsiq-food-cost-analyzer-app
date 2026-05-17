@@ -248,10 +248,14 @@ describe('assignLeadStatus — qualified paths', () => {
     expect(r.leadStatus).toBe(LEAD_STATUS.PDF_FAILED);
   });
 
-  it('PDF null (not yet run) → qualified_pdf_pending, no GHL sync', () => {
+  it('PDF null (not yet run) → qualified_pdf_pending, syncs to GHL with no-email hold', () => {
     const r = assignLeadStatus({ ...qualified, pdfStatus: null });
     expect(r.leadStatus).toBe(LEAD_STATUS.QUALIFIED_PDF_PENDING);
-    expect(r.shouldSyncGhl).toBe(false);
-    expect(r.tags).toHaveLength(0);
+    expect(r.communicationRoute).toBe(COMMUNICATION_ROUTE.NO_EMAIL_HOLD);
+    expect(r.shouldSyncGhl).toBe(true);
+    expect(r.tags).toContain(GHL_TAG.ANALYZER_SUBMITTED);
+    expect(r.tags).toContain(GHL_TAG.PDF_FAILED);
+    expect(r.tags).not.toContain(GHL_TAG.FULL_PDF_READY);
+    expect(r.tags).not.toContain(GHL_TAG.CONSERVATIVE_PDF_READY);
   });
 });

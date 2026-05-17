@@ -20,6 +20,12 @@ export async function sendToMetaCapi(events: MetaCapiEvent[]): Promise<MetaCapiR
 
   const body: Record<string, unknown> = { data: events };
   const testCode = process.env.META_TEST_EVENT_CODE;
+  if (testCode && process.env.NODE_ENV === 'production') {
+    console.error(
+      '[FSIQ] WARNING: META_TEST_EVENT_CODE is set in production. ' +
+      'This will corrupt Meta event data. Remove it from your production env vars immediately.'
+    );
+  }
   if (testCode) body.test_event_code = testCode;
 
   try {
