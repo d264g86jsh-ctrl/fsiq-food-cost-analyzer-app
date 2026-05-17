@@ -1,5 +1,11 @@
-// GHL CRM sync — upsert contact by email, apply custom fields and tags.
+// GHL CRM sync — always create a new contact, then apply tags via the tags endpoint.
 // Source of truth: docs/ghl-email-handoff.md §GHL API Notes.
+//
+// Strategy: every submission creates a new GHL contact (no dedup search).
+// If GHL blocks the create due to a duplicate (400 + meta.contactId), we skip
+// updating fields on the existing contact and go straight to applying tags via
+// POST /contacts/:id/tags. This guarantees the workflow trigger fires on every
+// submission regardless of duplicate contacts.
 //
 // Auth: GHL_ACCESS_TOKEN preferred; falls back to GHL_API_KEY.
 // Base URL: GHL_API_BASE_URL (default: https://services.leadconnectorhq.com).
@@ -23,40 +29,6 @@ function getConfig() {
   return { token, locationId, apiBase };
 }
 
-// Shared contact body — no locationId (PUT only).
-type ContactBody = {
-  firstName: string;
-  lastName: string;
-  email?: string;
-  phone?: string;
-  tags: string[];
-  customFields: Array<{ key: string; field_value: string }>;
-};
-
-// Parse the matchingField from a GHL 400 duplicate response body.
-function parseDuplicateResponse(detail: string): { dedupId: string | null; matchingField: string | null } {
-  try {
-    const parsed = JSON.parse(detail) as { meta?: { contactId?: string; matchingField?: string } };
-    return {
-      dedupId:       parsed?.meta?.contactId   ?? null,
-      matchingField: parsed?.meta?.matchingField ?? null,
-    };
-  } catch {
-    return { dedupId: null, matchingField: null };
-  }
-}
-
-// Strip a conflicting field from a contact body so a blocked PUT can be retried.
-// GHL deduplicates on: email, phone (and potentially firstName+lastName combos).
-// Stripping the conflicting field lets the PUT proceed without violating the constraint.
-function stripField(body: ContactBody, field: string | null): ContactBody {
-  if (!field) return body;
-  const stripped = { ...body };
-  if (field === 'email')  delete stripped.email;
-  if (field === 'phone')  delete stripped.phone;
-  return stripped;
-}
-
 export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResult> {
   const { token, locationId, apiBase } = getConfig();
 
@@ -76,90 +48,75 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
   };
 
   try {
-    // Step 1: search for existing contact by email
-    const searchUrl = `${apiBase}/contacts/search/duplicate?${new URLSearchParams({
-      email: payload.fsiq_email,
-      locationId,
-    }).toString()}`;
-
-    const searchRes = await fetch(searchUrl, { method: 'GET', headers, signal: AbortSignal.timeout(10_000) });
-    if (!searchRes.ok) {
-      const detail = await searchRes.text().catch(() => '');
-      throw new Error(`GHL search failed: ${searchRes.status} ${searchRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
-    }
-    const searchData = await searchRes.json() as { contact?: { id: string } | null };
-    const existingId = searchData.contact?.id ?? null;
-
-    // Step 2: assemble contact fields
     const nameParts = payload.fsiq_full_name.trim().split(/\s+/);
     const firstName = nameParts[0] ?? '';
     const lastName = nameParts.slice(1).join(' ') || '';
 
-    const customFields = buildCustomFields(payload);
+    // Step 1: always attempt to create a new contact.
+    // Tags are NOT included here — they are applied via the tags endpoint
+    // in step 2, which fires the GHL workflow trigger.
+    const createRes = await fetch(`${apiBase}/contacts`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        locationId,
+        firstName,
+        lastName,
+        email: payload.fsiq_email,
+        ...(payload.fsiq_phone ? { phone: payload.fsiq_phone } : {}),
+        customFields: buildCustomFields(payload),
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
 
-    // locationId is required for POST (create) but not accepted on PUT (update).
-    const sharedFields: ContactBody = {
-      firstName,
-      lastName,
-      email: payload.fsiq_email,
-      ...(payload.fsiq_phone ? { phone: payload.fsiq_phone } : {}),
-      tags: payload.tags as string[],
-      customFields,
-    };
-
-    // Step 3: create or update
     let contactId: string;
-    if (existingId) {
-      const result = await upsertContact(apiBase, existingId, sharedFields, headers);
-      contactId = result.contactId;
-      if (result.warning) {
-        return {
-          crmSyncStatus: 'synced',
-          ghlContactId: contactId,
-          crmSyncError: result.warning,
-          crmTags: payload.tags as string[],
-        };
+    let contactNote: string | null = null;
+
+    if (createRes.ok) {
+      const createData = await createRes.json() as { contact?: { id: string } };
+      if (!createData.contact?.id) {
+        throw new Error('GHL create returned no contact ID');
       }
+      contactId = createData.contact.id;
     } else {
-      const createRes = await fetch(`${apiBase}/contacts`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ locationId, ...sharedFields }),
-        signal: AbortSignal.timeout(10_000),
-      });
+      const detail = await createRes.text().catch(() => '');
 
-      if (!createRes.ok) {
-        const detail = await createRes.text().catch(() => '');
-        const { dedupId, matchingField } = parseDuplicateResponse(detail);
+      // GHL returns meta.contactId when the location blocks duplicate contacts.
+      // We do not try to update the existing contact's fields — we only apply
+      // tags so the workflow trigger fires.
+      let dedupId: string | null = null;
+      try {
+        const parsed = JSON.parse(detail) as { meta?: { contactId?: string } };
+        dedupId = parsed?.meta?.contactId ?? null;
+      } catch { /* not JSON */ }
 
-        if (dedupId) {
-          // GHL blocked create due to duplicate — update the canonical contact instead.
-          const result = await upsertContact(apiBase, dedupId, sharedFields, headers, matchingField);
-          contactId = result.contactId;
-          if (result.warning) {
-            return {
-              crmSyncStatus: 'synced',
-              ghlContactId: contactId,
-              crmSyncError: result.warning,
-              crmTags: payload.tags as string[],
-            };
-          }
-        } else {
-          throw new Error(`GHL create failed: ${createRes.status} ${createRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
-        }
+      if (dedupId) {
+        contactId = dedupId;
+        contactNote = 'GHL duplicate contact — fields not updated, tags applied to existing contact';
       } else {
-        const createData = await createRes.json() as { contact?: { id: string } };
-        if (!createData.contact?.id) {
-          throw new Error('GHL create returned no contact ID');
-        }
-        contactId = createData.contact.id;
+        throw new Error(`GHL create failed: ${createRes.status} ${createRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
       }
+    }
+
+    // Step 2: apply tags via the dedicated tags endpoint.
+    // This fires the GHL workflow trigger regardless of whether the contact
+    // was freshly created or already existed.
+    const tagsRes = await fetch(`${apiBase}/contacts/${contactId}/tags`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ tags: payload.tags }),
+      signal: AbortSignal.timeout(10_000),
+    });
+
+    if (!tagsRes.ok) {
+      const tagsDetail = await tagsRes.text().catch(() => '');
+      throw new Error(`GHL tag apply failed: ${tagsRes.status} ${tagsRes.statusText}${tagsDetail ? ` — ${tagsDetail.slice(0, 300)}` : ''}`);
     }
 
     return {
       crmSyncStatus: 'synced',
       ghlContactId: contactId,
-      crmSyncError: null,
+      crmSyncError: contactNote,
       crmTags: payload.tags as string[],
     };
   } catch (err) {
@@ -173,93 +130,12 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
   }
 }
 
-// ── upsertContact ─────────────────────────────────────────────────────────────
-// PUT a contact. On 400 duplicate:
-//   1. Try updating the conflicting contact (dedupId from meta).
-//   2. If that also 400s (circular conflict), strip the conflicting field and
-//      retry the original contact once more.
-//   3. If the stripped retry still fails, accept it as a partial sync — the
-//      contact exists in GHL, tags are applied, workflow fires.
-// Returns contactId and an optional warning string (never throws for duplicates).
-
-async function upsertContact(
-  apiBase: string,
-  contactId: string,
-  body: ContactBody,
-  headers: Record<string, string>,
-  // When called from the create dedup path, we already know one conflicting field.
-  knownConflictField: string | null = null,
-): Promise<{ contactId: string; warning: string | null }> {
-  const res = await fetch(`${apiBase}/contacts/${contactId}`, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(10_000),
-  });
-
-  if (res.ok) {
-    const data = await res.json() as { contact?: { id: string } };
-    return { contactId: data.contact?.id ?? contactId, warning: null };
-  }
-
-  const detail = await res.text().catch(() => '');
-  const { dedupId, matchingField } = parseDuplicateResponse(detail);
-
-  if (!dedupId) {
-    // Non-duplicate 400 — throw so the outer catch records it as a real error.
-    throw new Error(`GHL update failed: ${res.status} ${res.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
-  }
-
-  // First dedup: try updating the conflicting contact (dedupId).
-  // Pass the conflicting field so we know what to strip if this also fails.
-  const conflictField = matchingField ?? knownConflictField;
-
-  const dedupRes = await fetch(`${apiBase}/contacts/${dedupId}`, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(10_000),
-  });
-
-  if (dedupRes.ok) {
-    const dedupData = await dedupRes.json() as { contact?: { id: string } };
-    return { contactId: dedupData.contact?.id ?? dedupId, warning: null };
-  }
-
-  // Second dedup 400: circular conflict — Contact A↔B both block each other.
-  // Strip the conflicting field and retry the original contact once more.
-  const strippedBody = stripField(body, conflictField);
-  const retryRes = await fetch(`${apiBase}/contacts/${contactId}`, {
-    method: 'PUT',
-    headers,
-    body: JSON.stringify(strippedBody),
-    signal: AbortSignal.timeout(10_000),
-  });
-
-  if (retryRes.ok) {
-    const retryData = await retryRes.json() as { contact?: { id: string } };
-    const resolvedId = retryData.contact?.id ?? contactId;
-    return {
-      contactId: resolvedId,
-      warning: `GHL circular dedup: ${conflictField ?? 'unknown field'} stripped from update — contact synced without that field`,
-    };
-  }
-
-  // Stripped retry also failed — accept partial sync. Contact is in GHL,
-  // tags are applied (included in body), workflow will fire.
-  const retryDetail = await retryRes.text().catch(() => '');
-  return {
-    contactId,
-    warning: `GHL dedup conflict unresolved after stripping ${conflictField ?? 'unknown field'} — partial sync (tags applied): ${retryDetail.slice(0, 200)}`,
-  };
-}
-
 function buildCustomFields(payload: GhlHandoffPayload): Array<{ key: string; field_value: string }> {
   const fields: Array<{ key: string; field_value: string }> = [
     { key: 'fsiq_submission_id',          field_value: payload.fsiq_submission_id },
     { key: 'fsiq_restaurant_name',        field_value: payload.fsiq_restaurant_name },
     { key: 'fsiq_website',                field_value: payload.fsiq_website },
-    { key: 'fsiq_state',                 field_value: payload.fsiq_state },
+    { key: 'fsiq_state',                  field_value: payload.fsiq_state },
     { key: 'fsiq_concept_type',           field_value: payload.fsiq_concept_type },
     { key: 'fsiq_locations',              field_value: payload.fsiq_locations },
     { key: 'fsiq_annual_food_spend',      field_value: payload.fsiq_annual_food_spend },

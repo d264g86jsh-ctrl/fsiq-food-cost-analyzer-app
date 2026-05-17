@@ -41,11 +41,24 @@ const basePayload: GhlHandoffPayload = {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function dupResponse(contactId: string, matchingField: string) {
+function dupResponse(contactId: string) {
   return new Response(
-    JSON.stringify({ statusCode: 400, message: 'This location does not allow duplicated contacts.', meta: { contactId, matchingField }, succeded: false }),
+    JSON.stringify({
+      statusCode: 400,
+      message: 'This location does not allow duplicated contacts.',
+      meta: { contactId, matchingField: 'phone' },
+      succeded: false,
+    }),
     { status: 400 },
   );
+}
+
+function okContact(id: string) {
+  return new Response(JSON.stringify({ contact: { id } }), { status: 200 });
+}
+
+function okTags() {
+  return new Response(JSON.stringify({ tags: basePayload.tags }), { status: 200 });
 }
 
 // ── Env helpers ───────────────────────────────────────────────────────────────
@@ -80,221 +93,203 @@ describe('syncToGhl — missing credentials', () => {
   });
 });
 
-// ── Contact creation (no existing contact) ────────────────────────────────────
+// ── Happy path: create succeeds, tags applied ─────────────────────────────────
 
-describe('syncToGhl — create new contact', () => {
-  it('creates contact when search returns no existing contact', async () => {
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+describe('syncToGhl — create + tag (happy path)', () => {
+  it('returns synced with new contactId on successful create + tags', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/search/duplicate')) {
-        return new Response(JSON.stringify({ contact: null }), { status: 200 });
-      }
-      if (url.endsWith('/contacts')) {
-        return new Response(JSON.stringify({ contact: { id: 'new_contact_123' } }), { status: 200 });
-      }
+      if (url.endsWith('/contacts'))              return okContact('new_contact_123');
+      if (url.includes('/contacts/new_contact_123/tags')) return okTags();
       return new Response('not found', { status: 404 });
     });
 
     const result = await syncToGhl(basePayload);
-
     expect(result.crmSyncStatus).toBe('synced');
     expect(result.ghlContactId).toBe('new_contact_123');
     expect(result.crmSyncError).toBeNull();
     expect(result.crmTags).toContain(GHL_TAG.FULL_PDF_READY);
-
-    const calls = fetchSpy.mock.calls;
-    const createCall = calls.find(([url]) => typeof url === 'string' && url.endsWith('/contacts') && !url.includes('search'));
-    expect(createCall).toBeDefined();
-    const [, init] = createCall!;
-    expect((init as RequestInit).method).toBe('POST');
-    fetchSpy.mockRestore();
   });
-});
 
-// ── Contact update (existing contact found) ───────────────────────────────────
-
-describe('syncToGhl — update existing contact', () => {
-  it('updates contact when search finds existing contact', async () => {
+  it('uses POST for create', async () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/search/duplicate')) {
-        return new Response(JSON.stringify({ contact: { id: 'existing_456' } }), { status: 200 });
-      }
-      if (url.includes('/contacts/existing_456')) {
-        return new Response(JSON.stringify({ contact: { id: 'existing_456' } }), { status: 200 });
-      }
+      if (url.endsWith('/contacts'))                    return okContact('c1');
+      if (url.includes('/contacts/c1/tags'))            return okTags();
       return new Response('not found', { status: 404 });
     });
 
-    const result = await syncToGhl(basePayload);
+    await syncToGhl(basePayload);
 
-    expect(result.crmSyncStatus).toBe('synced');
-    expect(result.ghlContactId).toBe('existing_456');
+    const createCall = fetchSpy.mock.calls.find(([url]) =>
+      typeof url === 'string' && url.endsWith('/contacts'),
+    );
+    expect(createCall).toBeDefined();
+    expect((createCall![1] as RequestInit).method).toBe('POST');
+  });
 
-    const calls = fetchSpy.mock.calls;
-    const updateCall = calls.find(([url]) => typeof url === 'string' && url.includes('/contacts/existing_456'));
-    expect(updateCall).toBeDefined();
-    const [, init] = updateCall!;
-    expect((init as RequestInit).method).toBe('PUT');
-    fetchSpy.mockRestore();
+  it('does not call the duplicate search endpoint', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.endsWith('/contacts'))               return okContact('c1');
+      if (url.includes('/contacts/c1/tags'))       return okTags();
+      return new Response('not found', { status: 404 });
+    });
+
+    await syncToGhl(basePayload);
+
+    const searchCall = fetchSpy.mock.calls.find(([url]) =>
+      typeof url === 'string' && url.includes('search/duplicate'),
+    );
+    expect(searchCall).toBeUndefined();
+  });
+
+  it('sends tags via POST /contacts/:id/tags, not in create body', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.endsWith('/contacts'))               return okContact('c1');
+      if (url.includes('/contacts/c1/tags'))       return okTags();
+      return new Response('not found', { status: 404 });
+    });
+
+    await syncToGhl(basePayload);
+
+    // Create body should NOT include tags
+    const createCall = fetchSpy.mock.calls.find(([url]) =>
+      typeof url === 'string' && url.endsWith('/contacts'),
+    )!;
+    const createBody = JSON.parse((createCall[1] as RequestInit).body as string);
+    expect(createBody).not.toHaveProperty('tags');
+
+    // Tags call should include the tags
+    const tagsCall = fetchSpy.mock.calls.find(([url]) =>
+      typeof url === 'string' && url.includes('/tags'),
+    )!;
+    const tagsBody = JSON.parse((tagsCall[1] as RequestInit).body as string);
+    expect(tagsBody.tags).toContain(GHL_TAG.FULL_PDF_READY);
+  });
+
+  it('includes locationId in create body', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.endsWith('/contacts'))               return okContact('c1');
+      if (url.includes('/contacts/c1/tags'))       return okTags();
+      return new Response('not found', { status: 404 });
+    });
+
+    await syncToGhl(basePayload);
+
+    const createCall = fetchSpy.mock.calls.find(([url]) =>
+      typeof url === 'string' && url.endsWith('/contacts'),
+    )!;
+    const createBody = JSON.parse((createCall[1] as RequestInit).body as string);
+    expect(createBody.locationId).toBe('loc_test');
   });
 });
 
-// ── Dedup fallback — first level (one hop) ────────────────────────────────────
+// ── Duplicate blocked: apply tags to existing contact ────────────────────────
 
-describe('syncToGhl — dedup fallback (one hop)', () => {
-  it('updates dedup contact when update returns 400 with meta.contactId', async () => {
+describe('syncToGhl — duplicate contact (400 + meta.contactId)', () => {
+  it('returns synced when create is blocked and tags applied to existing contact', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/search/duplicate')) {
-        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
-      }
-      if (url.includes('/contacts/contact_a')) {
-        return dupResponse('contact_b', 'phone');
-      }
-      if (url.includes('/contacts/contact_b')) {
-        return new Response(JSON.stringify({ contact: { id: 'contact_b' } }), { status: 200 });
-      }
+      if (url.endsWith('/contacts'))                       return dupResponse('existing_abc');
+      if (url.includes('/contacts/existing_abc/tags'))     return okTags();
       return new Response('not found', { status: 404 });
     });
 
     const result = await syncToGhl(basePayload);
     expect(result.crmSyncStatus).toBe('synced');
-    expect(result.ghlContactId).toBe('contact_b');
-    expect(result.crmSyncError).toBeNull();
+    expect(result.ghlContactId).toBe('existing_abc');
+    expect(result.crmTags).toContain(GHL_TAG.FULL_PDF_READY);
   });
 
-  it('updates dedup contact when create returns 400 with meta.contactId', async () => {
+  it('sets a non-null crmSyncError note when using existing contact', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/search/duplicate')) {
-        return new Response(JSON.stringify({ contact: null }), { status: 200 });
-      }
-      if (url.endsWith('/contacts')) {
-        return dupResponse('contact_b', 'phone');
-      }
-      if (url.includes('/contacts/contact_b')) {
-        return new Response(JSON.stringify({ contact: { id: 'contact_b' } }), { status: 200 });
-      }
+      if (url.endsWith('/contacts'))                   return dupResponse('existing_abc');
+      if (url.includes('/contacts/existing_abc/tags')) return okTags();
       return new Response('not found', { status: 404 });
     });
 
     const result = await syncToGhl(basePayload);
-    expect(result.crmSyncStatus).toBe('synced');
-    expect(result.ghlContactId).toBe('contact_b');
+    expect(result.crmSyncError).toMatch(/duplicate/i);
   });
-});
 
-// ── Circular dedup — strip field and retry ────────────────────────────────────
-
-describe('syncToGhl — circular dedup (A↔B conflict)', () => {
-  it('strips conflicting field and retries when dedup PUT also returns 400', async () => {
-    let contactACallCount = 0;
-    let retryCallBody: string | null = null;
-
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
+  it('never attempts to update (PUT) the existing contact fields', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/search/duplicate')) {
-        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
-      }
-      if (url.includes('/contacts/contact_a')) {
-        contactACallCount++;
-        if (contactACallCount === 1) {
-          // First attempt: blocked on phone, points to contact_b
-          return dupResponse('contact_b', 'phone');
-        }
-        // Second attempt: stripped retry — succeed
-        retryCallBody = (init as RequestInit)?.body as string;
-        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
-      }
-      // contact_b blocked on email, points back to contact_a
-      if (url.includes('/contacts/contact_b')) {
-        return dupResponse('contact_a', 'email');
-      }
+      if (url.endsWith('/contacts'))                   return dupResponse('existing_abc');
+      if (url.includes('/contacts/existing_abc/tags')) return okTags();
       return new Response('not found', { status: 404 });
     });
 
-    const result = await syncToGhl(basePayload);
-    expect(result.crmSyncStatus).toBe('synced');
-    expect(result.ghlContactId).toBe('contact_a');
-    expect(result.crmSyncError).toMatch(/circular dedup/i);
-    // Verify the retry body does not contain the stripped field
-    const body = JSON.parse(retryCallBody!);
-    expect(body).not.toHaveProperty('phone');
+    await syncToGhl(basePayload);
+
+    const putCall = fetchSpy.mock.calls.find(([, init]) =>
+      (init as RequestInit)?.method === 'PUT',
+    );
+    expect(putCall).toBeUndefined();
   });
 
-  it('returns synced with warning when all retries fail (partial sync)', async () => {
+  it('returns error when tags call fails on duplicate path', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/search/duplicate')) {
-        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
-      }
-      // All PUT attempts to contact_a blocked on phone
-      if (url.includes('/contacts/contact_a')) {
-        return dupResponse('contact_b', 'phone');
-      }
-      // contact_b blocked on email
-      if (url.includes('/contacts/contact_b')) {
-        return dupResponse('contact_a', 'email');
-      }
+      if (url.endsWith('/contacts'))                   return dupResponse('existing_abc');
+      if (url.includes('/contacts/existing_abc/tags')) return new Response('Server Error', { status: 500 });
       return new Response('not found', { status: 404 });
     });
 
     const result = await syncToGhl(basePayload);
-    expect(result.crmSyncStatus).toBe('synced');
-    expect(result.crmSyncError).toMatch(/partial sync/i);
-  });
-
-  it('never returns crmSyncStatus error for a circular dedup conflict', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
-      const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/search/duplicate')) {
-        return new Response(JSON.stringify({ contact: { id: 'contact_a' } }), { status: 200 });
-      }
-      if (url.includes('/contacts/contact_a')) {
-        return dupResponse('contact_b', 'phone');
-      }
-      if (url.includes('/contacts/contact_b')) {
-        return dupResponse('contact_a', 'email');
-      }
-      return new Response('not found', { status: 404 });
-    });
-
-    const result = await syncToGhl(basePayload);
-    expect(result.crmSyncStatus).toBe('synced');
+    expect(result.crmSyncStatus).toBe('error');
+    expect(result.crmSyncError).toMatch(/tag apply failed/i);
   });
 });
 
 // ── API error handling ────────────────────────────────────────────────────────
 
 describe('syncToGhl — API errors', () => {
-  it('returns error result on search failure', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response('Internal Server Error', { status: 500 }),
-    );
+  it('returns error on non-duplicate create failure', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.endsWith('/contacts')) return new Response('Validation error', { status: 422 });
+      return new Response('not found', { status: 404 });
+    });
+
     const result = await syncToGhl(basePayload);
     expect(result.crmSyncStatus).toBe('error');
-    expect(result.crmSyncError).toMatch(/search failed/i);
+    expect(result.crmSyncError).toMatch(/create failed/i);
   });
 
-  it('returns error result on network failure', async () => {
+  it('returns error on network failure', async () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Network error'));
     const result = await syncToGhl(basePayload);
     expect(result.crmSyncStatus).toBe('error');
     expect(result.crmSyncError).toContain('Network error');
   });
 
-  it('returns error on non-duplicate update 400', async () => {
+  it('returns error when tags call fails on new contact', async () => {
     vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
       const url = typeof input === 'string' ? input : (input as Request).url;
-      if (url.includes('/search/duplicate')) {
-        return new Response(JSON.stringify({ contact: { id: 'existing_456' } }), { status: 200 });
-      }
-      return new Response(JSON.stringify({ message: 'Validation failed' }), { status: 400 });
+      if (url.endsWith('/contacts'))         return okContact('c1');
+      if (url.includes('/contacts/c1/tags')) return new Response('Server Error', { status: 500 });
+      return new Response('not found', { status: 404 });
     });
 
     const result = await syncToGhl(basePayload);
     expect(result.crmSyncStatus).toBe('error');
-    expect(result.crmSyncError).toMatch(/update failed/i);
+    expect(result.crmSyncError).toMatch(/tag apply failed/i);
+  });
+
+  it('returns error when create returns 200 but no contact id', async () => {
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+      const url = typeof input === 'string' ? input : (input as Request).url;
+      if (url.endsWith('/contacts')) return new Response(JSON.stringify({ contact: {} }), { status: 200 });
+      return new Response('not found', { status: 404 });
+    });
+
+    const result = await syncToGhl(basePayload);
+    expect(result.crmSyncStatus).toBe('error');
+    expect(result.crmSyncError).toMatch(/no contact id/i);
   });
 });
