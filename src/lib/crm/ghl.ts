@@ -93,15 +93,41 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
         headers,
         body: JSON.stringify({ locationId, ...sharedFields }),
       });
+
       if (!createRes.ok) {
         const detail = await createRes.text().catch(() => '');
-        throw new Error(`GHL create failed: ${createRes.status} ${createRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
+
+        // GHL returns the duplicate contact's ID in meta.contactId when the
+        // location blocks duplicate contacts (matched on phone, name, etc.).
+        // Fall back to updating that contact instead of failing.
+        let dedupId: string | null = null;
+        try {
+          const parsed = JSON.parse(detail) as { meta?: { contactId?: string } };
+          dedupId = parsed?.meta?.contactId ?? null;
+        } catch { /* not JSON — fall through to throw */ }
+
+        if (dedupId) {
+          const dedupRes = await fetch(`${apiBase}/contacts/${dedupId}`, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify(sharedFields),
+          });
+          if (!dedupRes.ok) {
+            const dedupDetail = await dedupRes.text().catch(() => '');
+            throw new Error(`GHL dedup-update failed: ${dedupRes.status} ${dedupRes.statusText}${dedupDetail ? ` — ${dedupDetail.slice(0, 300)}` : ''}`);
+          }
+          const dedupData = await dedupRes.json() as { contact?: { id: string } };
+          contactId = dedupData.contact?.id ?? dedupId;
+        } else {
+          throw new Error(`GHL create failed: ${createRes.status} ${createRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
+        }
+      } else {
+        const createData = await createRes.json() as { contact?: { id: string } };
+        if (!createData.contact?.id) {
+          throw new Error('GHL create returned no contact ID');
+        }
+        contactId = createData.contact.id;
       }
-      const createData = await createRes.json() as { contact?: { id: string } };
-      if (!createData.contact?.id) {
-        throw new Error('GHL create returned no contact ID');
-      }
-      contactId = createData.contact.id;
     }
 
     return {
