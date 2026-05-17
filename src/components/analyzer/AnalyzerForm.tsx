@@ -4,7 +4,7 @@
 // Source of truth: docs/analyzer-ux-flow.md, docs/brand-guidelines.md
 // Phase 8 replaces the submitAnalysis stub with full pipeline orchestration.
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { validateWebsite } from '@/actions/validateWebsite';
 import { submitAnalysis } from '@/actions/submitAnalysis';
 import {
@@ -31,6 +31,9 @@ import {
   getStep1Errors,
   getStep4Errors,
 } from '@/lib/analyzer/form-validation';
+import { persistTrackingParams, getTrackingParams, readMetaCookies } from '@/lib/meta/tracking-params';
+import { generateEventId } from '@/lib/meta/event-id';
+import { fireAnalyzerStarted, fireBrowserLead } from '@/lib/meta/browser-events';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -57,41 +60,39 @@ export function AnalyzerForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const analyzerStartedFired = useRef(false);
 
-  // Capture hidden tracking params once on mount
+  // Persist tracking params on mount (first-touch sessionStorage), then read them back.
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const tracking: Partial<FormData> = {};
+    persistTrackingParams();
+    const stored = getTrackingParams();
+    const cookies = readMetaCookies(stored.fbclid);
 
-    const utmKeys = [
-      'utm_source',
-      'utm_medium',
-      'utm_campaign',
-      'utm_content',
-      'utm_term',
-      'fbclid',
-      'gclid',
-    ] as const;
+    const tracking: Partial<FormData> = {
+      utm_source:    stored.utm_source,
+      utm_medium:    stored.utm_medium,
+      utm_campaign:  stored.utm_campaign,
+      utm_content:   stored.utm_content,
+      utm_term:      stored.utm_term,
+      utm_id:        stored.utm_id,
+      fbclid:        stored.fbclid,
+      gclid:         stored.gclid,
+      fbadid:        stored.fbadid,
+      creative_name: stored.creative_name,
+      creative_id:   stored.creative_id,
+      campaign:      stored.campaign,
+      referrer:      stored.referrer,
+      landing_page_url: stored.landing_page_url,
+      fbp:           cookies.fbp,
+      fbc:           cookies.fbc,
+    };
 
-    for (const key of utmKeys) {
-      const val = params.get(key);
-      if (val) (tracking as Record<string, string>)[key] = val;
-    }
+    // Remove undefined keys to keep formData clean
+    const clean = Object.fromEntries(
+      Object.entries(tracking).filter(([, v]) => v !== undefined),
+    ) as Partial<FormData>;
 
-    tracking.referrer = document.referrer || undefined;
-    tracking.landing_page_url = window.location.href;
-
-    // Capture fbp/fbc from cookies if available
-    const cookieMap = Object.fromEntries(
-      document.cookie.split(';').map((c) => {
-        const [k, ...v] = c.trim().split('=');
-        return [k.trim(), v.join('=')];
-      }),
-    );
-    if (cookieMap['_fbp']) tracking.fbp = cookieMap['_fbp'];
-    if (cookieMap['_fbc']) tracking.fbc = cookieMap['_fbc'];
-
-    setFormData((prev) => ({ ...prev, ...tracking }));
+    setFormData((prev) => ({ ...prev, ...clean }));
   }, []);
 
   // ── Field update ─────────────────────────────────────────────────────────────
@@ -105,6 +106,11 @@ export function AnalyzerForm() {
         delete next[field];
         return next;
       });
+    }
+    // Fire AnalyzerStarted once on first field interaction
+    if (!analyzerStartedFired.current) {
+      analyzerStartedFired.current = true;
+      fireAnalyzerStarted();
     }
   }
 
@@ -203,8 +209,17 @@ export function AnalyzerForm() {
     setIsSubmitting(true);
     setSubmitError(null);
 
+    // Generate event_id here so browser and server share the same value for Meta deduplication.
+    const eventId = generateEventId();
+    fireBrowserLead(eventId);
+
     try {
-      const result = await submitAnalysis(formData as AnalyzerFormPayload);
+      const payload: AnalyzerFormPayload = {
+        ...(formData as AnalyzerFormPayload),
+        event_id:          eventId,
+        client_user_agent: navigator.userAgent,
+      };
+      const result = await submitAnalysis(payload);
       if (result.success) {
         setIsSubmitted(true);
       } else {

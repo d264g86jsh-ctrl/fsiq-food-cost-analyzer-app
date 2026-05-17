@@ -28,12 +28,19 @@ export interface AnalyzerFormPayload {
   utm_campaign?: string;
   utm_content?: string;
   utm_term?: string;
+  utm_id?: string;          // GA4 campaign identifier
   fbclid?: string;
   gclid?: string;
+  fbadid?: string;          // Facebook ad ID
+  creative_name?: string;
+  creative_id?: string;
+  campaign?: string;        // full campaign name (distinct from utm_campaign)
   referrer?: string;
   landing_page_url?: string;
-  fbp?: string; // Meta browser ID cookie
-  fbc?: string; // Meta click ID cookie
+  fbp?: string;             // Meta browser ID cookie
+  fbc?: string;             // Meta click ID cookie (or derived from fbclid)
+  client_user_agent?: string; // captured at submit time for CAPI matching
+  event_id?: string;          // UUID generated at submit, shared with CAPI Lead event
 }
 
 // ── Dropdown options (source of truth: docs/FSIQ_SOP_v3.3.md §5) ─────────────

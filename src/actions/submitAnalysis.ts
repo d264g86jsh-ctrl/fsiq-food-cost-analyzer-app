@@ -27,6 +27,10 @@ import type { AiResearchResult, AiNarrativeResult } from '@/lib/ai/ai-types';
 import { assignLeadStatus, needsAiAndPdf, type AssignLeadStatusResult } from '@/lib/crm/assign-lead-status';
 import { buildGhlPayload } from '@/lib/crm/build-ghl-payload';
 import { syncToGhl } from '@/lib/crm/ghl';
+import { buildLeadEvent, buildQualifiedLeadEvent } from '@/lib/meta/meta-events';
+import { sendToMetaCapi } from '@/lib/meta/meta-capi';
+import { LEAD_STATUS } from '@/lib/crm/lead-status';
+import type { TrackingContext } from '@/lib/meta/meta-types';
 import type { AnalyzerFormPayload } from '@/lib/analyzer/form-types';
 
 // ── Result type ───────────────────────────────────────────────────────────────
@@ -49,7 +53,7 @@ type WorkflowError = { stage: string; error: string; timestamp: string };
 export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<SubmitAnalysisResult> {
   const workflowErrors: WorkflowError[] = [];
 
-  // ── Step 1: Capture IP (best effort) ────────────────────────────────────────
+  // ── Step 1: Capture IP (best effort) + assemble tracking context ────────────
   let ipAddress: string | null = null;
   try {
     const hdrs = await headers();
@@ -58,6 +62,14 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       hdrs.get('x-real-ip') ??
       null;
   } catch { /* best effort — not required */ }
+
+  const trackingContext: TrackingContext = {
+    fbp:             payload.fbp             ?? null,
+    fbc:             payload.fbc             ?? null,
+    eventId:         payload.event_id        ?? null,
+    clientUserAgent: payload.client_user_agent ?? null,
+    clientIpAddress: ipAddress,
+  };
 
   // ── Step 2: Initial DB save ──────────────────────────────────────────────────
   let submissionId: string;
@@ -207,6 +219,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       responseQualified:        effectiveQualified,
       responseDqReason:         effectiveDqReason,
       responseDollarEstimate:   null,
+      trackingContext,
     });
   }
 
@@ -330,10 +343,11 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     responseDqReason:       null,
     responseDollarEstimate: qualResult.dollarEstimateDisplay,
     pdfDownloadUrl:         pdfResult.pdfDownloadUrl,
+    trackingContext,
   });
 }
 
-// ── syncAndReturn: GHL sync + final DB update + client response ───────────────
+// ── syncAndReturn: GHL sync + Meta CAPI + final DB update + client response ────
 
 async function syncAndReturn({
   submissionId,
@@ -343,6 +357,7 @@ async function syncAndReturn({
   responseDqReason,
   responseDollarEstimate,
   pdfDownloadUrl = null,
+  trackingContext,
 }: {
   submissionId: string;
   status: AssignLeadStatusResult;
@@ -351,9 +366,10 @@ async function syncAndReturn({
   responseDqReason: string | null;
   responseDollarEstimate: string | null;
   pdfDownloadUrl?: string | null;
+  trackingContext: TrackingContext;
 }): Promise<SubmitAnalysisResult> {
   if (!status.shouldSyncGhl) {
-    // qualified_pdf_pending — defer GHL sync
+    // qualified_pdf_pending — defer GHL and CAPI sync
     await db.submission.update({
       where: { id: submissionId },
       data: {
@@ -377,7 +393,7 @@ async function syncAndReturn({
     };
   }
 
-  // Fetch fresh record for GHL payload builder
+  // Fetch fresh record for GHL payload builder and CAPI user data
   const fresh = await db.submission.findUnique({ where: { id: submissionId } }).catch(() => null);
 
   let crmSyncStatus: 'synced' | 'error' = 'error';
@@ -392,6 +408,30 @@ async function syncAndReturn({
     crmSyncError  = crmResult.crmSyncError;
   }
 
+  // ── Meta CAPI — non-fatal; fires after GHL sync ───────────────────────────
+  let metaResult: { metaStatus: 'fired' | 'error' | 'skipped'; metaEventIds: string[]; metaError: string | null } = {
+    metaStatus: 'skipped', metaEventIds: [], metaError: 'Record not found for CAPI',
+  };
+
+  if (fresh) {
+    const capiEvents = [buildLeadEvent(fresh, trackingContext)];
+
+    // QualifiedLead fires only for PDF-ready qualified leads
+    const isQualifiedPdfReady =
+      status.leadStatus === LEAD_STATUS.QUALIFIED_FULL_PDF_READY ||
+      status.leadStatus === LEAD_STATUS.QUALIFIED_CONSERVATIVE_PDF_READY;
+
+    if (isQualifiedPdfReady) {
+      capiEvents.push(buildQualifiedLeadEvent(fresh, trackingContext));
+    }
+
+    metaResult = await sendToMetaCapi(capiEvents).catch((err) => ({
+      metaStatus:   'error' as const,
+      metaEventIds: [],
+      metaError:    err instanceof Error ? err.message : String(err),
+    }));
+  }
+
   await db.submission.update({
     where: { id: submissionId },
     data: {
@@ -399,6 +439,9 @@ async function syncAndReturn({
       ghlContactId,
       crmSyncError,
       crmTags:        status.tags as unknown as Prisma.InputJsonValue,
+      metaStatus:     metaResult.metaStatus,
+      metaEventIds:   metaResult.metaEventIds as unknown as Prisma.InputJsonValue,
+      metaError:      metaResult.metaError,
       workflowStage:  'complete',
       workflowStatus: (workflowErrors.length > 0 || crmSyncStatus === 'error')
         ? 'partial' as WorkflowStatus
