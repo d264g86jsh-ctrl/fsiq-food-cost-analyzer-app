@@ -43,10 +43,12 @@ function mockFetch(status: number, body: unknown) {
 }
 
 // status: 'success' so the poll resolves on the first attempt.
+const VIEWER_URL = 'https://preview.pdfmonkey.io/pdf/web/viewer.html?file=https%3A%2F%2Fpreview.pdfmonkey.io%2Fdocument-render%2Fdoc_abc123%2Ftest-token';
 const successBody = {
   document: {
     id: 'doc_abc123',
     download_url: 'https://cdn.pdfmonkey.io/doc_abc123.pdf',
+    preview_url: VIEWER_URL,
     status: 'success',
   },
 };
@@ -112,10 +114,46 @@ describe('generatePdf — successful API call', () => {
     expect(r.pdfMonkeyDocumentId).toBe('doc_abc123');
   });
 
-  it('returns pdfDownloadUrl', async () => {
+  it('returns pdfDownloadUrl as web viewer URL (preview_url preferred over download_url)', async () => {
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await runWithTimers(() => generatePdf(baseInput));
+    expect(r.pdfDownloadUrl).toBe(VIEWER_URL);
+  });
+
+  it('returns pdfUrlType viewer when preview_url is present', async () => {
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await runWithTimers(() => generatePdf(baseInput));
+    expect(r.pdfUrlType).toBe('viewer');
+  });
+
+  it('falls back to download_url when preview_url is absent', async () => {
+    const noPreview = {
+      document: { id: 'doc_abc123', download_url: 'https://cdn.pdfmonkey.io/doc_abc123.pdf', status: 'success' },
+    };
+    vi.stubGlobal('fetch', mockFetch(200, noPreview));
     const { generatePdf } = await import('../pdf/pdfmonkey');
     const r = await runWithTimers(() => generatePdf(baseInput));
     expect(r.pdfDownloadUrl).toBe('https://cdn.pdfmonkey.io/doc_abc123.pdf');
+    expect(r.pdfUrlType).toBe('download');
+  });
+
+  it('returns pdfUrlType null on error', async () => {
+    vi.stubGlobal('fetch', mockFetch(500, {}));
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await generatePdf(baseInput);
+    expect(r.pdfUrlType).toBeNull();
+  });
+
+  it('returns error immediately when status is success but both URLs are null', async () => {
+    const successNoUrl = {
+      document: { id: 'doc_abc123', download_url: null, preview_url: null, status: 'success' },
+    };
+    vi.stubGlobal('fetch', mockFetch(200, successNoUrl));
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await runWithTimers(() => generatePdf(baseInput));
+    expect(r.pdfStatus).toBe('error');
+    expect(r.pdfError).toMatch(/success status but no url/i);
+    expect(r.pdfUrlType).toBeNull();
   });
 
   it('returns pdfMode matching input mode', async () => {

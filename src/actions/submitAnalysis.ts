@@ -311,7 +311,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
 
     let pdfResult: GeneratePdfResult;
     if (pdfModeDecision.mode === 'skip') {
-      pdfResult = { pdfStatus: 'skipped', pdfMode: null, pdfMonkeyDocumentId: null, pdfDownloadUrl: null, pdfError: `PDF skipped: ${pdfModeDecision.reason}`, pdfRetryCount: 0 };
+      pdfResult = { pdfStatus: 'skipped', pdfMode: null, pdfMonkeyDocumentId: null, pdfDownloadUrl: null, pdfError: `PDF skipped: ${pdfModeDecision.reason}`, pdfRetryCount: 0, pdfUrlType: null };
     } else {
       try {
         pdfResult = await generatePdf({
@@ -340,7 +340,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
         });
       } catch (err) {
         workflowErrors.push({ stage: 'pdf_generation', error: err instanceof Error ? err.message : String(err), timestamp: new Date().toISOString() });
-        pdfResult = { pdfStatus: 'error', pdfMode: pdfModeDecision.mode, pdfMonkeyDocumentId: null, pdfDownloadUrl: null, pdfError: err instanceof Error ? err.message : String(err), pdfRetryCount: 0 };
+        pdfResult = { pdfStatus: 'error', pdfMode: pdfModeDecision.mode, pdfMonkeyDocumentId: null, pdfDownloadUrl: null, pdfError: err instanceof Error ? err.message : String(err), pdfRetryCount: 0, pdfUrlType: null };
       }
     }
     await patch({

@@ -25,6 +25,7 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
       pdfDownloadUrl: null,
       pdfError: 'PDFMONKEY_API_KEY or PDFMONKEY_TEMPLATE_ID not configured',
       pdfRetryCount: 0,
+      pdfUrlType: null,
     };
   }
 
@@ -55,6 +56,7 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
         pdfDownloadUrl: null,
         pdfError: `PDFMonkey API error ${response.status}: ${errorText.slice(0, 300)}`,
         pdfRetryCount: 0,
+        pdfUrlType: null,
       };
     }
 
@@ -69,12 +71,18 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
         pdfDownloadUrl: null,
         pdfError: 'PDFMonkey response missing document.id',
         pdfRetryCount: 0,
+        pdfUrlType: null,
       };
     }
 
-    // PDFMonkey generates asynchronously — poll until download_url is available.
-    // Initial response has status: "pending" and no download_url.
+    // PDFMonkey generates asynchronously — poll until a URL is available.
+    // Initial response has status: "pending" and no URLs.
     const polled = await pollForDownloadUrl(apiKey, doc.id);
+
+    if (polled.urlType === 'download') {
+      console.warn(`[FSIQ PDF] preview_url unavailable — fell back to S3 download_url for document: ${doc.id}`);
+    }
+
     return {
       pdfStatus:           polled.downloadUrl ? 'complete' : 'error',
       pdfMode:             input.mode,
@@ -82,6 +90,7 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
       pdfDownloadUrl:      polled.downloadUrl,
       pdfError:            polled.error,
       pdfRetryCount:       0,
+      pdfUrlType:          polled.urlType,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -92,6 +101,7 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
       pdfDownloadUrl: null,
       pdfError: message,
       pdfRetryCount: 0,
+      pdfUrlType: null,
     };
   }
 }
@@ -102,6 +112,7 @@ interface PdfMonkeyResponse {
   document?: {
     id: string;
     download_url?: string | null;
+    preview_url?: string | null;  // web viewer URL — preferred for storage and GHL
     status?: string;
   };
 }
@@ -109,11 +120,13 @@ interface PdfMonkeyResponse {
 // ── Polling helper — waits for PDFMonkey to finish generating the document ────
 // PDFMonkey statuses: pending → generating → success | failure
 // Polls every 3 s, up to 10 attempts (30 s total).
+// Returns preview_url (web viewer) when available; falls back to download_url.
+// FIX: status === 'success' with both URLs null returns error immediately (unrecoverable).
 
 async function pollForDownloadUrl(
   apiKey: string,
   docId: string,
-): Promise<{ downloadUrl: string | null; error: string | null }> {
+): Promise<{ downloadUrl: string | null; urlType: 'viewer' | 'download' | null; error: string | null }> {
   const MAX_ATTEMPTS = 10;
   const INTERVAL_MS  = 3000;
 
@@ -125,25 +138,35 @@ async function pollForDownloadUrl(
         headers: { Authorization: `Bearer ${apiKey}` },
       });
       if (!res.ok) {
-        return { downloadUrl: null, error: `PDFMonkey poll ${res.status} on attempt ${attempt + 1}` };
+        return { downloadUrl: null, urlType: null, error: `PDFMonkey poll ${res.status} on attempt ${attempt + 1}` };
       }
       const data = (await res.json()) as PdfMonkeyResponse;
-      const status = data?.document?.status;
-      const url    = data?.document?.download_url ?? null;
+      const status     = data?.document?.status;
+      const viewerUrl  = data?.document?.preview_url ?? null;
+      const s3Url      = data?.document?.download_url ?? null;
+      const resolvedUrl = viewerUrl ?? s3Url;
 
-      if (status === 'success' && url) {
-        return { downloadUrl: url, error: null };
+      if (status === 'success') {
+        if (resolvedUrl) {
+          return {
+            downloadUrl: resolvedUrl,
+            urlType: viewerUrl ? 'viewer' : 'download',
+            error: null,
+          };
+        }
+        // status is success but both URLs are null — unrecoverable, don't burn remaining attempts
+        return { downloadUrl: null, urlType: null, error: 'PDFMonkey returned success status but no URL' };
       }
       if (status === 'failure') {
-        return { downloadUrl: null, error: 'PDFMonkey document generation failed' };
+        return { downloadUrl: null, urlType: null, error: 'PDFMonkey document generation failed' };
       }
       // status is still "pending" or "generating" — continue polling
     } catch (err) {
-      return { downloadUrl: null, error: err instanceof Error ? err.message : String(err) };
+      return { downloadUrl: null, urlType: null, error: err instanceof Error ? err.message : String(err) };
     }
   }
 
-  return { downloadUrl: null, error: `PDFMonkey did not finish within ${MAX_ATTEMPTS * INTERVAL_MS / 1000}s` };
+  return { downloadUrl: null, urlType: null, error: `PDFMonkey did not finish within ${MAX_ATTEMPTS * INTERVAL_MS / 1000}s` };
 }
 
 // ── Test helper (exported for unit tests only) ────────────────────────────────
