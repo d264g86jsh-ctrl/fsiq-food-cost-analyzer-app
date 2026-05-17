@@ -50,20 +50,21 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
 
     const searchRes = await fetch(searchUrl, { method: 'GET', headers });
     if (!searchRes.ok) {
-      throw new Error(`GHL search failed: ${searchRes.status} ${searchRes.statusText}`);
+      const detail = await searchRes.text().catch(() => '');
+      throw new Error(`GHL search failed: ${searchRes.status} ${searchRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
     }
     const searchData = await searchRes.json() as { contact?: { id: string } | null };
     const existingId = searchData.contact?.id ?? null;
 
-    // Step 2: assemble contact body
+    // Step 2: assemble contact fields
     const nameParts = payload.fsiq_full_name.trim().split(/\s+/);
     const firstName = nameParts[0] ?? '';
     const lastName = nameParts.slice(1).join(' ') || '';
 
     const customFields = buildCustomFields(payload);
 
-    const contactBody = {
-      locationId,
+    // locationId is required for POST (create) but not accepted on PUT (update).
+    const sharedFields = {
       firstName,
       lastName,
       email: payload.fsiq_email,
@@ -78,10 +79,11 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
       const updateRes = await fetch(`${apiBase}/contacts/${existingId}`, {
         method: 'PUT',
         headers,
-        body: JSON.stringify(contactBody),
+        body: JSON.stringify(sharedFields),
       });
       if (!updateRes.ok) {
-        throw new Error(`GHL update failed: ${updateRes.status} ${updateRes.statusText}`);
+        const detail = await updateRes.text().catch(() => '');
+        throw new Error(`GHL update failed: ${updateRes.status} ${updateRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
       }
       const updateData = await updateRes.json() as { contact?: { id: string } };
       contactId = updateData.contact?.id ?? existingId;
@@ -89,10 +91,11 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
       const createRes = await fetch(`${apiBase}/contacts`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(contactBody),
+        body: JSON.stringify({ locationId, ...sharedFields }),
       });
       if (!createRes.ok) {
-        throw new Error(`GHL create failed: ${createRes.status} ${createRes.statusText}`);
+        const detail = await createRes.text().catch(() => '');
+        throw new Error(`GHL create failed: ${createRes.status} ${createRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
       }
       const createData = await createRes.json() as { contact?: { id: string } };
       if (!createData.contact?.id) {
