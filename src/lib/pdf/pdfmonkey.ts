@@ -72,13 +72,16 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
       };
     }
 
+    // PDFMonkey generates asynchronously — poll until download_url is available.
+    // Initial response has status: "pending" and no download_url.
+    const polled = await pollForDownloadUrl(apiKey, doc.id);
     return {
-      pdfStatus: 'complete',
-      pdfMode: input.mode,
+      pdfStatus:           polled.downloadUrl ? 'complete' : 'error',
+      pdfMode:             input.mode,
       pdfMonkeyDocumentId: doc.id,
-      pdfDownloadUrl: doc.download_url ?? null,
-      pdfError: null,
-      pdfRetryCount: 0,
+      pdfDownloadUrl:      polled.downloadUrl,
+      pdfError:            polled.error,
+      pdfRetryCount:       0,
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
@@ -98,9 +101,49 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
 interface PdfMonkeyResponse {
   document?: {
     id: string;
-    download_url?: string;
+    download_url?: string | null;
     status?: string;
   };
+}
+
+// ── Polling helper — waits for PDFMonkey to finish generating the document ────
+// PDFMonkey statuses: pending → generating → success | failure
+// Polls every 3 s, up to 10 attempts (30 s total).
+
+async function pollForDownloadUrl(
+  apiKey: string,
+  docId: string,
+): Promise<{ downloadUrl: string | null; error: string | null }> {
+  const MAX_ATTEMPTS = 10;
+  const INTERVAL_MS  = 3000;
+
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    await new Promise((r) => setTimeout(r, INTERVAL_MS));
+
+    try {
+      const res = await fetch(`${PDFMONKEY_API_URL}/${docId}`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      });
+      if (!res.ok) {
+        return { downloadUrl: null, error: `PDFMonkey poll ${res.status} on attempt ${attempt + 1}` };
+      }
+      const data = (await res.json()) as PdfMonkeyResponse;
+      const status = data?.document?.status;
+      const url    = data?.document?.download_url ?? null;
+
+      if (status === 'success' && url) {
+        return { downloadUrl: url, error: null };
+      }
+      if (status === 'failure') {
+        return { downloadUrl: null, error: 'PDFMonkey document generation failed' };
+      }
+      // status is still "pending" or "generating" — continue polling
+    } catch (err) {
+      return { downloadUrl: null, error: err instanceof Error ? err.message : String(err) };
+    }
+  }
+
+  return { downloadUrl: null, error: `PDFMonkey did not finish within ${MAX_ATTEMPTS * INTERVAL_MS / 1000}s` };
 }
 
 // ── Test helper (exported for unit tests only) ────────────────────────────────

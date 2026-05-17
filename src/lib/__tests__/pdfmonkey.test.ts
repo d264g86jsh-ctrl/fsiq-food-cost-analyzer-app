@@ -42,23 +42,33 @@ function mockFetch(status: number, body: unknown) {
   });
 }
 
+// status: 'success' so the poll resolves on the first attempt.
 const successBody = {
   document: {
     id: 'doc_abc123',
     download_url: 'https://cdn.pdfmonkey.io/doc_abc123.pdf',
-    status: 'generating',
+    status: 'success',
   },
 };
+
+// Helper: run generatePdf while advancing fake timers so the poll resolves.
+async function runWithTimers<T>(fn: () => Promise<T>): Promise<T> {
+  const promise = fn();
+  await vi.runAllTimersAsync();
+  return promise;
+}
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 beforeEach(() => {
+  vi.useFakeTimers();
   vi.stubEnv('PDFMONKEY_API_KEY', 'test-api-key');
   vi.stubEnv('PDFMONKEY_TEMPLATE_ID', 'tmpl_test123');
   vi.stubGlobal('fetch', mockFetch(200, successBody));
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllEnvs();
   vi.unstubAllGlobals();
 });
@@ -91,32 +101,32 @@ describe('generatePdf — missing credentials', () => {
 describe('generatePdf — successful API call', () => {
   it('returns pdfStatus complete on 200', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    const r = await generatePdf(baseInput);
+    const r = await runWithTimers(() => generatePdf(baseInput));
     expect(r.pdfStatus).toBe('complete');
     expect(r.pdfError).toBeNull();
   });
 
   it('returns pdfMonkeyDocumentId', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    const r = await generatePdf(baseInput);
+    const r = await runWithTimers(() => generatePdf(baseInput));
     expect(r.pdfMonkeyDocumentId).toBe('doc_abc123');
   });
 
   it('returns pdfDownloadUrl', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    const r = await generatePdf(baseInput);
+    const r = await runWithTimers(() => generatePdf(baseInput));
     expect(r.pdfDownloadUrl).toBe('https://cdn.pdfmonkey.io/doc_abc123.pdf');
   });
 
   it('returns pdfMode matching input mode', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    const r = await generatePdf(baseInput);
+    const r = await runWithTimers(() => generatePdf(baseInput));
     expect(r.pdfMode).toBe('full');
   });
 
   it('pdfRetryCount is 0 on success', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    const r = await generatePdf(baseInput);
+    const r = await runWithTimers(() => generatePdf(baseInput));
     expect(r.pdfRetryCount).toBe(0);
   });
 });
@@ -172,7 +182,7 @@ describe('generatePdf — network/throw errors', () => {
 describe('generatePdf — conservative mode', () => {
   it('returns pdfMode conservative', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    const r = await generatePdf({ ...baseInput, mode: 'conservative' });
+    const r = await runWithTimers(() => generatePdf({ ...baseInput, mode: 'conservative' }));
     expect(r.pdfMode).toBe('conservative');
   });
 });
@@ -182,7 +192,7 @@ describe('generatePdf — fetch call shape', () => {
     const mockFetchFn = mockFetch(200, successBody);
     vi.stubGlobal('fetch', mockFetchFn);
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    await generatePdf(baseInput);
+    await runWithTimers(() => generatePdf(baseInput));
     const [, options] = mockFetchFn.mock.calls[0] as [string, RequestInit];
     const headers = options.headers as Record<string, string>;
     expect(headers['Authorization']).toBe('Bearer test-api-key');
@@ -192,7 +202,7 @@ describe('generatePdf — fetch call shape', () => {
     const mockFetchFn = mockFetch(200, successBody);
     vi.stubGlobal('fetch', mockFetchFn);
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    await generatePdf(baseInput);
+    await runWithTimers(() => generatePdf(baseInput));
     const [url] = mockFetchFn.mock.calls[0] as [string];
     expect(url).toContain('pdfmonkey.io');
   });
@@ -201,7 +211,7 @@ describe('generatePdf — fetch call shape', () => {
     const mockFetchFn = mockFetch(200, successBody);
     vi.stubGlobal('fetch', mockFetchFn);
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    await generatePdf(baseInput);
+    await runWithTimers(() => generatePdf(baseInput));
     const [, options] = mockFetchFn.mock.calls[0] as [string, RequestInit];
     const body = JSON.parse(options.body as string);
     expect(body.document.document_template_id).toBe('tmpl_test123');
@@ -211,7 +221,7 @@ describe('generatePdf — fetch call shape', () => {
     const mockFetchFn = mockFetch(200, successBody);
     vi.stubGlobal('fetch', mockFetchFn);
     const { generatePdf } = await import('../pdf/pdfmonkey');
-    await generatePdf(baseInput);
+    await runWithTimers(() => generatePdf(baseInput));
     const [, options] = mockFetchFn.mock.calls[0] as [string, RequestInit];
     const body = JSON.parse(options.body as string);
     const payload = JSON.parse(body.document.payload);

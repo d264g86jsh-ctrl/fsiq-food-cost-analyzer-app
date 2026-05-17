@@ -44,7 +44,6 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
   try {
     // Step 1: search for existing contact by email
     const searchUrl = `${apiBase}/contacts/search/duplicate?${new URLSearchParams({
-      type: 'Email',
       email: payload.fsiq_email,
       locationId,
     }).toString()}`;
