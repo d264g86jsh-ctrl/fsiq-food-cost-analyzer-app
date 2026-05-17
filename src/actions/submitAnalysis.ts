@@ -12,7 +12,7 @@
 // Security: never expose API keys to client; never throw unhandled errors to user.
 
 import { headers } from 'next/headers';
-import type { FinalDecision, CountryEligibility, DqReason, PdfMode, PdfStatus, CrmSyncStatus, WorkflowStatus, Prisma } from '@prisma/client';
+import type { FinalDecision, CountryEligibility, DqReason, PdfMode, PdfStatus, CrmSyncStatus, WorkflowStatus, ManualReviewStatus, Prisma } from '@prisma/client';
 import { db } from '@/lib/db';
 import { runValidation } from '@/lib/website/run-validation';
 import { qualifyLead, type QualifyLeadResult } from '@/lib/qualification/qualify-lead';
@@ -130,6 +130,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       locationConfidenceScore: validationResult.locationConfidenceScore,
       internalFlags:           validationResult.internalFlags as Prisma.InputJsonValue,
       manualReviewRequired:    validationResult.manualReviewRequired,
+      manualReviewStatus:      validationResult.manualReviewRequired ? ('pending' as ManualReviewStatus) : undefined,
       workflowStage:           'validated',
     });
   } catch (err) {
