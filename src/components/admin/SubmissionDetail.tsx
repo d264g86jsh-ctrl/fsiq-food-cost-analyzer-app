@@ -4,7 +4,6 @@ import {
   PdfStatusBadge,
   CrmSyncBadge,
   MetaStatusBadge,
-  ManualReviewBadge,
 } from './SubmissionStatusBadge';
 import { WorkflowTimeline } from './WorkflowTimeline';
 import { ManualReviewPanel } from './ManualReviewPanel';

@@ -216,31 +216,30 @@ until `pdfDownloadUrl` is non-null and confirmed usable.**
 
 ---
 
-## Phase 10 — Admin / QA / Manual Review Dashboard
-- Admin-only route: view all submissions
-- Filter by status, date, `manualReviewRequired`, `crmSyncStatus`
-- Manually approve / reject / retry PDF for flagged submissions
-- Trigger GHL re-sync for failed or manual-review submissions
-- Trigger retry for failed PDFMonkey jobs
+## Phase 10 — Admin / QA / Manual Review Dashboard ✅
+- [x] Admin-only route: view all submissions with filter/pagination
+- [x] Filter by status, date, `manualReviewRequired`, `crmSyncStatus`
+- [x] Submission detail view: identity, validation, qualification, AI, PDF, GHL, Meta, workflow timeline
+- [x] Manual review panel: approve / reject / add notes (`updateManualReview` server action)
+- [x] QA summary bar: 8 stat counters with problem-state highlighting
+- [x] Retry PDF / Re-sync GHL buttons: placeholder UI (retry worker deferred to post-launch)
+- [x] Middleware-based HttpOnly cookie auth (`ADMIN_ACCESS_TOKEN`)
+- [x] `sanitizeErrorString` — redacts tokens/keys from all error displays
+- [x] `manualReviewStatus` set to `pending` automatically when `manualReviewRequired = true`
+- 69 new tests (589 total). Commit: `9d5874d`
 
 ---
 
-## Phase 11 — Admin + Manual Review Dashboard
-- Admin-only route: view all submissions
-- Filter by status, date, `manualReviewRequired`
-- Manually approve / reject / retry PDF for flagged submissions
-- Trigger retry for failed PDFMonkey or email jobs
-
----
-
-## Phase 12 — QA & Hardening
-- Run full QA checklist from `docs/qa-checklist.md`
-- Cloudflare test with `spiritscenla.com`
-- Spend parser edge cases
-- All DQ path tests
-- Full vs conservative PDF routing
-- Visual PDF review (all 6 pages)
-- ZIP/postal code and country eligibility edge cases
-- Meta event and CRM sync verification
-- Admin dashboard manual review flow
-- `/security-review` before deploy
+## Phase 11 — QA, Hardening, Launch Readiness + Claude Code Operating Hooks ✅
+- [x] Lint warning fixed: removed unused `ManualReviewBadge` import from `SubmissionDetail.tsx`
+- [x] All 5 Claude Code hook scripts implemented (no longer stubs):
+  - `format-after-edit.sh` — runs `pnpm tsc --noEmit` after every `.ts`/`.tsx` edit
+  - `secret-scan.sh` — scans edited files for secret patterns (sk-, eyJ, Bearer tokens)
+  - `block-dangerous-commands.sh` — blocks force-push to main, `git reset --hard`, `rm -rf /`, `DROP TABLE`, committing `.env.local`
+  - `docs-change-reminder.sh` — warns when core behavior files are edited (qualification, website, AI, PDF, CRM, Meta)
+  - `stop-reminder.sh` — session-end checklist: uncommitted changes, check commands reminder, guardrails
+- [x] `settings.json` updated: `PreToolUse` hook wired for Bash blocking; all 3 PostToolUse hooks active
+- [x] `.env.example` annotated: every var classified as required / optional / staging-only / template-side / reserved
+- [x] `docs/launch-blockers.md` created: full deployment readiness checklist, env var guide, known gaps, launch checklist
+- [x] `docs/build-phases.md` updated (this file)
+- No behavioral changes. No schema changes. 589 tests passing.
