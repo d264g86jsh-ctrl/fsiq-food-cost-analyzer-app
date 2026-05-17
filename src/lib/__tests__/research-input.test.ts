@@ -40,6 +40,7 @@ const baseValidation: ValidationResult = {
   internalFlags: ['us_state_selected'],
   manualReviewRequired: false,
   websiteLogoHints: ['https://casaroberto.com/logo.png', 'https://casaroberto.com/images/logo.svg'],
+  logoUrl: 'https://casaroberto.com/logo.png',
 };
 
 const baseQualification: QualifyLeadResult = {
@@ -102,6 +103,16 @@ describe('buildResearchInput — shape', () => {
       'https://casaroberto.com/logo.png',
       'https://casaroberto.com/images/logo.svg',
     ]);
+  });
+
+  it('passes logoUrl from Phase 2 validation result', () => {
+    const r = buildResearchInput(baseForm, baseValidation, baseQualification);
+    expect(r.logoUrl).toBe('https://casaroberto.com/logo.png');
+  });
+
+  it('passes null logoUrl when validation has no logo', () => {
+    const r = buildResearchInput(baseForm, { ...baseValidation, logoUrl: null }, baseQualification);
+    expect(r.logoUrl).toBeNull();
   });
 
   it('includes restaurantSignalScore from Phase 2', () => {

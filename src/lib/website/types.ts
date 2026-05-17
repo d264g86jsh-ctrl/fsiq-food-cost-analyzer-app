@@ -50,6 +50,10 @@ export interface ValidationResult {
 
   // Logo hints for the AI Researcher (Phase 5) — verbatim URLs only
   websiteLogoHints: string[];
+
+  // Pre-validated logo URL from the extraction waterfall (Clearbit → Google → og:image → null).
+  // AI Researcher uses this directly — does not pick from websiteLogoHints.
+  logoUrl: string | null;
 }
 
 export interface ValidateWebsiteRequest {

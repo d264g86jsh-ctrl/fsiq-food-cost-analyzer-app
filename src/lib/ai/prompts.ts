@@ -17,11 +17,6 @@ export function buildResearcherSystemPrompt(): string {
 }
 
 export function buildResearcherUserPrompt(input: AiResearchInput): string {
-  const logoHintsList =
-    input.websiteLogoHints.length > 0
-      ? input.websiteLogoHints.map((u, i) => `  ${i + 1}. ${u}`).join('\n')
-      : '  (none provided)';
-
   return `Generate structured research for this restaurant submission.
 
 RESTAURANT CONTEXT:
@@ -33,19 +28,14 @@ RESTAURANT CONTEXT:
 - Validation status: ${input.finalDecision}
 - Restaurant signal score (0-100): ${input.restaurantSignalScore}
 
-LOGO CANDIDATES (verbatim URLs from the restaurant's website):
-${logoHintsList}
-
 OUTPUT REQUIREMENTS:
 Return exactly this JSON structure — no other text:
 {
-  "logoUrl": "<one URL from the candidate list above verbatim, or null if none are suitable>",
   "businessSummary": "<1-2 sentences, max 120 words. Describe the restaurant based only on the name, concept type, and location count. Do not invent cuisine specifics, founding dates, awards, or details not supplied.>",
   "conceptSignals": ["<tag>", ...]
 }
 
 Rules:
-- logoUrl: must be verbatim from the candidate list, or null. Never invent or modify a URL.
 - businessSummary: factual, operator-focused, confident tone. No em-dashes or en-dashes.
 - conceptSignals: 2-6 short descriptive tags (e.g. "casual dining", "multi-unit", "family style"). No invented specifics.
 - Return JSON only. No text outside the JSON object.`;

@@ -45,6 +45,7 @@ export function buildResearchInput(
     websiteReachabilityStatus: validation.websiteReachabilityStatus,
     restaurantSignalScore: validation.restaurantSignalScore,
     websiteLogoHints: validation.websiteLogoHints,
+    logoUrl: validation.logoUrl,
     scrapeStatus,
 
     // Phase 3 deterministic outputs — read-only context; AI must not alter these

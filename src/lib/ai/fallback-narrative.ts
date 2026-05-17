@@ -23,7 +23,7 @@ export function buildFallbackResearch(input: AiResearchInput): FallbackResearch 
   const conceptLower = input.conceptType.toLowerCase();
 
   return {
-    logoUrl: null,
+    logoUrl: input.logoUrl ?? null,  // use waterfall-validated logo, not null
     businessSummary: `${input.restaurantName} is a ${locationLabel} ${conceptLower} restaurant.`,
     conceptSignals: [conceptLower, locationLabel].filter(Boolean),
     scrapeStatus: input.scrapeStatus,

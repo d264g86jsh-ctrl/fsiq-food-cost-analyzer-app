@@ -42,9 +42,13 @@ export interface AiResearchInput {
   websiteReachabilityStatus: string;
   restaurantSignalScore: number;
 
-  // websiteLogoHints: verbatim candidate URLs extracted by Phase 2.
-  // AI Researcher may select one as logoUrl — or return null. Never fabricates a URL.
+  // websiteLogoHints: verbatim candidate URLs from Phase 2 HTML extraction.
+  // Used only for scrapeStatus calculation — AI no longer selects from this list.
   websiteLogoHints: string[];
+
+  // logoUrl: pre-validated URL from the extraction waterfall (Clearbit → Google → og:image → null).
+  // AI Researcher passes this through directly — does not pick from websiteLogoHints.
+  logoUrl: string | null;
 
   // scrapeStatus: derived from Phase 2 outputs — never from live scraping.
   // "phase2_signals" = Phase 2 produced usable signals
@@ -65,8 +69,8 @@ export interface AiResearchInput {
 // ── Outputs ───────────────────────────────────────────────────────────────────
 
 export interface AiResearchResult {
-  // logoUrl: selected verbatim from websiteLogoHints — never fabricated.
-  // null if no suitable hint was provided or AI could not identify one.
+  // logoUrl: pre-validated URL passed through from AiResearchInput.logoUrl.
+  // Set by the extraction waterfall in Phase 2 — AI does not select this.
   logoUrl: string | null;
 
   businessSummary: string;   // max 500 chars

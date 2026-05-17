@@ -43,7 +43,7 @@ export async function runAiResearch(input: AiResearchInput): Promise<AiResearchR
     const rawText =
       response.content[0]?.type === 'text' ? response.content[0].text : '';
 
-    const parsed = parseResearchResponse(rawText, input);
+    const parsed = parseResearchResponse(rawText);
 
     if (!parsed) {
       return {
@@ -58,6 +58,7 @@ export async function runAiResearch(input: AiResearchInput): Promise<AiResearchR
 
     return {
       ...parsed,
+      logoUrl: input.logoUrl,  // waterfall-validated — AI does not pick from hints
       scrapeStatus: input.scrapeStatus,
       aiUsed: true,
       aiFallbackUsed: false,
@@ -81,8 +82,7 @@ export async function runAiResearch(input: AiResearchInput): Promise<AiResearchR
 
 function parseResearchResponse(
   raw: string,
-  input: AiResearchInput,
-): Pick<AiResearchResult, 'logoUrl' | 'businessSummary' | 'conceptSignals'> | null {
+): Pick<AiResearchResult, 'businessSummary' | 'conceptSignals'> | null {
   try {
     // Extract JSON object — handles optional markdown code fences
     const match = raw.match(/\{[\s\S]*\}/);
@@ -90,12 +90,6 @@ function parseResearchResponse(
 
     const parsed = JSON.parse(match[0]) as Record<string, unknown>;
     if (typeof parsed !== 'object' || parsed === null) return null;
-
-    // logoUrl: must be verbatim from the hint list — never accept a fabricated URL
-    const logoUrl =
-      typeof parsed.logoUrl === 'string' && input.websiteLogoHints.includes(parsed.logoUrl)
-        ? parsed.logoUrl
-        : null;
 
     // businessSummary: required non-empty string, truncated to max
     const rawSummary = typeof parsed.businessSummary === 'string' ? parsed.businessSummary.trim() : '';
@@ -108,7 +102,7 @@ function parseResearchResponse(
       .filter((s): s is string => typeof s === 'string')
       .slice(0, CONCEPT_SIGNALS_MAX);
 
-    return { logoUrl, businessSummary, conceptSignals };
+    return { businessSummary, conceptSignals };
   } catch {
     return null;
   }

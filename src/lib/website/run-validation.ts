@@ -5,6 +5,7 @@
 import { normalizeUrl, extractDomain } from '@/lib/website/normalize-url';
 import { checkWebsite } from '@/lib/website/check-website';
 import { headlessFetch } from '@/lib/website/headless-fetch';
+import { extractLogoUrl } from '@/lib/website/logo-extractor';
 import { detectNationalChain } from '@/lib/qualification/national-chains';
 import { computeRestaurantScores } from '@/lib/relevance/classify-restaurant';
 import { computeWebsiteRelationship } from '@/lib/relevance/website-relationship';
@@ -42,6 +43,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
       googlePlacesQueried: false,
       claudeAiUsed: false,
       websiteLogoHints: [],
+      logoUrl: null,
       internalFlags: [...internalFlags, 'malformed_url'],
       reasons: ['malformed_url'],
       userFacingMessage: "That doesn't look like a valid web address.",
@@ -71,6 +73,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
       googlePlacesQueried: false,
       claudeAiUsed: false,
       websiteLogoHints: [],
+      logoUrl: null,
       internalFlags: [...internalFlags, 'chain_detected_by_name'],
       reasons: [`national_chain:${nameChainCheck.matchedChain ?? 'unknown'}`],
       userFacingMessage:
@@ -103,6 +106,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
       googlePlacesQueried: false,
       claudeAiUsed: false,
       websiteLogoHints: [],
+      logoUrl: null,
       internalFlags: [...internalFlags],
       reasons: fetchResult.reachability.internalFlags,
       userFacingMessage: fetchResult.reachability.userFacingMessage,
@@ -125,6 +129,11 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
       internalFlags.push('headless_attempted');
     }
   }
+
+  // Start logo extraction concurrently with remaining validation steps.
+  // rawHtml comes from the standard fetch (headless doesn't return HTML).
+  // Early-exit paths below don't need a logo (they never generate PDFs).
+  const logoUrlPromise = extractLogoUrl(finalUrl, fetchResult.html);
 
   // ── Step 5: Chain detection — domain + page content pass ──────────────────
   const domain = extractDomain(finalUrl);
@@ -155,6 +164,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
       googlePlacesQueried: false,
       claudeAiUsed: false,
       websiteLogoHints: [],
+      logoUrl: null,
       internalFlags: [...internalFlags, 'chain_detected_by_page'],
       reasons: [`national_chain:${pageChainCheck.matchedChain ?? 'unknown'}`],
       userFacingMessage:
@@ -188,6 +198,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
       googlePlacesQueried: false,
       claudeAiUsed: false,
       websiteLogoHints: signals?.logoHints ?? [],
+      logoUrl: null,
       internalFlags: [...internalFlags],
       reasons: ['known_vendor_domain'],
       userFacingMessage:
@@ -213,6 +224,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   if (ruleBased) {
     reasons.push(ruleBased.reason);
     const manualReview = shouldFlagManualReview(fetchResult.reachability.status, scores, signals);
+    const logoUrl = await logoUrlPromise;
     return buildResult({
       finalDecision: ruleBased.decision,
       normalizedUrl,
@@ -228,6 +240,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
       googlePlacesQueried: false,
       claudeAiUsed: false,
       websiteLogoHints: signals?.logoHints ?? [],
+      logoUrl,
       internalFlags: [...internalFlags],
       reasons,
       userFacingMessage: buildUserMessage(ruleBased.decision),
@@ -265,6 +278,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   }
 
   const manualReview = shouldFlagManualReview(fetchResult.reachability.status, scores, signals);
+  const logoUrl = await logoUrlPromise;
 
   return buildResult({
     finalDecision,
@@ -281,6 +295,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     googlePlacesQueried: false,
     claudeAiUsed,
     websiteLogoHints: signals?.logoHints ?? [],
+    logoUrl,
     internalFlags: [...internalFlags],
     reasons,
     userFacingMessage: buildUserMessage(finalDecision),

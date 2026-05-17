@@ -36,6 +36,7 @@ const baseInput: AiResearchInput = {
   websiteReachabilityStatus: 'reachable',
   restaurantSignalScore: 72,
   websiteLogoHints: [],
+  logoUrl: null,
   scrapeStatus: 'phase2_signals',
   qualified: true,
   spendBucket: '$1M–$3M',

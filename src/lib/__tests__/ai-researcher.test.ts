@@ -36,6 +36,7 @@ const baseInput: AiResearchInput = {
   websiteReachabilityStatus: 'reachable',
   restaurantSignalScore: 72,
   websiteLogoHints: ['https://casaroberto.com/logo.png'],
+  logoUrl: 'https://casaroberto.com/logo.png',
   scrapeStatus: 'phase2_signals',
   qualified: true,
   spendBucket: '$1M–$3M',
@@ -57,7 +58,6 @@ function makeMockClient(responseText: string) {
 }
 
 const validResearchResponse = JSON.stringify({
-  logoUrl: 'https://casaroberto.com/logo.png',
   businessSummary: 'Casa Roberto is a casual dining restaurant with multiple locations in Texas.',
   conceptSignals: ['casual dining', 'multi-location', 'mexican cuisine'],
 });
@@ -84,9 +84,15 @@ describe('runAiResearch — fallback: no API key', () => {
     expect(r.businessSummary).toContain('Casa Roberto');
   });
 
-  it('fallback logoUrl is null when no key', async () => {
+  it('fallback logoUrl uses input.logoUrl (waterfall-validated)', async () => {
     mockGetClient.mockReturnValue(null);
     const r = await runAiResearch(baseInput);
+    expect(r.logoUrl).toBe('https://casaroberto.com/logo.png');
+  });
+
+  it('fallback logoUrl is null when input.logoUrl is null', async () => {
+    mockGetClient.mockReturnValue(null);
+    const r = await runAiResearch({ ...baseInput, logoUrl: null });
     expect(r.logoUrl).toBeNull();
   });
 });
@@ -106,7 +112,7 @@ describe('runAiResearch — successful AI call', () => {
     expect(r.aiModel).toBe('claude-sonnet-4-6');
   });
 
-  it('accepts logoUrl that is in websiteLogoHints', async () => {
+  it('passes through input.logoUrl directly (not from AI response)', async () => {
     mockGetClient.mockReturnValue(makeMockClient(validResearchResponse) as unknown as ReturnType<typeof getAnthropicClient>);
     const r = await runAiResearch(baseInput);
     expect(r.logoUrl).toBe('https://casaroberto.com/logo.png');
@@ -131,25 +137,30 @@ describe('runAiResearch — successful AI call', () => {
   });
 });
 
-describe('runAiResearch — logo URL guard', () => {
-  it('rejects logoUrl that is NOT in websiteLogoHints', async () => {
-    const fabricated = JSON.stringify({
-      logoUrl: 'https://invented.com/fabricated-logo.png',
+describe('runAiResearch — logoUrl passthrough', () => {
+  it('uses input.logoUrl regardless of what AI returns', async () => {
+    // AI response is ignored for logo — the waterfall-validated URL wins
+    const aiWithDifferentLogo = JSON.stringify({
       businessSummary: 'A restaurant.',
       conceptSignals: ['casual dining'],
     });
-    mockGetClient.mockReturnValue(makeMockClient(fabricated) as unknown as ReturnType<typeof getAnthropicClient>);
+    mockGetClient.mockReturnValue(makeMockClient(aiWithDifferentLogo) as unknown as ReturnType<typeof getAnthropicClient>);
     const r = await runAiResearch(baseInput);
-    expect(r.logoUrl).toBeNull();
-    expect(r.aiUsed).toBe(true);
+    expect(r.logoUrl).toBe('https://casaroberto.com/logo.png'); // from input, not AI
   });
 
-  it('accepts null logoUrl from AI', async () => {
-    const noLogo = JSON.stringify({ logoUrl: null, businessSummary: 'A restaurant.', conceptSignals: [] });
-    mockGetClient.mockReturnValue(makeMockClient(noLogo) as unknown as ReturnType<typeof getAnthropicClient>);
-    const r = await runAiResearch(baseInput);
+  it('returns null logoUrl when input.logoUrl is null', async () => {
+    mockGetClient.mockReturnValue(makeMockClient(validResearchResponse) as unknown as ReturnType<typeof getAnthropicClient>);
+    const r = await runAiResearch({ ...baseInput, logoUrl: null });
     expect(r.logoUrl).toBeNull();
     expect(r.aiFallbackUsed).toBe(false);
+  });
+
+  it('fallback also uses input.logoUrl', async () => {
+    mockGetClient.mockReturnValue(null);
+    const r = await runAiResearch({ ...baseInput, logoUrl: 'https://casaroberto.com/logo.png' });
+    expect(r.logoUrl).toBe('https://casaroberto.com/logo.png');
+    expect(r.aiFallbackUsed).toBe(true);
   });
 });
 
