@@ -2,6 +2,8 @@
 
 Last updated: Phase 11 (QA & Hardening)
 
+> For the full staging deployment checklist, test submission scenarios, and go/no-go sign-off list, see `docs/staging-checklist.md`.
+
 ---
 
 ## Environment Variables

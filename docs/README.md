@@ -14,6 +14,8 @@ Focused project specs override the historical SOP when they document approved pr
 | `savings-formula.md` | Savings math — `finalPct`, `dollarEstimate`, projections | Source of truth for savings formula |
 | `brand-guidelines.md` | Brand colors, logo assets, component styling, voice and tone | Source of truth for UI design |
 | `qa-checklist.md` | QA test cases, run after every phase | |
+| `launch-blockers.md` | Required env vars, known gaps, deployment readiness | |
+| `staging-checklist.md` | Staging deployment checklist and live integration QA plan | |
 | `FSIQ_SOP_v3.3.md` | Full SOP converted to Markdown | Historical baseline / reference |
 | `FSIQ_SOP_v3.3.pdf` | Original PDF SOP | Archive / internal reference only |
 
