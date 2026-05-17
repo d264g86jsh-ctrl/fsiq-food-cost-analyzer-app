@@ -268,6 +268,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
   // ── Background: steps 7–10 via waitUntil (runs after response is sent) ────────
   waitUntil((async () => {
     try {
+    console.log('[FSIQ DEBUG] waitUntil background started for submission:', submissionId);
     // ── Step 7: AI Research ────────────────────────────────────────────────────
     let researchResult: AiResearchResult;
     try {
@@ -373,6 +374,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     let crmSyncError: string | null = 'Record not found for GHL sync';
 
     if (fresh) {
+      console.log('[FSIQ DEBUG] Starting GHL sync for submission:', submissionId);
       const ghlPayload = buildGhlPayload(fresh, finalStatus.leadStatus, finalStatus.communicationRoute, finalStatus.tags);
       const crmResult = await syncToGhl(ghlPayload);
       crmSyncStatus = crmResult.crmSyncStatus;
