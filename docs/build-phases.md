@@ -189,9 +189,12 @@ until `pdfDownloadUrl` is non-null and confirmed usable.**
 ---
 
 ## Phase 8 — App Workflow Orchestration + GHL Sync
-- `src/actions/submitAnalysis.ts` — orchestrate Phases 2–7 in sequence
-- `src/lib/crm/ghl.ts` — GHL API sync; assembles `GhlHandoffPayload` and calls GHL API
-- Persist submission to DB at each stage (validation → qualification → AI → PDF → GHL sync)
+- `src/lib/db.ts` — Prisma client singleton (`globalForPrisma` pattern)
+- `src/lib/crm/assign-lead-status.ts` — `assignLeadStatus()` pure function; returns `leadStatus`, `communicationRoute`, `tags`, `shouldSyncGhl`
+- `src/lib/crm/build-ghl-payload.ts` — `buildGhlPayload()` maps Prisma `Submission` + status/route/tags → `GhlHandoffPayload`
+- `src/lib/crm/ghl.ts` — `syncToGhl()` upsert-by-email via LeadConnector API; missing credentials → error result, no throw
+- `src/actions/submitAnalysis.ts` — full pipeline replacing Phase 4 stub
+- Persist submission to DB at each stage (validated → qualified → ai_research → ai_narrative → pdf_generation → complete)
 - Route to correct PDF mode (full vs conservative) based on `finalDecision` and `countryEligibility`
 - **Single final GHL handoff after all processing is complete:**
   - DQ leads: sync immediately after DQ route is known — no PDF required
@@ -199,8 +202,9 @@ until `pdfDownloadUrl` is non-null and confirmed usable.**
   - Manual review leads: sync with `manual_review_hold` — no PDF-ready tag, no email fires
   - PDF failure: sync with `pdf_failure_hold` — no report email until PDF is retried and URL confirmed
   - `qualified_pdf_pending` status defers GHL sync — do not sync with PDF-ready tag prematurely
-- Handle errors gracefully: log, persist error state, do not throw to user
-- Two-stage sync (early "submitted" tag + final routing sync) is optional/future — not in v1
+- `clear_non_fit` leads are always DQ regardless of spend (orchestrator overrides qualified=true from the engine)
+- Handle errors gracefully: log, persist `workflowErrors` JSON, do not throw to user
+- Env vars: `GHL_ACCESS_TOKEN` (preferred) or `GHL_API_KEY` fallback; `GHL_LOCATION_ID`; `GHL_API_BASE_URL` (default: `https://services.leadconnectorhq.com`)
 
 ---
 
