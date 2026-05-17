@@ -48,7 +48,7 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
       locationId,
     }).toString()}`;
 
-    const searchRes = await fetch(searchUrl, { method: 'GET', headers });
+    const searchRes = await fetch(searchUrl, { method: 'GET', headers, signal: AbortSignal.timeout(10_000) });
     if (!searchRes.ok) {
       const detail = await searchRes.text().catch(() => '');
       throw new Error(`GHL search failed: ${searchRes.status} ${searchRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
@@ -80,18 +80,45 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
         method: 'PUT',
         headers,
         body: JSON.stringify(sharedFields),
+        signal: AbortSignal.timeout(10_000),
       });
       if (!updateRes.ok) {
         const detail = await updateRes.text().catch(() => '');
-        throw new Error(`GHL update failed: ${updateRes.status} ${updateRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
+
+        // GHL blocks an update when it would create a phone/name duplicate with
+        // another contact. Fall back to updating the canonical contact in meta.contactId.
+        let dedupId: string | null = null;
+        try {
+          const parsed = JSON.parse(detail) as { meta?: { contactId?: string } };
+          dedupId = parsed?.meta?.contactId ?? null;
+        } catch { /* not JSON — fall through to throw */ }
+
+        if (dedupId) {
+          const dedupRes = await fetch(`${apiBase}/contacts/${dedupId}`, {
+            method: 'PUT',
+            headers,
+            body: JSON.stringify(sharedFields),
+            signal: AbortSignal.timeout(10_000),
+          });
+          if (!dedupRes.ok) {
+            const dedupDetail = await dedupRes.text().catch(() => '');
+            throw new Error(`GHL dedup-update failed: ${dedupRes.status} ${dedupRes.statusText}${dedupDetail ? ` — ${dedupDetail.slice(0, 300)}` : ''}`);
+          }
+          const dedupData = await dedupRes.json() as { contact?: { id: string } };
+          contactId = dedupData.contact?.id ?? dedupId;
+        } else {
+          throw new Error(`GHL update failed: ${updateRes.status} ${updateRes.statusText}${detail ? ` — ${detail.slice(0, 300)}` : ''}`);
+        }
+      } else {
+        const updateData = await updateRes.json() as { contact?: { id: string } };
+        contactId = updateData.contact?.id ?? existingId;
       }
-      const updateData = await updateRes.json() as { contact?: { id: string } };
-      contactId = updateData.contact?.id ?? existingId;
     } else {
       const createRes = await fetch(`${apiBase}/contacts`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ locationId, ...sharedFields }),
+        signal: AbortSignal.timeout(10_000),
       });
 
       if (!createRes.ok) {
@@ -111,6 +138,7 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
             method: 'PUT',
             headers,
             body: JSON.stringify(sharedFields),
+            signal: AbortSignal.timeout(10_000),
           });
           if (!dedupRes.ok) {
             const dedupDetail = await dedupRes.text().catch(() => '');

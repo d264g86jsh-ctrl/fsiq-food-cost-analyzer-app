@@ -267,6 +267,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
 
   // ── Background: steps 7–10 via waitUntil (runs after response is sent) ────────
   waitUntil((async () => {
+    try {
     // ── Step 7: AI Research ────────────────────────────────────────────────────
     let researchResult: AiResearchResult;
     try {
@@ -420,6 +421,13 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
           : undefined,
       },
     }).catch(() => {});
+    } catch (unexpectedErr) {
+      console.error('[submitAnalysis] background pipeline unexpected error:', unexpectedErr);
+      await db.submission.update({
+        where: { id: submissionId },
+        data: { workflowStage: 'complete', workflowStatus: 'partial' as WorkflowStatus },
+      }).catch(() => {});
+    }
   })());
 
   // Return to client immediately — background continues via waitUntil
