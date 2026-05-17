@@ -1,5 +1,14 @@
-import { timingSafeEqual } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
+
+// Edge-runtime safe constant-time string comparison (no Node crypto dependency)
+function safeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -11,12 +20,7 @@ export function middleware(request: NextRequest) {
   if (!token || !session) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
-  const sessionBuf = Buffer.from(session);
-  const tokenBuf = Buffer.from(token);
-  const isValid =
-    sessionBuf.length === tokenBuf.length &&
-    timingSafeEqual(sessionBuf, tokenBuf);
-  if (!isValid) {
+  if (!safeEqual(session, token)) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
   return NextResponse.next();
