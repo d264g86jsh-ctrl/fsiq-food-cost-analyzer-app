@@ -335,7 +335,7 @@ export function AnalyzerForm() {
                 >
                   <option value="">Select your state</option>
                   {STATE_OPTIONS.map((s) => (
-                    <option key={s} value={s}>{s}</option>
+                    <option key={s.value} value={s.value}>{s.label}</option>
                   ))}
                 </select>
               </FormField>

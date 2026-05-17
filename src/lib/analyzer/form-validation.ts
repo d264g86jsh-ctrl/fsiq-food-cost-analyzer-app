@@ -10,7 +10,8 @@ import type { ValidationUIState } from '@/components/analyzer/WebsiteValidationS
 // ── Field format validators ───────────────────────────────────────────────────
 
 export function isValidUsState(state: string): boolean {
-  return STATE_OPTIONS.includes(state.trim().toUpperCase() as typeof STATE_OPTIONS[number]);
+  const upper = state.trim().toUpperCase();
+  return STATE_OPTIONS.some((option) => option.value === upper);
 }
 
 export function isValidEmail(email: string): boolean {
