@@ -2,6 +2,7 @@ import { AdminShell } from '@/components/admin/AdminShell';
 import { QaSummaryBar } from '@/components/admin/QaSummaryBar';
 import { SubmissionFilters } from '@/components/admin/SubmissionFilters';
 import { SubmissionTable } from '@/components/admin/SubmissionTable';
+import { AdminAutoRefresh } from '@/components/admin/AdminAutoRefresh';
 import { getSubmissions, getSubmissionCounts, type SubmissionFilter } from '@/lib/admin/submission-queries';
 import Link from 'next/link';
 
@@ -31,6 +32,7 @@ export default async function SubmissionsPage({
             <p className="text-sm text-[#475569]">
               {total} submission{total !== 1 ? 's' : ''}{filter !== 'all' ? ` matching filter` : ''}
             </p>
+            <AdminAutoRefresh />
           </div>
           <SubmissionTable items={items} />
         </div>
