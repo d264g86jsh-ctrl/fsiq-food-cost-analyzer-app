@@ -104,19 +104,31 @@ export function WebsiteValidationStatus({ state, allowSubmit }: WebsiteValidatio
 
   if (state === 'idle' || !config.message) return null;
 
+  const icon =
+    state === 'checking' ? (
+      <span className="w-3.5 h-3.5 rounded-full border-2 border-[#64748b]/40 fsiq-spinner shrink-0 mt-[3px]" aria-label="Checking" />
+    ) : state === 'verified' ? (
+      <span className="w-4 h-4 grid place-items-center rounded-full bg-[#52C275] text-white shrink-0 mt-[2px]" aria-hidden="true">
+        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+          <path d="M2.5 6.2l2.4 2.3L9.5 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+    ) : state === 'invalid_website' ? (
+      <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0 mt-[5px]" aria-hidden="true" />
+    ) : (
+      <span className="w-1.5 h-1.5 rounded-full bg-[#94a3b8] shrink-0 mt-[5px]" aria-hidden="true" />
+    );
+
   return (
     <div
       role="status"
       aria-live="polite"
       data-validation-state={state}
       data-allow-submit={allowSubmit}
-      className={`mt-1.5 text-sm ${config.colorClass}`}
+      className={`mt-2 flex items-start gap-2 text-[12px] leading-snug ${config.colorClass}`}
     >
-      {state === 'checking' ? (
-        <span aria-label="Checking">{config.message}</span>
-      ) : (
-        <span>{config.message}</span>
-      )}
+      {icon}
+      <span>{config.message}</span>
     </div>
   );
 }

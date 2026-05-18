@@ -1,3 +1,153 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── FSIQ v2 — Animations ──────────────────────────────────────────────────── */
+
+@keyframes fsiq-fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+.fsiq-step-in { animation: fsiq-fadeUp .32s cubic-bezier(.2,.7,.2,1); }
+
+@keyframes fsiq-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.fsiq-float { animation: fsiq-float 5s ease-in-out infinite; }
+
+@keyframes fsiq-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.fsiq-bar { position: relative; overflow: hidden; }
+.fsiq-bar::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
+  animation: fsiq-shimmer 1.6s linear infinite;
+}
+
+@keyframes fsiq-pulse { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+.fsiq-pulse { animation: fsiq-pulse 1.4s ease-in-out infinite; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.fsiq-spinner {
+  border-style: solid;
+  border-top-color: transparent !important;
+  animation: spin .8s linear infinite;
+}
+
+/* ── Atmospheric sage background ──────────────────────────────────────────── */
+.bg-sage {
+  background:
+    radial-gradient(1100px 700px at 20% -10%, rgba(82,194,117,0.28), transparent 55%),
+    radial-gradient(900px 600px at 110% 10%, rgba(20,50,37,0.10), transparent 60%),
+    radial-gradient(1200px 800px at 50% 110%, rgba(82,194,117,0.10), transparent 60%),
+    linear-gradient(180deg, #eef3ee 0%, #f5f2ea 100%);
+}
+
+/* ── PDF report artifact card ─────────────────────────────────────────────── */
+.report-page {
+  position: absolute;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 16px 40px -12px rgba(20,50,37,.30), 0 2px 4px rgba(20,50,37,.06);
+  border: 1px solid rgba(20,50,37,.06);
+  overflow: hidden;
+}
+
+/* ── Glass form card ──────────────────────────────────────────────────────── */
+.glass-card {
+  background: rgba(255,255,255,0.78);
+  backdrop-filter: saturate(160%) blur(18px);
+  -webkit-backdrop-filter: saturate(160%) blur(18px);
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow:
+    0 1px 1px rgba(20,50,37,.04),
+    0 30px 60px -30px rgba(20,50,37,.25),
+    inset 0 1px 0 rgba(255,255,255,0.9);
+}
+
+/* ── Underline input ──────────────────────────────────────────────────────── */
+.field-underline {
+  width: 100%;
+  background: transparent;
+  border: 0;
+  border-bottom: 1.5px solid #cbd5e1;
+  padding: 10px 0;
+  font-size: 17px;
+  color: #143225;
+  transition: border-color .18s ease;
+  outline: none;
+  display: block;
+}
+.field-underline::placeholder { color: #94a3b8; }
+.field-underline:focus { border-bottom-color: #143225; }
+.field-underline.field-error { border-bottom-color: #dc2626; }
+
+/* ── Select caret (background-image approach, no wrapper div needed) ────── */
+.select-underline-caret {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-right: 22px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5 7.5l5 5 5-5' stroke='%2364748b' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0 center;
+}
+
+/* ── CTA pill button ──────────────────────────────────────────────────────── */
+.cta-pill {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  border-radius: 9999px;
+  padding: 18px 28px;
+  background: #143225;
+  color: #fff;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 10px 24px -8px rgba(20,50,37,.45);
+  transition: transform .08s ease, background .18s ease, box-shadow .18s ease;
+}
+.cta-pill:hover:not(:disabled) { background: #1a4632; }
+.cta-pill:active:not(:disabled) { transform: translateY(1px); }
+.cta-pill:disabled {
+  background: rgba(20, 50, 37, 0.40);
+  color: rgba(255, 255, 255, 0.70);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ── Ghost back button ────────────────────────────────────────────────────── */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 10px 4px;
+  transition: color .15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.btn-ghost:hover { color: #143225; }
+.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Reduce motion ────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .fsiq-float,
+  .fsiq-step-in,
+  .fsiq-bar::after,
+  .fsiq-pulse,
+  .fsiq-spinner {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,5 +1,5 @@
-import { AnalyzerForm } from '@/components/analyzer/AnalyzerForm';
+import { AnalyzerPageV2 } from '@/components/analyzer/AnalyzerPageV2';
 
 export default function Home() {
-  return <AnalyzerForm />;
+  return <AnalyzerPageV2 />;
 }
