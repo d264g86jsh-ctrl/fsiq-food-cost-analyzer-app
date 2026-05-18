@@ -126,15 +126,15 @@ export const ANNUAL_FOOD_SPEND_OPTIONS = [
 ] as const;
 
 export const DISTRIBUTOR_TYPE_OPTIONS: { value: string; label: string }[] = [
-  { value: 'national_broadliners', label: 'National broadliners (Sysco, US Foods)' },
-  { value: 'combination',          label: 'Combination of distributors' },
-  { value: 'regional',             label: 'Regional distributor' },
-  { value: 'local_specialty',      label: 'Local/specialty only' },
+  { value: 'national_broadliners', label: 'I purchase primarily through broadline distributors (Sysco, US Foods, Performance Food Group, etc.)' },
+  { value: 'combination',          label: 'I use a mix of broadline and specialty/local distributors' },
+  { value: 'regional',             label: 'I purchase primarily through regional distributors' },
+  { value: 'local_specialty',      label: 'I purchase through local or specialty distributors only' },
 ];
 
 export const PROCUREMENT_STRATEGY_OPTIONS: { value: string; label: string }[] = [
-  { value: 'market_price_single',    label: 'Market price, single distributor' },
-  { value: 'market_price_multiple',  label: 'Market price, multiple distributors' },
-  { value: 'gpo',                    label: 'GPO or Group Purchasing Organization' },
-  { value: 'negotiated_cost_plus',   label: 'Negotiated cost-plus agreement' },
+  { value: 'market_price_single',   label: 'I buy at market price through one distributor' },
+  { value: 'market_price_multiple', label: 'I buy at market price across multiple distributors' },
+  { value: 'gpo',                   label: 'I use a GPO or Group Purchasing Organization' },
+  { value: 'negotiated_cost_plus',  label: 'I have a negotiated cost-plus agreement' },
 ];

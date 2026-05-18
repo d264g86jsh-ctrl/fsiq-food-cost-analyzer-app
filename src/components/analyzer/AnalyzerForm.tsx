@@ -404,21 +404,29 @@ export function AnalyzerForm() {
         {step === 3 && (
           <div key="step-3" className="mt-6 space-y-6 fsiq-step-in">
             <FormField label="Primary distributor type" required>
-              <RadioCardGroup
-                name="distributor_type"
-                options={DISTRIBUTOR_TYPE_OPTIONS}
+              <select
                 value={formData.distributor_type ?? ''}
-                onChange={(v) => update('distributor_type', v)}
-              />
+                onChange={(e) => update('distributor_type', e.target.value)}
+                className={selectCls(false)}
+              >
+                <option value="">Select distributor type</option>
+                {DISTRIBUTOR_TYPE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
             </FormField>
 
             <FormField label="Procurement strategy" required>
-              <RadioCardGroup
-                name="procurement_strategy"
-                options={PROCUREMENT_STRATEGY_OPTIONS}
+              <select
                 value={formData.procurement_strategy ?? ''}
-                onChange={(v) => update('procurement_strategy', v)}
-              />
+                onChange={(e) => update('procurement_strategy', e.target.value)}
+                className={selectCls(false)}
+              >
+                <option value="">Select procurement strategy</option>
+                {PROCUREMENT_STRATEGY_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
             </FormField>
 
             <FormField label="Top SKUs / spend categories" required>
