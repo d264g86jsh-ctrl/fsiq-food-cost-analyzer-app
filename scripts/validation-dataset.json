@@ -1,0 +1,7091 @@
+{
+  "restaurants": [
+    {
+      "url": "https://highlandsbarandgrill.com",
+      "name": "Highlands Bar and Grill",
+      "city": "Birmingham",
+      "state": "AL",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://sawsbbq.com",
+      "name": "Saw's BBQ",
+      "city": "Birmingham",
+      "state": "AL",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://thebrightstar.com",
+      "name": "The Bright Star",
+      "city": "Bessemer",
+      "state": "AL",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://bigbobgibson.com",
+      "name": "Big Bob Gibson BBQ",
+      "city": "Decatur",
+      "state": "AL",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://olebaycafe.com",
+      "name": "Ole Bay Cafe",
+      "city": "Mobile",
+      "state": "AL",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.johnsrestaurant.com",
+      "name": "John's Restaurant",
+      "city": "Birmingham",
+      "state": "AL",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rodneyscottsbbq.com",
+      "name": "Rodney Scott's BBQ",
+      "city": "Birmingham",
+      "state": "AL",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oceanrestaurant.net",
+      "name": "Ocean Restaurant",
+      "city": "Birmingham",
+      "state": "AL",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://bottegafrombirmingham.com",
+      "name": "Bottega",
+      "city": "Birmingham",
+      "state": "AL",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hotandhotfishclub.com",
+      "name": "Hot and Hot Fish Club",
+      "city": "Birmingham",
+      "state": "AL",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://moosestooth.net",
+      "name": "Moose's Tooth",
+      "city": "Anchorage",
+      "state": "AK",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://snowcitycafe.com",
+      "name": "Snow City Cafe",
+      "city": "Anchorage",
+      "state": "AK",
+      "cuisine": "Cafe",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.marxbroscafe.com",
+      "name": "Marx Bros Cafe",
+      "city": "Anchorage",
+      "state": "AK",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kinleyrestaurant.com",
+      "name": "Kinley",
+      "city": "Anchorage",
+      "state": "AK",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.simonandseaforts.com",
+      "name": "Simon & Seaforts",
+      "city": "Anchorage",
+      "state": "AK",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.orsalaska.com",
+      "name": "Orso",
+      "city": "Anchorage",
+      "state": "AK",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.southsidebistro.com",
+      "name": "Southside Bistro",
+      "city": "Anchorage",
+      "state": "AK",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.beartoothmovies.net",
+      "name": "Bear Tooth Theatrepub",
+      "city": "Anchorage",
+      "state": "AK",
+      "cuisine": "Pub",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pangalaska.com",
+      "name": "Pangea Restaurant",
+      "city": "Juneau",
+      "state": "AK",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://tracyskingcrab.com",
+      "name": "Tracy's King Crab Shack",
+      "city": "Juneau",
+      "state": "AK",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://pizzeriabianco.com",
+      "name": "Pizzeria Bianco",
+      "city": "Phoenix",
+      "state": "AZ",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://barriocafe.com",
+      "name": "Barrio Cafe",
+      "city": "Phoenix",
+      "state": "AZ",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cafemonarch.com",
+      "name": "Cafe Monarch",
+      "city": "Scottsdale",
+      "state": "AZ",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tocamadera.com",
+      "name": "Toca Madera",
+      "city": "Scottsdale",
+      "state": "AZ",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lonsdalefour.com",
+      "name": "LON's at The Hermosa",
+      "city": "Paradise Valley",
+      "state": "AZ",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.quelintaqueria.com",
+      "name": "Quelin Taqueria",
+      "city": "Tucson",
+      "state": "AZ",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cafeportagul.com",
+      "name": "Cafe Poca Cosa",
+      "city": "Tucson",
+      "state": "AZ",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.elcharro.com",
+      "name": "El Charro Cafe",
+      "city": "Tucson",
+      "state": "AZ",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.binkscafe.com",
+      "name": "Bink's Midtown",
+      "city": "Phoenix",
+      "state": "AZ",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tarbell.com",
+      "name": "Tarbell's",
+      "city": "Phoenix",
+      "state": "AZ",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thehivebentonville.com",
+      "name": "The Hive",
+      "city": "Bentonville",
+      "state": "AR",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://doeseatplace.com",
+      "name": "Doe's Eat Place",
+      "city": "Little Rock",
+      "state": "AR",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pressroombentonville.com",
+      "name": "Pressroom",
+      "city": "Bentonville",
+      "state": "AR",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.catfishhole.com",
+      "name": "The Catfish Hole",
+      "city": "Fayetteville",
+      "state": "AR",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mocojackson.com",
+      "name": "Mojo on Center",
+      "city": "Little Rock",
+      "state": "AR",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://thecappuccinohotel.com",
+      "name": "The Capital Hotel Bar",
+      "city": "Little Rock",
+      "state": "AR",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.brunoscafeandgrill.com",
+      "name": "Bruno's Little Italy",
+      "city": "Little Rock",
+      "state": "AR",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tusklounge.com",
+      "name": "Tusk Lounge",
+      "city": "Bentonville",
+      "state": "AR",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.leverettlounge.com",
+      "name": "Leverett Lounge",
+      "city": "Fayetteville",
+      "state": "AR",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.herbershq.com",
+      "name": "Herbers HQ",
+      "city": "Rogers",
+      "state": "AR",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://chezpanisse.com",
+      "name": "Chez Panisse",
+      "city": "Berkeley",
+      "state": "CA",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tartinebakery.com",
+      "name": "Tartine Bakery",
+      "city": "San Francisco",
+      "state": "CA",
+      "cuisine": "Bakery",
+      "source": "seed"
+    },
+    {
+      "url": "https://bestiala.com",
+      "name": "Bestia",
+      "city": "Los Angeles",
+      "state": "CA",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://republiquela.com",
+      "name": "Republique",
+      "city": "Los Angeles",
+      "state": "CA",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://statebirdsf.com",
+      "name": "State Bird Provisions",
+      "city": "San Francisco",
+      "state": "CA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nopalitosf.com",
+      "name": "Nopalito",
+      "city": "San Francisco",
+      "state": "CA",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://zunicafe.com",
+      "name": "Zuni Cafe",
+      "city": "San Francisco",
+      "state": "CA",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.portosbakery.com",
+      "name": "Porto's Bakery",
+      "city": "Glendale",
+      "state": "CA",
+      "cuisine": "Bakery",
+      "source": "seed"
+    },
+    {
+      "url": "https://animalrestaurant.com",
+      "name": "Animal",
+      "city": "Los Angeles",
+      "state": "CA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://providencela.com",
+      "name": "Providence",
+      "city": "Los Angeles",
+      "state": "CA",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://gjelina.com",
+      "name": "Gjelina",
+      "city": "Los Angeles",
+      "state": "CA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cassiala.com",
+      "name": "Cassia",
+      "city": "Los Angeles",
+      "state": "CA",
+      "cuisine": "Southeast Asian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.manuela-la.com",
+      "name": "Manuela",
+      "city": "Los Angeles",
+      "state": "CA",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.richtablesf.com",
+      "name": "Rich Table",
+      "city": "San Francisco",
+      "state": "CA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tartinemanufactory.com",
+      "name": "Tartine Manufactory",
+      "city": "San Francisco",
+      "state": "CA",
+      "cuisine": "Bakery",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.frascafoodandwine.com",
+      "name": "Frasca Food and Wine",
+      "city": "Boulder",
+      "state": "CO",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tavernettadenver.com",
+      "name": "Tavernetta",
+      "city": "Denver",
+      "state": "CO",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mercantiledenver.com",
+      "name": "Mercantile Dining",
+      "city": "Denver",
+      "state": "CO",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.saftarestaurant.com",
+      "name": "Safta",
+      "city": "Denver",
+      "state": "CO",
+      "cuisine": "Israeli",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.guardandgrace.com",
+      "name": "Guard and Grace",
+      "city": "Denver",
+      "state": "CO",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.denveracorn.com",
+      "name": "Acorn",
+      "city": "Denver",
+      "state": "CO",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.flagstaffhouse.com",
+      "name": "Flagstaff House",
+      "city": "Boulder",
+      "state": "CO",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.riojadenvcer.com",
+      "name": "Rioja",
+      "city": "Denver",
+      "state": "CO",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.elways.com",
+      "name": "Elway's",
+      "city": "Denver",
+      "state": "CO",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mizuna-denver.com",
+      "name": "Mizuna",
+      "city": "Denver",
+      "state": "CO",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://pepespizzeria.com",
+      "name": "Frank Pepe's",
+      "city": "New Haven",
+      "state": "CT",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.unionleaguecafe.com",
+      "name": "Union League Cafe",
+      "city": "New Haven",
+      "state": "CT",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.barcelonawinebar.com",
+      "name": "Barcelona Wine Bar",
+      "city": "Stamford",
+      "state": "CT",
+      "cuisine": "Spanish",
+      "source": "seed"
+    },
+    {
+      "url": "https://sallysapizza.com",
+      "name": "Sally's Apizza",
+      "city": "New Haven",
+      "state": "CT",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.modernapizza.com",
+      "name": "Modern Apizza",
+      "city": "New Haven",
+      "state": "CT",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oysterclubnorwalk.com",
+      "name": "Oyster Club",
+      "city": "Norwalk",
+      "state": "CT",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thomashenkelmancatering.com",
+      "name": "Thomas Henkelmann",
+      "city": "Greenwich",
+      "state": "CT",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.grandbycorner.com",
+      "name": "Millwright's",
+      "city": "Simsbury",
+      "state": "CT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.burgerbar-hartford.com",
+      "name": "Plan B Burger Bar",
+      "city": "Hartford",
+      "state": "CT",
+      "cuisine": "Burger",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ondaskitchen.com",
+      "name": "Ondas Kitchen",
+      "city": "Bridgeport",
+      "state": "CT",
+      "cuisine": "Brazilian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.domainehudson.com",
+      "name": "Domaine Hudson",
+      "city": "Wilmington",
+      "state": "DE",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.buckleystavern.com",
+      "name": "Buckley's Tavern",
+      "city": "Centreville",
+      "state": "DE",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lafiawilmington.com",
+      "name": "La Fia",
+      "city": "Wilmington",
+      "state": "DE",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.henlopen-city-oyster-house.com",
+      "name": "Henlopen City Oyster House",
+      "city": "Rehoboth Beach",
+      "state": "DE",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.backporchcafe.com",
+      "name": "Back Porch Cafe",
+      "city": "Rehoboth Beach",
+      "state": "DE",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bancroft-on-the-green.com",
+      "name": "Bancroft on the Green",
+      "city": "Wilmington",
+      "state": "DE",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.jessopstavern.com",
+      "name": "Jessop's Tavern",
+      "city": "New Castle",
+      "state": "DE",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pizzabythesea.com",
+      "name": "Pizza by the Sea",
+      "city": "Rehoboth Beach",
+      "state": "DE",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lupositaliankit.com",
+      "name": "Lupo Italian Kitchen",
+      "city": "Georgetown",
+      "state": "DE",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.harrysseafood.com",
+      "name": "Harry's Seafood",
+      "city": "Wilmington",
+      "state": "DE",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.joesstonecrab.com",
+      "name": "Joe's Stone Crab",
+      "city": "Miami Beach",
+      "state": "FL",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.versaillesrestaurant.com",
+      "name": "Versailles",
+      "city": "Miami",
+      "state": "FL",
+      "cuisine": "Cuban",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.boiaderestaurant.com",
+      "name": "Boia De",
+      "city": "Miami",
+      "state": "FL",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mandolinmiami.com",
+      "name": "Mandolin Aegean Bistro",
+      "city": "Miami",
+      "state": "FL",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://columbiarestaurant.com",
+      "name": "Columbia Restaurant",
+      "city": "Tampa",
+      "state": "FL",
+      "cuisine": "Spanish",
+      "source": "seed"
+    },
+    {
+      "url": "https://bernssteakhouse.com",
+      "name": "Bern's Steak House",
+      "city": "Tampa",
+      "state": "FL",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.theravenouspig.com",
+      "name": "The Ravenous Pig",
+      "city": "Winter Park",
+      "state": "FL",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://4rsmokehouse.com",
+      "name": "4 Rivers Smokehouse",
+      "city": "Winter Park",
+      "state": "FL",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mignonetteuptown.com",
+      "name": "Mignonette",
+      "city": "Miami",
+      "state": "FL",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.michaelsgenuine.com",
+      "name": "Michael's Genuine",
+      "city": "Miami",
+      "state": "FL",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://foxbrosbbq.com",
+      "name": "Fox Bros BBQ",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://marymacs.com",
+      "name": "Mary Mac's Tea Room",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.theoptimistrestaurant.com",
+      "name": "The Optimist",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://staplehouse.com",
+      "name": "Staplehouse",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://gunshowatl.com",
+      "name": "Gunshow",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://heirloommarketbbq.com",
+      "name": "Heirloom Market BBQ",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "Korean BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://millerunion.com",
+      "name": "Miller Union",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "Farm to Table",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.empirestatesouthrestaurant.com",
+      "name": "Empire State South",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.canoeatlanta.com",
+      "name": "Canoe",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bacchanalia.com",
+      "name": "Bacchanalia",
+      "city": "Atlanta",
+      "state": "GA",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.helenashawaiianfood.com",
+      "name": "Helena's Hawaiian Food",
+      "city": "Honolulu",
+      "state": "HI",
+      "cuisine": "Hawaiian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mamasfishhouse.com",
+      "name": "Mama's Fish House",
+      "city": "Paia",
+      "state": "HI",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://tinroofmaui.com",
+      "name": "Tin Roof",
+      "city": "Kahului",
+      "state": "HI",
+      "cuisine": "Hawaiian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rainbowdrivein.com",
+      "name": "Rainbow Drive-In",
+      "city": "Honolulu",
+      "state": "HI",
+      "cuisine": "Hawaiian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sidestreetinn.com",
+      "name": "Side Street Inn",
+      "city": "Honolulu",
+      "state": "HI",
+      "cuisine": "Hawaiian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mw-restaurant.com",
+      "name": "MW Restaurant",
+      "city": "Honolulu",
+      "state": "HI",
+      "cuisine": "Hawaiian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.roysrestaurant.com",
+      "name": "Roy's",
+      "city": "Honolulu",
+      "state": "HI",
+      "cuisine": "Hawaiian Fusion",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.onoseafood.com",
+      "name": "Ono Seafood",
+      "city": "Honolulu",
+      "state": "HI",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.highwayin-haleiwa.com",
+      "name": "Haleiwa Joe's",
+      "city": "Haleiwa",
+      "state": "HI",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.giovannisshrimptruck.com",
+      "name": "Giovanni's Shrimp Truck",
+      "city": "Kahuku",
+      "state": "HI",
+      "cuisine": "Food Truck",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.boisefrycompany.com",
+      "name": "Boise Fry Company",
+      "city": "Boise",
+      "state": "ID",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.chandlersboise.com",
+      "name": "Chandler's",
+      "city": "Boise",
+      "state": "ID",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://forkboise.com",
+      "name": "Fork",
+      "city": "Boise",
+      "state": "ID",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.barbacoa.com",
+      "name": "Barbacoa",
+      "city": "Boise",
+      "state": "ID",
+      "cuisine": "Latin",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.richardsdining.com",
+      "name": "Richard's",
+      "city": "Boise",
+      "state": "ID",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.juniperboise.com",
+      "name": "Juniper",
+      "city": "Boise",
+      "state": "ID",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.goldy-s.com",
+      "name": "Goldy's",
+      "city": "Boise",
+      "state": "ID",
+      "cuisine": "Breakfast",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thecellarcda.com",
+      "name": "The Cellar",
+      "city": "Coeur d'Alene",
+      "state": "ID",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.boisedeli.com",
+      "name": "Guru Donuts",
+      "city": "Boise",
+      "state": "ID",
+      "cuisine": "Bakery",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kbsboise.com",
+      "name": "KIN",
+      "city": "Boise",
+      "state": "ID",
+      "cuisine": "Asian",
+      "source": "seed"
+    },
+    {
+      "url": "https://alinearestaurant.com",
+      "name": "Alinea",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://girlandthegoat.com",
+      "name": "Girl & the Goat",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://monteverdechicago.com",
+      "name": "Monteverde",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://pequodspizza.com",
+      "name": "Pequod's Pizza",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lulacafe.com",
+      "name": "Lula Cafe",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://avecchicago.com",
+      "name": "Avec",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://bigstarchicago.com",
+      "name": "Big Star",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://smythandtheloyal.com",
+      "name": "Smyth",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://thepublicanrestaurant.com",
+      "name": "The Publican",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fronteragrill.net",
+      "name": "Frontera Grill",
+      "city": "Chicago",
+      "state": "IL",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://milktoothindy.com",
+      "name": "Milktooth",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "Brunch",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.stelmos.com",
+      "name": "St. Elmo Steak House",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://bluebeardindy.com",
+      "name": "Bluebeard",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cateringbygeorge.com",
+      "name": "Beholder",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.liveryindy.com",
+      "name": "Livery",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tinkerstreet.com",
+      "name": "Tinker Street",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.blackmarketindy.com",
+      "name": "Black Market",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.theeagle-indy.com",
+      "name": "The Eagle",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oceanprimeindy.com",
+      "name": "Late Harvest Kitchen",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.louvoguepistro.com",
+      "name": "Bru Burger",
+      "city": "Indianapolis",
+      "state": "IN",
+      "cuisine": "Burger",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.harbingerdsm.com",
+      "name": "Harbinger",
+      "city": "Des Moines",
+      "state": "IA",
+      "cuisine": "Asian Fusion",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.albastpizza.com",
+      "name": "Eatery A",
+      "city": "Des Moines",
+      "state": "IA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zombieburgerdm.com",
+      "name": "Zombie Burger",
+      "city": "Des Moines",
+      "state": "IA",
+      "cuisine": "Burger",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pullmandining.com",
+      "name": "Pullman Bar & Diner",
+      "city": "Iowa City",
+      "state": "IA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.aposto.us",
+      "name": "Aposto",
+      "city": "Des Moines",
+      "state": "IA",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.saintanejo.com",
+      "name": "Saint Anejo",
+      "city": "Des Moines",
+      "state": "IA",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pablitosic.com",
+      "name": "Pablito's Tacos",
+      "city": "Iowa City",
+      "state": "IA",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.jethrotx.com",
+      "name": "Jethro's BBQ",
+      "city": "Des Moines",
+      "state": "IA",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dsmbarcelona.com",
+      "name": "Centro",
+      "city": "Des Moines",
+      "state": "IA",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gatewaymarket.com",
+      "name": "Gateway Market",
+      "city": "Des Moines",
+      "state": "IA",
+      "cuisine": "Cafe",
+      "source": "seed"
+    },
+    {
+      "url": "https://joeskc.com",
+      "name": "Joe's KC BBQ",
+      "city": "Kansas City",
+      "state": "KS",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.therieger.com",
+      "name": "The Rieger",
+      "city": "Kansas City",
+      "state": "KS",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ryekc.com",
+      "name": "Rye",
+      "city": "Leawood",
+      "state": "KS",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.portfonda.com",
+      "name": "Port Fonda",
+      "city": "Kansas City",
+      "state": "KS",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.q39kc.com",
+      "name": "Q39",
+      "city": "Kansas City",
+      "state": "KS",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.brownandbrow.com",
+      "name": "Brown & Loe",
+      "city": "Kansas City",
+      "state": "KS",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.voltzkc.com",
+      "name": "Voltaire",
+      "city": "Kansas City",
+      "state": "KS",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thecapitalgrillewichita.com",
+      "name": "Chester's Chophouse",
+      "city": "Wichita",
+      "state": "KS",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dempseysbrewhousekc.com",
+      "name": "Dempsey's",
+      "city": "Kansas City",
+      "state": "KS",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.noodlebowlwichita.com",
+      "name": "Noodle Bowl",
+      "city": "Wichita",
+      "state": "KS",
+      "cuisine": "Vietnamese",
+      "source": "seed"
+    },
+    {
+      "url": "https://610magnolia.com",
+      "name": "610 Magnolia",
+      "city": "Louisville",
+      "state": "KY",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.proofon-main.com",
+      "name": "Proof on Main",
+      "city": "Louisville",
+      "state": "KY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.milkwoodrestaurant.com",
+      "name": "Milkwood",
+      "city": "Louisville",
+      "state": "KY",
+      "cuisine": "Asian Fusion",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.jackfrys.com",
+      "name": "Jack Fry's",
+      "city": "Louisville",
+      "state": "KY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.holygrale.com",
+      "name": "Holy Grale",
+      "city": "Louisville",
+      "state": "KY",
+      "cuisine": "Gastropub",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hammerheadslouisville.com",
+      "name": "Hammerheads",
+      "city": "Louisville",
+      "state": "KY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.deccalouisville.com",
+      "name": "Decca",
+      "city": "Louisville",
+      "state": "KY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.leveerestaurant.com",
+      "name": "The Silver Dollar",
+      "city": "Louisville",
+      "state": "KY",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mightysmallkitchen.com",
+      "name": "Ramsey's Diners",
+      "city": "Lexington",
+      "state": "KY",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.winchells-restaurant.com",
+      "name": "Winchell's",
+      "city": "Lexington",
+      "state": "KY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.commanderspalace.com",
+      "name": "Commander's Palace",
+      "city": "New Orleans",
+      "state": "LA",
+      "cuisine": "Creole",
+      "source": "seed"
+    },
+    {
+      "url": "https://cochonrestaurant.com",
+      "name": "Cochon",
+      "city": "New Orleans",
+      "state": "LA",
+      "cuisine": "Cajun",
+      "source": "seed"
+    },
+    {
+      "url": "https://herbsaint.com",
+      "name": "Herbsaint",
+      "city": "New Orleans",
+      "state": "LA",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pecherestaurant.com",
+      "name": "Peche Seafood Grill",
+      "city": "New Orleans",
+      "state": "LA",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.galatoires.com",
+      "name": "Galatoire's",
+      "city": "New Orleans",
+      "state": "LA",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.brigtsens.com",
+      "name": "Brigtsen's",
+      "city": "New Orleans",
+      "state": "LA",
+      "cuisine": "Cajun",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.coquette-nola.com",
+      "name": "Coquette",
+      "city": "New Orleans",
+      "state": "LA",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.comperelapin.com",
+      "name": "Compere Lapin",
+      "city": "New Orleans",
+      "state": "LA",
+      "cuisine": "Caribbean",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mosquitosupperclub.com",
+      "name": "Mosquito Supper Club",
+      "city": "New Orleans",
+      "state": "LA",
+      "cuisine": "Cajun",
+      "source": "seed"
+    },
+    {
+      "url": "https://spiritscenla.com",
+      "name": "Spirits Food & Friends",
+      "city": "Alexandria",
+      "state": "LA",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://eventideoysterco.com",
+      "name": "Eventide Oyster Co",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://forestreet.biz",
+      "name": "Fore Street",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://duckfat.com",
+      "name": "Duckfat",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hugos.net",
+      "name": "Hugo's",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thehoneyepaw.com",
+      "name": "The Honey Paw",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "Asian Fusion",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.centralprovisionsportland.com",
+      "name": "Central Provisions",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thedogfish.com",
+      "name": "The Dogfish Cafe",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "Cafe",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.beckybridges.com",
+      "name": "Scales",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.streetandsoda.com",
+      "name": "Street & Co",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bolsterfoodcompany.com",
+      "name": "Bolster, Snow & Co",
+      "city": "Portland",
+      "state": "ME",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thamesstreetoysterhouse.com",
+      "name": "Thames Street Oyster House",
+      "city": "Baltimore",
+      "state": "MD",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.woodberrykitchen.com",
+      "name": "Woodberry Kitchen",
+      "city": "Baltimore",
+      "state": "MD",
+      "cuisine": "Farm to Table",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.charlestonrestaurant.com",
+      "name": "Charleston",
+      "city": "Baltimore",
+      "state": "MD",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.helmand.com",
+      "name": "The Helmand",
+      "city": "Baltimore",
+      "state": "MD",
+      "cuisine": "Afghan",
+      "source": "seed"
+    },
+    {
+      "url": "https://ekiben.com",
+      "name": "Ekiben",
+      "city": "Baltimore",
+      "state": "MD",
+      "cuisine": "Asian Fusion",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gertrudes-restaurant.com",
+      "name": "Gertrude's",
+      "city": "Baltimore",
+      "state": "MD",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.diamondtavern.com",
+      "name": "Alma Cocina Latina",
+      "city": "Baltimore",
+      "state": "MD",
+      "cuisine": "Venezuelan",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thedylanbar.com",
+      "name": "Dylan's Oyster Cellar",
+      "city": "Baltimore",
+      "state": "MD",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.forkvale.com",
+      "name": "Fork & Wrench",
+      "city": "Baltimore",
+      "state": "MD",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thedogs-dc.com",
+      "name": "Iron Rooster",
+      "city": "Annapolis",
+      "state": "MD",
+      "cuisine": "Brunch",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.neptuneoyster.com",
+      "name": "Neptune Oyster",
+      "city": "Boston",
+      "state": "MA",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oleanarestaurant.com",
+      "name": "Oleana",
+      "city": "Cambridge",
+      "state": "MA",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://toro-restaurant.com",
+      "name": "Toro",
+      "city": "Boston",
+      "state": "MA",
+      "cuisine": "Spanish",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.no9park.com",
+      "name": "No. 9 Park",
+      "city": "Boston",
+      "state": "MA",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.craigieonmain.com",
+      "name": "Craigie on Main",
+      "city": "Cambridge",
+      "state": "MA",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.coppaboston.com",
+      "name": "Coppa",
+      "city": "Boston",
+      "state": "MA",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.giuliarestaurant.com",
+      "name": "Giulia",
+      "city": "Cambridge",
+      "state": "MA",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.row34.com",
+      "name": "Row 34",
+      "city": "Boston",
+      "state": "MA",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.myersandchang.com",
+      "name": "Myers + Chang",
+      "city": "Boston",
+      "state": "MA",
+      "cuisine": "Asian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.eometfest.com",
+      "name": "Sarma",
+      "city": "Somerville",
+      "state": "MA",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zingermansdeli.com",
+      "name": "Zingerman's Deli",
+      "city": "Ann Arbor",
+      "state": "MI",
+      "cuisine": "Deli",
+      "source": "seed"
+    },
+    {
+      "url": "https://greyghostdetroit.com",
+      "name": "Grey Ghost",
+      "city": "Detroit",
+      "state": "MI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://seldenstandard.com",
+      "name": "Selden Standard",
+      "city": "Detroit",
+      "state": "MI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.slows-bbq.com",
+      "name": "Slows Bar BQ",
+      "city": "Detroit",
+      "state": "MI",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.buddyspizza.com",
+      "name": "Buddy's Pizza",
+      "city": "Detroit",
+      "state": "MI",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.commongroundgr.com",
+      "name": "The Chop House",
+      "city": "Grand Rapids",
+      "state": "MI",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.traversebaypie.com",
+      "name": "Grand Traverse Pie",
+      "city": "Traverse City",
+      "state": "MI",
+      "cuisine": "Bakery",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.elacolumbus.com",
+      "name": "Mabel Gray",
+      "city": "Hazel Park",
+      "state": "MI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dimedetroit.com",
+      "name": "Dime Store",
+      "city": "Detroit",
+      "state": "MI",
+      "cuisine": "Brunch",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ottawataverndetroit.com",
+      "name": "Ottava Via",
+      "city": "Detroit",
+      "state": "MI",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://spoonandstable.com",
+      "name": "Spoon and Stable",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.barlagrassa.com",
+      "name": "Bar La Grassa",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.youngjoni.com",
+      "name": "Young Joni",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://haihai.com",
+      "name": "Hai Hai",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "Vietnamese",
+      "source": "seed"
+    },
+    {
+      "url": "https://owamni.com",
+      "name": "Owamni",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "Indigenous",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.revival-mpls.com",
+      "name": "Revival",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.martina.restaurant",
+      "name": "Martina",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hola-arepa.com",
+      "name": "Hola Arepa",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "Venezuelan",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.unionrestaurantmn.com",
+      "name": "Union Hmong Kitchen",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "Hmong",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.colita-mpls.com",
+      "name": "Colita",
+      "city": "Minneapolis",
+      "state": "MN",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.themanship.com",
+      "name": "The Manship",
+      "city": "Jackson",
+      "state": "MS",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.brentsdrugs.com",
+      "name": "Brent's Drugs",
+      "city": "Jackson",
+      "state": "MS",
+      "cuisine": "Diner",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.walkersdrivein.com",
+      "name": "Walker's Drive-In",
+      "city": "Jackson",
+      "state": "MS",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.abebbq.com",
+      "name": "Abe's BBQ",
+      "city": "Clarksdale",
+      "state": "MS",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.groundzerobluesman.com",
+      "name": "Ground Zero Blues Club",
+      "city": "Clarksdale",
+      "state": "MS",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.snackbar-oxford.com",
+      "name": "Snackbar",
+      "city": "Oxford",
+      "state": "MS",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bigbadbreakfast.com",
+      "name": "Big Bad Breakfast",
+      "city": "Oxford",
+      "state": "MS",
+      "cuisine": "Brunch",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ajaxdiner.net",
+      "name": "Ajax Diner",
+      "city": "Oxford",
+      "state": "MS",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.docseatplace.com",
+      "name": "Doe's Eat Place",
+      "city": "Greenville",
+      "state": "MS",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.elviesjackson.com",
+      "name": "Elvie's",
+      "city": "Jackson",
+      "state": "MS",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sidneystreetcafe.com",
+      "name": "Sidney Street Cafe",
+      "city": "St. Louis",
+      "state": "MO",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pappyssmokehouse.com",
+      "name": "Pappy's Smokehouse",
+      "city": "St. Louis",
+      "state": "MO",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bulrushstl.com",
+      "name": "Bulrush",
+      "city": "St. Louis",
+      "state": "MO",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.broadway-oyster-bar.com",
+      "name": "Broadway Oyster Bar",
+      "city": "St. Louis",
+      "state": "MO",
+      "cuisine": "Cajun",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bogartssmokehouse.com",
+      "name": "Bogarts Smokehouse",
+      "city": "St. Louis",
+      "state": "MO",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sweetarreligionbbq.com",
+      "name": "Salt + Smoke",
+      "city": "St. Louis",
+      "state": "MO",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nixtataqueria.com",
+      "name": "Nixta Mexican Grill",
+      "city": "St. Louis",
+      "state": "MO",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.viciapizzeria.com",
+      "name": "Vicia",
+      "city": "St. Louis",
+      "state": "MO",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.joemamas.com",
+      "name": "Joe Mama's",
+      "city": "Kansas City",
+      "state": "MO",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.anthonysrestaurant.com",
+      "name": "Arthur Bryant's",
+      "city": "Kansas City",
+      "state": "MO",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cafekandahar.com",
+      "name": "Cafe Kandahar",
+      "city": "Whitefish",
+      "state": "MT",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.montanaaleworks.com",
+      "name": "Montana Ale Works",
+      "city": "Bozeman",
+      "state": "MT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ciaomambo.com",
+      "name": "Ciao Mambo",
+      "city": "Billings",
+      "state": "MT",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.jakers.com",
+      "name": "Jaker's",
+      "city": "Missoula",
+      "state": "MT",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thecarousel.com",
+      "name": "The Pearl Cafe",
+      "city": "Missoula",
+      "state": "MT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.silvertipbbq.com",
+      "name": "Silk Road",
+      "city": "Bozeman",
+      "state": "MT",
+      "cuisine": "Asian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.plonkwinebar.com",
+      "name": "Plonk",
+      "city": "Missoula",
+      "state": "MT",
+      "cuisine": "Wine Bar",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.opensourcebrewing.com",
+      "name": "Open Range",
+      "city": "Bozeman",
+      "state": "MT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thekeepmissoula.com",
+      "name": "The Keep",
+      "city": "Missoula",
+      "state": "MT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.whitefish-lake-restaurant.com",
+      "name": "Whitefish Lake Restaurant",
+      "city": "Whitefish",
+      "state": "MT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.boilerroomrestaurant.com",
+      "name": "The Boiler Room",
+      "city": "Omaha",
+      "state": "NE",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vmertz.com",
+      "name": "V. Mertz",
+      "city": "Omaha",
+      "state": "NE",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dariosbrasserie.com",
+      "name": "Dario's Brasserie",
+      "city": "Omaha",
+      "state": "NE",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.block16omaha.com",
+      "name": "Block 16",
+      "city": "Omaha",
+      "state": "NE",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dantesomaha.com",
+      "name": "Dante Ristorante",
+      "city": "Omaha",
+      "state": "NE",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.modernloveomaha.com",
+      "name": "Modern Love",
+      "city": "Omaha",
+      "state": "NE",
+      "cuisine": "Vegan",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.leadingladyomaha.com",
+      "name": "Yoshitomo",
+      "city": "Omaha",
+      "state": "NE",
+      "cuisine": "Japanese",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lazylionlincoln.com",
+      "name": "The Oven",
+      "city": "Lincoln",
+      "state": "NE",
+      "cuisine": "Indian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vincenzoristorante.com",
+      "name": "Vincenzo's",
+      "city": "Omaha",
+      "state": "NE",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.heartlandbbq.com",
+      "name": "Heartland BBQ",
+      "city": "Omaha",
+      "state": "NE",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lotusofsiamlv.com",
+      "name": "Lotus of Siam",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "Thai",
+      "source": "seed"
+    },
+    {
+      "url": "https://sparrowandwolf.com",
+      "name": "Sparrow + Wolf",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.evelpie.com",
+      "name": "Evel Pie",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.7thandcarson.com",
+      "name": "7th & Carson",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.estheritchensaigon.com",
+      "name": "Esther's Kitchen",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.carsonkitchen.com",
+      "name": "Carson Kitchen",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.partagevegas.com",
+      "name": "Partage",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.freedkitchenvegas.com",
+      "name": "Freed's Bakery",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "Bakery",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lamolletaqueria.com",
+      "name": "Tacos El Gordo",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thepeppermillvegas.com",
+      "name": "Peppermill",
+      "city": "Las Vegas",
+      "state": "NV",
+      "cuisine": "Diner",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.blacktrumpetbistro.com",
+      "name": "Black Trumpet",
+      "city": "Portsmouth",
+      "state": "NH",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.moxyrestaurant.com",
+      "name": "Moxy",
+      "city": "Portsmouth",
+      "state": "NH",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cottonfood.com",
+      "name": "Cotton",
+      "city": "Manchester",
+      "state": "NH",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.revivalkitchennh.com",
+      "name": "Revival Kitchen",
+      "city": "Concord",
+      "state": "NH",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thelaconiandining.com",
+      "name": "The Common Man",
+      "city": "Ashland",
+      "state": "NH",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.stagehomedining.com",
+      "name": "Stages at One Washington",
+      "city": "Dover",
+      "state": "NH",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.saltslice.com",
+      "name": "Salt + Slice",
+      "city": "Portsmouth",
+      "state": "NH",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.labellaconcord.com",
+      "name": "La Bella Tavola",
+      "city": "Concord",
+      "state": "NH",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thedeckrestaurant.com",
+      "name": "The Deck",
+      "city": "Meredith",
+      "state": "NH",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tulsinh.com",
+      "name": "Tulsi",
+      "city": "Hanover",
+      "state": "NH",
+      "cuisine": "Indian",
+      "source": "seed"
+    },
+    {
+      "url": "https://rfrnyc.com",
+      "name": "Razza",
+      "city": "Jersey City",
+      "state": "NJ",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://battellojc.com",
+      "name": "Battello",
+      "city": "Jersey City",
+      "state": "NJ",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.restaurantlorena.com",
+      "name": "Restaurant Lorena",
+      "city": "Maplewood",
+      "state": "NJ",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.delorenzospizza.com",
+      "name": "DeLorenzo's Tomato Pies",
+      "city": "Robbinsville",
+      "state": "NJ",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.heirloomkitchennj.com",
+      "name": "Heirloom Kitchen",
+      "city": "Old Bridge",
+      "state": "NJ",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ratsrestaurant.com",
+      "name": "Rat's Restaurant",
+      "city": "Hamilton",
+      "state": "NJ",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.highlawnpavilion.com",
+      "name": "Highlawn Pavilion",
+      "city": "West Orange",
+      "state": "NJ",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.louiseandjerrys.com",
+      "name": "Louise & Jerry's",
+      "city": "Hoboken",
+      "state": "NJ",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sobolerestaurant.com",
+      "name": "Satis Bistro",
+      "city": "Jersey City",
+      "state": "NJ",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vesta-restaurant.com",
+      "name": "Vesta",
+      "city": "Astoria",
+      "state": "NJ",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ranchodechimayo.com",
+      "name": "Rancho de Chimayo",
+      "city": "Chimayo",
+      "state": "NM",
+      "cuisine": "New Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sfshed.com",
+      "name": "The Shed",
+      "city": "Santa Fe",
+      "state": "NM",
+      "cuisine": "New Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lospoblanos.com",
+      "name": "Los Poblanos",
+      "city": "Albuquerque",
+      "state": "NM",
+      "cuisine": "Farm to Table",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sazonrestaurant.com",
+      "name": "Sazon",
+      "city": "Santa Fe",
+      "state": "NM",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.geronimosantafe.com",
+      "name": "Geronimo",
+      "city": "Santa Fe",
+      "state": "NM",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.compoundsantafe.com",
+      "name": "The Compound",
+      "city": "Santa Fe",
+      "state": "NM",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.papastafesantafe.com",
+      "name": "Cafe Pasqual's",
+      "city": "Santa Fe",
+      "state": "NM",
+      "cuisine": "New Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rangeabq.com",
+      "name": "Range Cafe",
+      "city": "Albuquerque",
+      "state": "NM",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.severedsf.com",
+      "name": "La Plazuela",
+      "city": "Santa Fe",
+      "state": "NM",
+      "cuisine": "New Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.elfarolsantafe.com",
+      "name": "El Farol",
+      "city": "Santa Fe",
+      "state": "NM",
+      "cuisine": "Spanish",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gramercytavern.com",
+      "name": "Gramercy Tavern",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rezdora.nyc",
+      "name": "Rezdora",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.viacarota.com",
+      "name": "Via Carota",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.russanddaughters.com",
+      "name": "Russ & Daughters",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Deli",
+      "source": "seed"
+    },
+    {
+      "url": "https://sylviasrestaurant.com",
+      "name": "Sylvia's Restaurant",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Soul Food",
+      "source": "seed"
+    },
+    {
+      "url": "https://peterluger.com",
+      "name": "Peter Luger",
+      "city": "Brooklyn",
+      "state": "NY",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://difara.com",
+      "name": "Di Fara Pizza",
+      "city": "Brooklyn",
+      "state": "NY",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.keens.com",
+      "name": "Keens Steakhouse",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://momofuku.com",
+      "name": "Momofuku",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Asian",
+      "source": "seed"
+    },
+    {
+      "url": "https://donangie.com",
+      "name": "Don Angie",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dhamakanyc.com",
+      "name": "Dhamaka",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Indian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.superiority-burger.com",
+      "name": "Superiority Burger",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Vegetarian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lospolloshermanos.com",
+      "name": "Kopitiam",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Malaysian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lilianewyork.com",
+      "name": "Lilia",
+      "city": "Brooklyn",
+      "state": "NY",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.4charlesnyc.com",
+      "name": "4 Charles Prime Rib",
+      "city": "New York",
+      "state": "NY",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bidamanda.com",
+      "name": "Bida Manda",
+      "city": "Raleigh",
+      "state": "NC",
+      "cuisine": "Laotian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.curationasheville.com",
+      "name": "Curate",
+      "city": "Asheville",
+      "state": "NC",
+      "cuisine": "Spanish",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kindreddavidson.com",
+      "name": "Kindred",
+      "city": "Davidson",
+      "state": "NC",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.poolesdowntowndiner.com",
+      "name": "Poole's Diner",
+      "city": "Raleigh",
+      "state": "NC",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://buxtonhall.com",
+      "name": "Buxton Hall",
+      "city": "Asheville",
+      "state": "NC",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.12bonesbbq.com",
+      "name": "12 Bones Smokehouse",
+      "city": "Asheville",
+      "state": "NC",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sauceontheside.com",
+      "name": "Chai Pani",
+      "city": "Asheville",
+      "state": "NC",
+      "cuisine": "Indian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.midwoodsmokehouse.com",
+      "name": "Midwood Smokehouse",
+      "city": "Charlotte",
+      "state": "NC",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thecapitalgrill.com",
+      "name": "Beasley's Chicken + Honey",
+      "city": "Raleigh",
+      "state": "NC",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.limestonerestaurant.com",
+      "name": "Limestone",
+      "city": "Wilmington",
+      "state": "NC",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rosewildfargo.com",
+      "name": "Rosewild",
+      "city": "Fargo",
+      "state": "ND",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thetoastedfrog.com",
+      "name": "The Toasted Frog",
+      "city": "Fargo",
+      "state": "ND",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hoteldonaldson.com",
+      "name": "HoDo Restaurant",
+      "city": "Fargo",
+      "state": "ND",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.drunken-noodle.com",
+      "name": "Drunken Noodle",
+      "city": "Fargo",
+      "state": "ND",
+      "cuisine": "Thai",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lunafargo.com",
+      "name": "Luna",
+      "city": "Fargo",
+      "state": "ND",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.space-aliens.com",
+      "name": "Space Aliens",
+      "city": "Bismarck",
+      "state": "ND",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.peacockalleys.com",
+      "name": "Peacock Alley",
+      "city": "Bismarck",
+      "state": "ND",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fireflour.com",
+      "name": "Fireflour Pizza",
+      "city": "Fargo",
+      "state": "ND",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.boiler-room-fargo.com",
+      "name": "Boiler Room",
+      "city": "Fargo",
+      "state": "ND",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rhineoakfargo.com",
+      "name": "Rhombus Guys Pizza",
+      "city": "Fargo",
+      "state": "ND",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.jenis.com",
+      "name": "Jeni's Ice Creams",
+      "city": "Columbus",
+      "state": "OH",
+      "cuisine": "Ice Cream",
+      "source": "seed"
+    },
+    {
+      "url": "https://mabelsbbq.com",
+      "name": "Mabel's BBQ",
+      "city": "Cleveland",
+      "state": "OH",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.slymans.com",
+      "name": "Slyman's",
+      "city": "Cleveland",
+      "state": "OH",
+      "cuisine": "Deli",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thenorthstarcafe.com",
+      "name": "Northstar Cafe",
+      "city": "Columbus",
+      "state": "OH",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.momoirvine.com",
+      "name": "The Refectory",
+      "city": "Columbus",
+      "state": "OH",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thurmanscafe.com",
+      "name": "Thurman's Cafe",
+      "city": "Columbus",
+      "state": "OH",
+      "cuisine": "Burger",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rockmill-brewery.com",
+      "name": "Rockmill Brewery",
+      "city": "Lancaster",
+      "state": "OH",
+      "cuisine": "Brewery",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.treehuggerjuicebar.com",
+      "name": "A Tavola",
+      "city": "Columbus",
+      "state": "OH",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.soho-chicken-whiskey.com",
+      "name": "Soho Chicken + Whiskey",
+      "city": "Cleveland",
+      "state": "OH",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.larder-deli.com",
+      "name": "Larder",
+      "city": "Cleveland",
+      "state": "OH",
+      "cuisine": "Deli",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nonesuchokc.com",
+      "name": "Nonesuch",
+      "city": "Oklahoma City",
+      "state": "OK",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://nicsgrill.com",
+      "name": "Nic's Grill",
+      "city": "Oklahoma City",
+      "state": "OK",
+      "cuisine": "Burger",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thejonesassembly.com",
+      "name": "The Jones Assembly",
+      "city": "Oklahoma City",
+      "state": "OK",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.watertableokc.com",
+      "name": "Watertable",
+      "city": "Oklahoma City",
+      "state": "OK",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vanessen.com",
+      "name": "Van's Pig Stand",
+      "city": "Oklahoma City",
+      "state": "OK",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.elegantelephant.com",
+      "name": "Ludivine",
+      "city": "Oklahoma City",
+      "state": "OK",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.burn-co-bbq.com",
+      "name": "Burn Co BBQ",
+      "city": "Tulsa",
+      "state": "OK",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thebrokenarrrowcafe.com",
+      "name": "Roppongi",
+      "city": "Oklahoma City",
+      "state": "OK",
+      "cuisine": "Japanese",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mahogany-prime.com",
+      "name": "Mahogany Prime",
+      "city": "Oklahoma City",
+      "state": "OK",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.elote-okc.com",
+      "name": "Elote",
+      "city": "Tulsa",
+      "state": "OK",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://lepigeon.com",
+      "name": "Le Pigeon",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://oxpdx.com",
+      "name": "OX Restaurant",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://kannrestaurant.com",
+      "name": "Kann",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "Haitian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.eemportland.com",
+      "name": "Eem",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "Thai BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://screendoorrestaurant.com",
+      "name": "Screen Door",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pokpokrestaurants.com",
+      "name": "Pok Pok",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "Thai",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lardopdx.com",
+      "name": "Lardo",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.langbaanpdx.com",
+      "name": "Langbaan",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "Thai",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nostranoportland.com",
+      "name": "Nostrana",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tuskportland.com",
+      "name": "Tusk",
+      "city": "Portland",
+      "state": "OR",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://zahavrestaurant.com",
+      "name": "Zahav",
+      "city": "Philadelphia",
+      "state": "PA",
+      "cuisine": "Israeli",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pizzeriabeddia.com",
+      "name": "Pizzeria Beddia",
+      "city": "Philadelphia",
+      "state": "PA",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vetricucina.com",
+      "name": "Vetri Cucina",
+      "city": "Philadelphia",
+      "state": "PA",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.talulastable.com",
+      "name": "Talula's Table",
+      "city": "Kennett Square",
+      "state": "PA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://federaldonuts.com",
+      "name": "Federal Donuts",
+      "city": "Philadelphia",
+      "state": "PA",
+      "cuisine": "Bakery",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vernickphilly.com",
+      "name": "Vernick Food & Drink",
+      "city": "Philadelphia",
+      "state": "PA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fridaysaturdaysunday.com",
+      "name": "Friday Saturday Sunday",
+      "city": "Philadelphia",
+      "state": "PA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fishtown-social.com",
+      "name": "Kalaya",
+      "city": "Philadelphia",
+      "state": "PA",
+      "cuisine": "Thai",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.laurelphilly.com",
+      "name": "Laurel",
+      "city": "Philadelphia",
+      "state": "PA",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.suraya-philly.com",
+      "name": "Suraya",
+      "city": "Philadelphia",
+      "state": "PA",
+      "cuisine": "Lebanese",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.alforno.com",
+      "name": "Al Forno",
+      "city": "Providence",
+      "state": "RI",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oberlinrestaurant.com",
+      "name": "Oberlin",
+      "city": "Providence",
+      "state": "RI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.eatnorth.com",
+      "name": "North",
+      "city": "Providence",
+      "state": "RI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thedorrance.com",
+      "name": "The Dorrance",
+      "city": "Providence",
+      "state": "RI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.persimmonristorante.com",
+      "name": "Persimmon",
+      "city": "Bristol",
+      "state": "RI",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.los-andes.com",
+      "name": "Los Andes",
+      "city": "Providence",
+      "state": "RI",
+      "cuisine": "Bolivian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.camillesprov.com",
+      "name": "Camille's",
+      "city": "Providence",
+      "state": "RI",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.denyserestaurant.com",
+      "name": "Den",
+      "city": "Providence",
+      "state": "RI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.birchprovidence.com",
+      "name": "Birch",
+      "city": "Providence",
+      "state": "RI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gracerestaurant.com",
+      "name": "Gracie's",
+      "city": "Providence",
+      "state": "RI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://huskrestaurant.com",
+      "name": "Husk",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://eatatfig.com",
+      "name": "FIG",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.theordinary.com",
+      "name": "The Ordinary",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://rodneyscottsbbq.com",
+      "name": "Rodney Scott's BBQ",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://edmundsoast.com",
+      "name": "Edmund's Oast",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lewisbarbecue.com",
+      "name": "Lewis Barbecue",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.xiao-bao.com",
+      "name": "Xiao Bao Biscuit",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "Asian Fusion",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hominy-grill.com",
+      "name": "Hominy Grill",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mccrady.com",
+      "name": "McCrady's",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.82queen.com",
+      "name": "82 Queen",
+      "city": "Charleston",
+      "state": "SC",
+      "cuisine": "Southern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.minervas.net",
+      "name": "Minerva's",
+      "city": "Sioux Falls",
+      "state": "SD",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.parkersbistro.net",
+      "name": "Parker's Bistro",
+      "city": "Sioux Falls",
+      "state": "SD",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.grille26.com",
+      "name": "Grille 26",
+      "city": "Sioux Falls",
+      "state": "SD",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.phillysf.com",
+      "name": "Phillips Avenue Diner",
+      "city": "Sioux Falls",
+      "state": "SD",
+      "cuisine": "Diner",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.foleysirishpub.com",
+      "name": "Foley's Irish Pub",
+      "city": "Sioux Falls",
+      "state": "SD",
+      "cuisine": "Pub",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cheds.com",
+      "name": "Chez LaRoux",
+      "city": "Sioux Falls",
+      "state": "SD",
+      "cuisine": "Cajun",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sansbarrestaurant.com",
+      "name": "Sanaa's Gourmet",
+      "city": "Sioux Falls",
+      "state": "SD",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.alpineinnhill.com",
+      "name": "Alpine Inn",
+      "city": "Hill City",
+      "state": "SD",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.desperados-cowboy.com",
+      "name": "Desperados Cowboy",
+      "city": "Hill City",
+      "state": "SD",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.blackhillsbbq.com",
+      "name": "Dakota Steakhouse",
+      "city": "Rapid City",
+      "state": "SD",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://princeshotchicken.com",
+      "name": "Prince's Hot Chicken",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "Hot Chicken",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thecatbirdseatrestaurant.com",
+      "name": "The Catbird Seat",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://boltonsspicy.com",
+      "name": "Bolton's Spicy Chicken",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "Hot Chicken",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.martinsbbqjoint.com",
+      "name": "Martin's Bar-B-Que",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.butcherandbee.com",
+      "name": "Butcher & Bee",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.peglegporker.com",
+      "name": "Peg Leg Porker",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.farmhousenashville.com",
+      "name": "The Farm House",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "Farm to Table",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cityhousenashville.com",
+      "name": "City House",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rolfandaughters.com",
+      "name": "Rolf and Daughters",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hattiebs.com",
+      "name": "Hattie B's",
+      "city": "Nashville",
+      "state": "TN",
+      "cuisine": "Hot Chicken",
+      "source": "seed"
+    },
+    {
+      "url": "https://franklinbbq.com",
+      "name": "Franklin Barbecue",
+      "city": "Austin",
+      "state": "TX",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://uchiaustin.com",
+      "name": "Uchi",
+      "city": "Austin",
+      "state": "TX",
+      "cuisine": "Japanese",
+      "source": "seed"
+    },
+    {
+      "url": "https://oddduckaustin.com",
+      "name": "Odd Duck",
+      "city": "Austin",
+      "state": "TX",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.suerteatx.com",
+      "name": "Suerte",
+      "city": "Austin",
+      "state": "TX",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://launderetteaustin.com",
+      "name": "Launderette",
+      "city": "Austin",
+      "state": "TX",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://pecanlodge.com",
+      "name": "Pecan Lodge",
+      "city": "Dallas",
+      "state": "TX",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ninfas.com",
+      "name": "The Original Ninfa's",
+      "city": "Houston",
+      "state": "TX",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://underbellyhouston.com",
+      "name": "Underbelly Hospitality",
+      "city": "Houston",
+      "state": "TX",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.killensbarbecue.com",
+      "name": "Killen's BBQ",
+      "city": "Pearland",
+      "state": "TX",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.homeslicepizza.com",
+      "name": "Home Slice Pizza",
+      "city": "Austin",
+      "state": "TX",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hellsbackbonegrill.com",
+      "name": "Hell's Backbone Grill",
+      "city": "Boulder",
+      "state": "UT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thecopperonion.com",
+      "name": "The Copper Onion",
+      "city": "Salt Lake City",
+      "state": "UT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.valtersosteria.com",
+      "name": "Valter's Osteria",
+      "city": "Salt Lake City",
+      "state": "UT",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hslrestaurant.com",
+      "name": "HSL",
+      "city": "Salt Lake City",
+      "state": "UT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://handleparkcity.com",
+      "name": "Handle",
+      "city": "Park City",
+      "state": "UT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.loghavenrestaurant.com",
+      "name": "Log Haven",
+      "city": "Salt Lake City",
+      "state": "UT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.currentfishandoyster.com",
+      "name": "Current Fish & Oyster",
+      "city": "Salt Lake City",
+      "state": "UT",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.settebellonaples.com",
+      "name": "Settebello",
+      "city": "Salt Lake City",
+      "state": "UT",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.redhockeyslc.com",
+      "name": "Red Iguana",
+      "city": "Salt Lake City",
+      "state": "UT",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.spagoaltaclub.com",
+      "name": "Riverhorse on Main",
+      "city": "Park City",
+      "state": "UT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.henofthewood.com",
+      "name": "Hen of the Wood",
+      "city": "Burlington",
+      "state": "VT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.skinnypancake.com",
+      "name": "The Skinny Pancake",
+      "city": "Burlington",
+      "state": "VT",
+      "cuisine": "Crepes",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.prohibitionpig.com",
+      "name": "Prohibition Pig",
+      "city": "Waterbury",
+      "state": "VT",
+      "cuisine": "BBQ",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.honeyroadvt.com",
+      "name": "Honey Road",
+      "city": "Burlington",
+      "state": "VT",
+      "cuisine": "Mediterranean",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.miseryloves.co",
+      "name": "Misery Loves Co.",
+      "city": "Winooski",
+      "state": "VT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.juniperburlington.com",
+      "name": "Juniper",
+      "city": "Burlington",
+      "state": "VT",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pennyplankvt.com",
+      "name": "Penny Cluse Cafe",
+      "city": "Burlington",
+      "state": "VT",
+      "cuisine": "Brunch",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.theessextowers.com",
+      "name": "Kitchen Table Bistro",
+      "city": "Richmond",
+      "state": "VT",
+      "cuisine": "Farm to Table",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.arvenevt.com",
+      "name": "Arvene",
+      "city": "Burlington",
+      "state": "VT",
+      "cuisine": "Indian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.twocatsbarista.com",
+      "name": "Leunig's Bistro",
+      "city": "Burlington",
+      "state": "VT",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.theinnatlittlewashington.com",
+      "name": "The Inn at Little Washington",
+      "city": "Washington",
+      "state": "VA",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rroysters.com",
+      "name": "Rappahannock Oyster Bar",
+      "city": "Richmond",
+      "state": "VA",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lopossum.com",
+      "name": "L'Opossum",
+      "city": "Richmond",
+      "state": "VA",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.brennerpassrva.com",
+      "name": "Brenner Pass",
+      "city": "Richmond",
+      "state": "VA",
+      "cuisine": "Austrian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.shagbarkrva.com",
+      "name": "Shagbark",
+      "city": "Richmond",
+      "state": "VA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.edo-squid.com",
+      "name": "Edo's Squid",
+      "city": "Richmond",
+      "state": "VA",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lemairerva.com",
+      "name": "Lemaire",
+      "city": "Richmond",
+      "state": "VA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.peterchangrestaurant.com",
+      "name": "Peter Chang",
+      "city": "Charlottesville",
+      "state": "VA",
+      "cuisine": "Chinese",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.metzgerbarandbutchery.com",
+      "name": "Metzger",
+      "city": "Richmond",
+      "state": "VA",
+      "cuisine": "German",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thecockatoopresents.com",
+      "name": "Longoven",
+      "city": "Richmond",
+      "state": "VA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://canlis.com",
+      "name": "Canlis",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://spinasse.com",
+      "name": "Spinasse",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "Italian",
+      "source": "seed"
+    },
+    {
+      "url": "https://mamnoonrestaurant.com",
+      "name": "Mamnoon",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "Middle Eastern",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thewalrusbar.com",
+      "name": "The Walrus and the Carpenter",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "Seafood",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.copineseattle.com",
+      "name": "Copine",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.archipelago-seattle.com",
+      "name": "Archipelago",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "Filipino",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.restaurantbateau.com",
+      "name": "Bateau",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kamoneg.com",
+      "name": "Kamoneg",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "Filipino",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.salarerestaurant.com",
+      "name": "Salare",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bruceyleegarden.com",
+      "name": "Ma'ono",
+      "city": "Seattle",
+      "state": "WA",
+      "cuisine": "Hawaiian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.piesandpints.net",
+      "name": "Pies & Pints",
+      "city": "Charleston",
+      "state": "WV",
+      "cuisine": "Pizza",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.blacksheepwv.com",
+      "name": "Black Sheep Burrito",
+      "city": "Huntington",
+      "state": "WV",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bridgeroadbistro.com",
+      "name": "Bridge Road Bistro",
+      "city": "Charleston",
+      "state": "WV",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.secretsandwhispers.com",
+      "name": "Dish",
+      "city": "Charleston",
+      "state": "WV",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hillsbendcafe.com",
+      "name": "Hills Bend Cafe",
+      "city": "Hillsboro",
+      "state": "WV",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thechophouse-wv.com",
+      "name": "Chop House",
+      "city": "Charleston",
+      "state": "WV",
+      "cuisine": "Steak",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lacarettawv.com",
+      "name": "La Carreta",
+      "city": "Charleston",
+      "state": "WV",
+      "cuisine": "Mexican",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thebluelanerestaurant.com",
+      "name": "The Market",
+      "city": "Lewisburg",
+      "state": "WV",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.southernwvgrille.com",
+      "name": "Blossom Dairy & Soda Fountain",
+      "city": "Renick",
+      "state": "WV",
+      "cuisine": "Diner",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thedogwoodcatering.com",
+      "name": "Dogwood Catering",
+      "city": "Morgantown",
+      "state": "WV",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sanfordrestaurant.com",
+      "name": "Sanford",
+      "city": "Milwaukee",
+      "state": "WI",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.theoldfashioned.com",
+      "name": "The Old Fashioned",
+      "city": "Madison",
+      "state": "WI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.braiselocalfood.com",
+      "name": "Braise",
+      "city": "Milwaukee",
+      "state": "WI",
+      "cuisine": "Farm to Table",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.letoile-restaurant.com",
+      "name": "L'Etoile",
+      "city": "Madison",
+      "state": "WI",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.strangetownmke.com",
+      "name": "Strange Town",
+      "city": "Milwaukee",
+      "state": "WI",
+      "cuisine": "Asian",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lakeparkbistro.com",
+      "name": "Lake Park Bistro",
+      "city": "Milwaukee",
+      "state": "WI",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.heritage-tavern.com",
+      "name": "Heritage Tavern",
+      "city": "Madison",
+      "state": "WI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ardent-mke.com",
+      "name": "Ardent",
+      "city": "Milwaukee",
+      "state": "WI",
+      "cuisine": "Fine Dining",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.graze-madison.com",
+      "name": "Graze",
+      "city": "Madison",
+      "state": "WI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.olderalleys.com",
+      "name": "Old Fashioned Tavern",
+      "city": "Madison",
+      "state": "WI",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.snakerivergrill.com",
+      "name": "Snake River Grill",
+      "city": "Jackson",
+      "state": "WY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.localjh.com",
+      "name": "Local Restaurant & Bar",
+      "city": "Jackson",
+      "state": "WY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.norasfishcreekinn.com",
+      "name": "Nora's Fish Creek Inn",
+      "city": "Wilson",
+      "state": "WY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.risenshine.com",
+      "name": "Rendezvous Bistro",
+      "city": "Jackson",
+      "state": "WY",
+      "cuisine": "French",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thekitchenjh.com",
+      "name": "The Kitchen",
+      "city": "Jackson",
+      "state": "WY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bluebirdcafelogancreek.com",
+      "name": "Blue Lion",
+      "city": "Jackson",
+      "state": "WY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dornans.com",
+      "name": "Dornan's",
+      "city": "Moose",
+      "state": "WY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.persephone-bakery.com",
+      "name": "Persephone Bakery",
+      "city": "Jackson",
+      "state": "WY",
+      "cuisine": "Bakery",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.milvalinejackson.com",
+      "name": "Trio Bistro",
+      "city": "Jackson",
+      "state": "WY",
+      "cuisine": "American",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.snakeriver-brewing.com",
+      "name": "Snake River Brewing",
+      "city": "Jackson",
+      "state": "WY",
+      "cuisine": "Brewery",
+      "source": "seed"
+    }
+  ],
+  "non_restaurants": [
+    {
+      "url": "https://www.salesforce.com",
+      "name": "Salesforce",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hubspot.com",
+      "name": "HubSpot",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.atlassian.com",
+      "name": "Atlassian",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://slack.com",
+      "name": "Slack",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.datadoghq.com",
+      "name": "Datadog",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.servicenow.com",
+      "name": "ServiceNow",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zendesk.com",
+      "name": "Zendesk",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.box.com",
+      "name": "Box",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dropbox.com",
+      "name": "Dropbox",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://asana.com",
+      "name": "Asana",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.shopify.com",
+      "name": "Shopify",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.notion.so",
+      "name": "Notion",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://monday.com",
+      "name": "Monday.com",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.airtable.com",
+      "name": "Airtable",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.figma.com",
+      "name": "Figma",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.canva.com",
+      "name": "Canva",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.intercom.com",
+      "name": "Intercom",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://segment.com",
+      "name": "Segment",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.amplitude.com",
+      "name": "Amplitude",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mixpanel.com",
+      "name": "Mixpanel",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://stripe.com",
+      "name": "Stripe",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://squareup.com",
+      "name": "Square",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://plaid.com",
+      "name": "Plaid",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.brex.com",
+      "name": "Brex",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gusto.com",
+      "name": "Gusto",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rippling.com",
+      "name": "Rippling",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://lattice.com",
+      "name": "Lattice",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.greenhouse.com",
+      "name": "Greenhouse",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lever.co",
+      "name": "Lever",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.twilio.com",
+      "name": "Twilio",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sendgrid.com",
+      "name": "SendGrid",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mailchimp.com",
+      "name": "Mailchimp",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.typeform.com",
+      "name": "Typeform",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.surveymonkey.com",
+      "name": "SurveyMonkey",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.calendly.com",
+      "name": "Calendly",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zoom.us",
+      "name": "Zoom",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.webex.com",
+      "name": "Webex",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.docusign.com",
+      "name": "DocuSign",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pandadoc.com",
+      "name": "PandaDoc",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.freshworks.com",
+      "name": "Freshworks",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.okta.com",
+      "name": "Okta",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.auth0.com",
+      "name": "Auth0",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cloudflare.com",
+      "name": "Cloudflare",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fastly.com",
+      "name": "Fastly",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://vercel.com",
+      "name": "Vercel",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.netlify.com",
+      "name": "Netlify",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mongodb.com",
+      "name": "MongoDB",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.snowflake.com",
+      "name": "Snowflake",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.databricks.com",
+      "name": "Databricks",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.confluent.io",
+      "name": "Confluent",
+      "category": "saas",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.skadden.com",
+      "name": "Skadden",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lw.com",
+      "name": "Latham & Watkins",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kirkland.com",
+      "name": "Kirkland & Ellis",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dlapiper.com",
+      "name": "DLA Piper",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gibsondunn.com",
+      "name": "Gibson Dunn",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bakerlaw.com",
+      "name": "BakerHostetler",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.perkinscoie.com",
+      "name": "Perkins Coie",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cooley.com",
+      "name": "Cooley",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.quinnemanuel.com",
+      "name": "Quinn Emanuel",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mintz.com",
+      "name": "Mintz",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.jonesday.com",
+      "name": "Jones Day",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sullcrom.com",
+      "name": "Sullivan & Cromwell",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.davispolk.com",
+      "name": "Davis Polk",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.clearygottlieb.com",
+      "name": "Cleary Gottlieb",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.stblaw.com",
+      "name": "Simpson Thacher",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cravath.com",
+      "name": "Cravath",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.willkie.com",
+      "name": "Willkie Farr",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.milbank.com",
+      "name": "Milbank",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.paulweiss.com",
+      "name": "Paul Weiss",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.weil.com",
+      "name": "Weil Gotshal",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.whitecase.com",
+      "name": "White & Case",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sidley.com",
+      "name": "Sidley Austin",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.morganlewis.com",
+      "name": "Morgan Lewis",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dentons.com",
+      "name": "Dentons",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bakermckenzie.com",
+      "name": "Baker McKenzie",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hoganlovells.com",
+      "name": "Hogan Lovells",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nortonrosefulbright.com",
+      "name": "Norton Rose Fulbright",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.reedsmith.com",
+      "name": "Reed Smith",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.alston.com",
+      "name": "Alston & Bird",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.arnoldporter.com",
+      "name": "Arnold & Porter",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.foley.com",
+      "name": "Foley & Lardner",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.goodwinlaw.com",
+      "name": "Goodwin",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.huntonak.com",
+      "name": "Hunton Andrews Kurth",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kattenlaw.com",
+      "name": "Katten",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kslaw.com",
+      "name": "King & Spalding",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lockelord.com",
+      "name": "Locke Lord",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mayerbrown.com",
+      "name": "Mayer Brown",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mcguirewoods.com",
+      "name": "McGuireWoods",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ogletree.com",
+      "name": "Ogletree Deakins",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.orrick.com",
+      "name": "Orrick",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.polsinelli.com",
+      "name": "Polsinelli",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.seyfarth.com",
+      "name": "Seyfarth",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.shearman.com",
+      "name": "Shearman & Sterling",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.troutman.com",
+      "name": "Troutman Pepper",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.venable.com",
+      "name": "Venable",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.wsgr.com",
+      "name": "Wilson Sonsini",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.winston.com",
+      "name": "Winston & Strawn",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nixonpeabody.com",
+      "name": "Nixon Peabody",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dechert.com",
+      "name": "Dechert",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.proskauer.com",
+      "name": "Proskauer Rose",
+      "category": "law_firm",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.aspendental.com",
+      "name": "Aspen Dental",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.1800dentist.com",
+      "name": "1-800-Dentist",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.smiledirectclub.com",
+      "name": "SmileDirectClub",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.deltadentalins.com",
+      "name": "Delta Dental",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mayoclinic.org",
+      "name": "Mayo Clinic",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://my.clevelandclinic.org",
+      "name": "Cleveland Clinic",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hopkinsmedicine.org",
+      "name": "Johns Hopkins Medicine",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.massgeneral.org",
+      "name": "Massachusetts General Hospital",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://nyulangone.org",
+      "name": "NYU Langone",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ucsfhealth.org",
+      "name": "UCSF Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://stanfordhealthcare.org",
+      "name": "Stanford Health Care",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pennmedicine.org",
+      "name": "Penn Medicine",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cedars-sinai.org",
+      "name": "Cedars-Sinai",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mountsinai.org",
+      "name": "Mount Sinai",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nm.org",
+      "name": "Northwestern Medicine",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rush.edu",
+      "name": "Rush University Medical Center",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.scripps.org",
+      "name": "Scripps Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.geisinger.org",
+      "name": "Geisinger",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://intermountainhealthcare.org",
+      "name": "Intermountain Healthcare",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ochsner.org",
+      "name": "Ochsner Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.beaumont.org",
+      "name": "Beaumont Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.baptisthealth.com",
+      "name": "Baptist Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sharp.com",
+      "name": "Sharp HealthCare",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.henryford.com",
+      "name": "Henry Ford Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.inova.org",
+      "name": "Inova Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pacificdentalservices.com",
+      "name": "Pacific Dental Services",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.heartlanddentalcare.com",
+      "name": "Heartland Dental",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.affordabledentures.com",
+      "name": "Affordable Dentures",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gentledental.com",
+      "name": "Gentle Dental",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.britedentalgroup.com",
+      "name": "Brite Dental",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.westerndentalservices.com",
+      "name": "Western Dental",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dentalworks.com",
+      "name": "DentalWorks",
+      "category": "dental",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zocdoc.com",
+      "name": "Zocdoc",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.teladoc.com",
+      "name": "Teladoc",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.onemedical.com",
+      "name": "One Medical",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.carbonhealth.com",
+      "name": "Carbon Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.citymd.com",
+      "name": "CityMD",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mdvip.com",
+      "name": "MDVIP",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.aetna.com",
+      "name": "Aetna",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cigna.com",
+      "name": "Cigna",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.humana.com",
+      "name": "Humana",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.anthem.com",
+      "name": "Anthem",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bswhealth.com",
+      "name": "Baylor Scott & White",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.providence.org",
+      "name": "Providence Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hackensackmeridianhealth.org",
+      "name": "Hackensack Meridian",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.atriushealth.org",
+      "name": "Atrius Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.iha.org",
+      "name": "IHA",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.osf-healthcare.org",
+      "name": "OSF HealthCare",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.christushealth.org",
+      "name": "CHRISTUS Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.advocateaurorahealth.org",
+      "name": "Advocate Aurora Health",
+      "category": "medical_clinic",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.patagonia.com",
+      "name": "Patagonia",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rei.com",
+      "name": "REI",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.warbyparker.com",
+      "name": "Warby Parker",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.everlane.com",
+      "name": "Everlane",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.allbirds.com",
+      "name": "Allbirds",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://bombas.com",
+      "name": "Bombas",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cotopaxi.com",
+      "name": "Cotopaxi",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.brooklinen.com",
+      "name": "Brooklinen",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.awaytravel.com",
+      "name": "Away",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://casper.com",
+      "name": "Casper",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.glossier.com",
+      "name": "Glossier",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.outdoorvoices.com",
+      "name": "Outdoor Voices",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://bonobos.com",
+      "name": "Bonobos",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.renttherunway.com",
+      "name": "Rent the Runway",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.stitchfix.com",
+      "name": "Stitch Fix",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dollarshaveclub.com",
+      "name": "Dollar Shave Club",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.harrys.com",
+      "name": "Harry's",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nativecos.com",
+      "name": "Native",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.westelm.com",
+      "name": "West Elm",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cb2.com",
+      "name": "CB2",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.anthropologie.com",
+      "name": "Anthropologie",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.freepeople.com",
+      "name": "Free People",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lululemon.com",
+      "name": "Lululemon",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nordstrom.com",
+      "name": "Nordstrom",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sephora.com",
+      "name": "Sephora",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ulta.com",
+      "name": "Ulta",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.williams-sonoma.com",
+      "name": "Williams-Sonoma",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.potterybarn.com",
+      "name": "Pottery Barn",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.crateandbarrel.com",
+      "name": "Crate & Barrel",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.wayfair.com",
+      "name": "Wayfair",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.overstock.com",
+      "name": "Overstock",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.etsy.com",
+      "name": "Etsy",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.chewy.com",
+      "name": "Chewy",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zappos.com",
+      "name": "Zappos",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nike.com",
+      "name": "Nike",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.adidas.com",
+      "name": "Adidas",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.underarmour.com",
+      "name": "Under Armour",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gap.com",
+      "name": "Gap",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hm.com",
+      "name": "H&M",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zara.com",
+      "name": "Zara",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.uniqlo.com",
+      "name": "Uniqlo",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.asos.com",
+      "name": "ASOS",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fashionnova.com",
+      "name": "Fashion Nova",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.revolve.com",
+      "name": "Revolve",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.urbanoutfitters.com",
+      "name": "Urban Outfitters",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.macys.com",
+      "name": "Macy's",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bloomingdales.com",
+      "name": "Bloomingdale's",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.neimanmarcus.com",
+      "name": "Neiman Marcus",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.saksfifthavenue.com",
+      "name": "Saks Fifth Avenue",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.barneys.com",
+      "name": "Barney's",
+      "category": "retail",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.planetfitness.com",
+      "name": "Planet Fitness",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.orangetheory.com",
+      "name": "Orangetheory",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.equinox.com",
+      "name": "Equinox",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lifetime.life",
+      "name": "Life Time",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.crunch.com",
+      "name": "Crunch Fitness",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://f45training.com",
+      "name": "F45 Training",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.purebarre.com",
+      "name": "Pure Barre",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.barrys.com",
+      "name": "Barry's",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.clubpilates.com",
+      "name": "Club Pilates",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.solidcore.co",
+      "name": "Solidcore",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.crossfit.com",
+      "name": "CrossFit",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.soulcycle.com",
+      "name": "SoulCycle",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.corepoweryoga.com",
+      "name": "CorePower Yoga",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.anytimefitness.com",
+      "name": "Anytime Fitness",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.goldsgym.com",
+      "name": "Gold's Gym",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lafitness.com",
+      "name": "LA Fitness",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ymca.org",
+      "name": "YMCA",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.snap-fitness.com",
+      "name": "Snap Fitness",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.blinkfitness.com",
+      "name": "Blink Fitness",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.title-boxing.com",
+      "name": "TITLE Boxing Club",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rowhousefit.com",
+      "name": "Row House",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cyclebar.com",
+      "name": "CycleBar",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.stretchlab.com",
+      "name": "StretchLab",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.akt.com",
+      "name": "AKT",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.burnbootcamp.com",
+      "name": "Burn Boot Camp",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.9round.com",
+      "name": "9Round",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rumble-boxing.com",
+      "name": "Rumble Boxing",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.peloton.com",
+      "name": "Peloton",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.toneitup.com",
+      "name": "Tone It Up",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.beachbodyondemand.com",
+      "name": "Beachbody",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.claspass.com",
+      "name": "ClassPass",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mindbodyonline.com",
+      "name": "Mindbody",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.wellnessliving.com",
+      "name": "WellnessLiving",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.glofox.com",
+      "name": "Glofox",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.wodify.com",
+      "name": "Wodify",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zenplanner.com",
+      "name": "Zen Planner",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.virtuagym.com",
+      "name": "Virtuagym",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gymshark.com",
+      "name": "Gymshark",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tonal.com",
+      "name": "Tonal",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mirrorfit.com",
+      "name": "Mirror",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hydrow.com",
+      "name": "Hydrow",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nordictrack.com",
+      "name": "NordicTrack",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bowflex.com",
+      "name": "Bowflex",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.concept2.com",
+      "name": "Concept2",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fitbit.com",
+      "name": "Fitbit",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.garmin.com",
+      "name": "Garmin",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.whoop.com",
+      "name": "WHOOP",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oura.com",
+      "name": "Oura",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.myfitnesspal.com",
+      "name": "MyFitnessPal",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.noom.com",
+      "name": "Noom",
+      "category": "gym",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zillow.com",
+      "name": "Zillow",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.redfin.com",
+      "name": "Redfin",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.compass.com",
+      "name": "Compass",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kw.com",
+      "name": "Keller Williams",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.remax.com",
+      "name": "RE/MAX",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.century21.com",
+      "name": "Century 21",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.coldwellbanker.com",
+      "name": "Coldwell Banker",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sothebysrealty.com",
+      "name": "Sotheby's Realty",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.exprealty.com",
+      "name": "eXp Realty",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.realtor.com",
+      "name": "Realtor.com",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.trulia.com",
+      "name": "Trulia",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.apartments.com",
+      "name": "Apartments.com",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rent.com",
+      "name": "Rent.com",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hotpads.com",
+      "name": "HotPads",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.opendoor.com",
+      "name": "Opendoor",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.offerpad.com",
+      "name": "Offerpad",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.homelight.com",
+      "name": "HomeLight",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.movoto.com",
+      "name": "Movoto",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.homes.com",
+      "name": "Homes.com",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bhgre.com",
+      "name": "Better Homes RE",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.weichert.com",
+      "name": "Weichert",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.longandfoster.com",
+      "name": "Long & Foster",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.howardhanna.com",
+      "name": "Howard Hanna",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.alainpinel.com",
+      "name": "Alain Pinel",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.windermere.com",
+      "name": "Windermere",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.corcoran.com",
+      "name": "Corcoran",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.elliman.com",
+      "name": "Douglas Elliman",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.halstead.com",
+      "name": "Halstead",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.brownharris.com",
+      "name": "Brown Harris Stevens",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.stribling.com",
+      "name": "Stribling",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rfrnyc.com",
+      "name": "RFR Realty",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.brookfieldproperties.com",
+      "name": "Brookfield Properties",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hines.com",
+      "name": "Hines",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.prologis.com",
+      "name": "Prologis",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bostonproperties.com",
+      "name": "Boston Properties",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.slgreen.com",
+      "name": "SL Green",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vornado.com",
+      "name": "Vornado",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mfrp.com",
+      "name": "Mack Real Estate",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tishmanrealty.com",
+      "name": "Tishman Realty",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.simon.com",
+      "name": "Simon Property Group",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kimcorealty.com",
+      "name": "Kimco Realty",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.regencycenters.com",
+      "name": "Regency Centers",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.federalrealty.com",
+      "name": "Federal Realty",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.weingarten.com",
+      "name": "Weingarten Realty",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rpai.com",
+      "name": "RPT Realty",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.invenio-re.com",
+      "name": "Invenio Realty",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cbre.com",
+      "name": "CBRE",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.jll.com",
+      "name": "JLL",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cushmanwakefield.com",
+      "name": "Cushman & Wakefield",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.marcusmillichap.com",
+      "name": "Marcus & Millichap",
+      "category": "real_estate",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.deloitte.com",
+      "name": "Deloitte",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pwc.com",
+      "name": "PwC",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ey.com",
+      "name": "Ernst & Young",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://kpmg.com",
+      "name": "KPMG",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bdo.com",
+      "name": "BDO",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.grantthornton.com",
+      "name": "Grant Thornton",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://rsmus.com",
+      "name": "RSM",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.crowe.com",
+      "name": "Crowe",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bakertilly.com",
+      "name": "Baker Tilly",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.claconnect.com",
+      "name": "CliftonLarsonAllen",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.plantemoran.com",
+      "name": "Plante Moran",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mossadams.com",
+      "name": "Moss Adams",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cbh.com",
+      "name": "Cherry Bekaert",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.marcumllp.com",
+      "name": "Marcum",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cohnreznick.com",
+      "name": "CohnReznick",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.eisneramper.com",
+      "name": "Eisner Amper",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.frazierdeeter.com",
+      "name": "Frazier & Deeter",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.forvis.com",
+      "name": "Forvis",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.wipfli.com",
+      "name": "Wipfli",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.weaver.com",
+      "name": "Weaver",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.intuit.com",
+      "name": "Intuit",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hrblock.com",
+      "name": "H&R Block",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.jacksonhewitt.com",
+      "name": "Jackson Hewitt",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.libertytax.com",
+      "name": "Liberty Tax",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.turbotax.com",
+      "name": "TurboTax",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nerdwallet.com",
+      "name": "NerdWallet",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.legalzoom.com",
+      "name": "LegalZoom",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.quickbooks.com",
+      "name": "QuickBooks",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.freshbooks.com",
+      "name": "FreshBooks",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.xero.com",
+      "name": "Xero",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sage.com",
+      "name": "Sage",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.waveapps.com",
+      "name": "Wave",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bench.co",
+      "name": "Bench",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pilot.com",
+      "name": "Pilot",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.scalefactor.com",
+      "name": "ScaleFactor",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.botkeeper.com",
+      "name": "Botkeeper",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.finally.com",
+      "name": "Finally",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.merrill.com",
+      "name": "Merrill Lynch",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.schwab.com",
+      "name": "Charles Schwab",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fidelity.com",
+      "name": "Fidelity",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vanguard.com",
+      "name": "Vanguard",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tdameritrade.com",
+      "name": "TD Ameritrade",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.etrade.com",
+      "name": "E-Trade",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.robinhood.com",
+      "name": "Robinhood",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.wealthfront.com",
+      "name": "Wealthfront",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.betterment.com",
+      "name": "Betterment",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.personalcapital.com",
+      "name": "Personal Capital",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sofi.com",
+      "name": "SoFi",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.marcus.com",
+      "name": "Marcus by Goldman",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ally.com",
+      "name": "Ally Financial",
+      "category": "accounting",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.jiffylube.com",
+      "name": "Jiffy Lube",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.midas.com",
+      "name": "Midas",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.firestonecompleteautocare.com",
+      "name": "Firestone",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.meineke.com",
+      "name": "Meineke",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.aamco.com",
+      "name": "AAMCO",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.maaco.com",
+      "name": "Maaco",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.pepboys.com",
+      "name": "Pep Boys",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.valvoline.com",
+      "name": "Valvoline",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ntb.com",
+      "name": "NTB",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.calibercollision.com",
+      "name": "Caliber Collision",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.serviceking.com",
+      "name": "Service King",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.gerberautocollision.com",
+      "name": "Gerber Collision",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.takeaturn.com",
+      "name": "Take 5 Oil Change",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.expressionsoil.com",
+      "name": "Express Oil Change",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.grease-monkey.com",
+      "name": "Grease Monkey",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bigotiresusa.com",
+      "name": "Big O Tires",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tiresplus.com",
+      "name": "Tires Plus",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.discounttire.com",
+      "name": "Discount Tire",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.goodyearautoservice.com",
+      "name": "Goodyear Auto Service",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bfracing.com",
+      "name": "BFGoodrich",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.autozone.com",
+      "name": "AutoZone",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oreillyauto.com",
+      "name": "O'Reilly Auto",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.advanceautoparts.com",
+      "name": "Advance Auto Parts",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.napaonline.com",
+      "name": "NAPA",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rockauto.com",
+      "name": "RockAuto",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.carmax.com",
+      "name": "CarMax",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.carvana.com",
+      "name": "Carvana",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vroom.com",
+      "name": "Vroom",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.truecar.com",
+      "name": "TrueCar",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.edmunds.com",
+      "name": "Edmunds",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kbb.com",
+      "name": "Kelley Blue Book",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.carfax.com",
+      "name": "Carfax",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cargurus.com",
+      "name": "CarGurus",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cars.com",
+      "name": "Cars.com",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.autotrader.com",
+      "name": "AutoTrader",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hertz.com",
+      "name": "Hertz",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.enterprise.com",
+      "name": "Enterprise",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.avis.com",
+      "name": "Avis",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.budget.com",
+      "name": "Budget",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.turo.com",
+      "name": "Turo",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sixt.com",
+      "name": "Sixt",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.getaround.com",
+      "name": "Getaround",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.zipcar.com",
+      "name": "Zipcar",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.geico.com",
+      "name": "GEICO",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.progressive.com",
+      "name": "Progressive",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.statefarm.com",
+      "name": "State Farm",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.allstate.com",
+      "name": "Allstate",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.libertymutual.com",
+      "name": "Liberty Mutual",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.farmers.com",
+      "name": "Farmers Insurance",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.usaa.com",
+      "name": "USAA",
+      "category": "auto_repair",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.marriott.com",
+      "name": "Marriott",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hilton.com",
+      "name": "Hilton",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ihg.com",
+      "name": "IHG Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hyatt.com",
+      "name": "Hyatt",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.wyndhamhotels.com",
+      "name": "Wyndham",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.choicehotels.com",
+      "name": "Choice Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.bestwestern.com",
+      "name": "Best Western",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.radissonhotels.com",
+      "name": "Radisson",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.accor.com",
+      "name": "Accor",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fourseasons.com",
+      "name": "Four Seasons",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ritzcarlton.com",
+      "name": "The Ritz-Carlton",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.starwoodhotels.com",
+      "name": "Starwood",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rosewoodhotels.com",
+      "name": "Rosewood",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mandarinoriental.com",
+      "name": "Mandarin Oriental",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.peninsula.com",
+      "name": "The Peninsula",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tajhotels.com",
+      "name": "Taj Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.fairmont.com",
+      "name": "Fairmont",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.shangri-la.com",
+      "name": "Shangri-La",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.aman.com",
+      "name": "Aman Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sixsenses.com",
+      "name": "Six Senses",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oneandonlyresorts.com",
+      "name": "One&Only",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.belmond.com",
+      "name": "Belmond",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oetkerhotelcollection.com",
+      "name": "Oetker Collection",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.dorchestercollection.com",
+      "name": "Dorchester Collection",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.roccofortehotels.com",
+      "name": "Rocco Forte",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.airbnb.com",
+      "name": "Airbnb",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vrbo.com",
+      "name": "VRBO",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.booking.com",
+      "name": "Booking.com",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.expedia.com",
+      "name": "Expedia",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hotels.com",
+      "name": "Hotels.com",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.trivago.com",
+      "name": "Trivago",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kayak.com",
+      "name": "Kayak",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.priceline.com",
+      "name": "Priceline",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.hotwire.com",
+      "name": "Hotwire",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.orbitz.com",
+      "name": "Orbitz",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.travelocity.com",
+      "name": "Travelocity",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tripadvisor.com",
+      "name": "TripAdvisor",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oyster.com",
+      "name": "Oyster Hotel Reviews",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tablethotels.com",
+      "name": "Tablet Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mrandmrssmith.com",
+      "name": "Mr & Mrs Smith",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.designhotels.com",
+      "name": "Design Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.slh.com",
+      "name": "Small Luxury Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lhw.com",
+      "name": "Leading Hotels of the World",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.preferredhotels.com",
+      "name": "Preferred Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kimptonhotels.com",
+      "name": "Kimpton Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.acehotel.com",
+      "name": "Ace Hotel",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.1hotels.com",
+      "name": "1 Hotel",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thestandard.com",
+      "name": "The Standard",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thompsonhotels.com",
+      "name": "Thompson Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.editionhotels.com",
+      "name": "Edition Hotels",
+      "category": "hotel",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.angi.com",
+      "name": "Angi",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.thumbtack.com",
+      "name": "Thumbtack",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.taskrabbit.com",
+      "name": "TaskRabbit",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.houzz.com",
+      "name": "Houzz",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.homeadvisor.com",
+      "name": "HomeAdvisor",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lowes.com",
+      "name": "Lowe's",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.homedepot.com",
+      "name": "Home Depot",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.menards.com",
+      "name": "Menards",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.stanleysteemer.com",
+      "name": "Stanley Steemer",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.servpro.com",
+      "name": "Servpro",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.servicemaster.com",
+      "name": "ServiceMaster",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.molly-maid.com",
+      "name": "Molly Maid",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.merrymaids.com",
+      "name": "Merry Maids",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.handymanconnection.com",
+      "name": "Handyman Connection",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.mrrooter.com",
+      "name": "Mr. Rooter",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rotorooter.com",
+      "name": "Roto-Rooter",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ahs.com",
+      "name": "American Home Shield",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.firstam.com",
+      "name": "First American",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.onehomedirect.com",
+      "name": "One Guard",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vivint.com",
+      "name": "Vivint",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.adt.com",
+      "name": "ADT",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.simplisafe.com",
+      "name": "SimpliSafe",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://ring.com",
+      "name": "Ring",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.nest.com",
+      "name": "Google Nest",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ecobee.com",
+      "name": "Ecobee",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.honeywell.com",
+      "name": "Honeywell",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.lennox.com",
+      "name": "Lennox",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.trane.com",
+      "name": "Trane",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.carrier.com",
+      "name": "Carrier",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.rheem.com",
+      "name": "Rheem",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.kohler.com",
+      "name": "Kohler",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.moen.com",
+      "name": "Moen",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.delta-faucet.com",
+      "name": "Delta Faucet",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.americanstandard.com",
+      "name": "American Standard",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sherwin-williams.com",
+      "name": "Sherwin-Williams",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.benjaminmoore.com",
+      "name": "Benjamin Moore",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.behr.com",
+      "name": "Behr",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ppg.com",
+      "name": "PPG Paints",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.adobe.com",
+      "name": "Adobe",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.microsoft.com",
+      "name": "Microsoft",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.google.com",
+      "name": "Google",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.amazon.com",
+      "name": "Amazon",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.apple.com",
+      "name": "Apple",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.tesla.com",
+      "name": "Tesla",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.spacex.com",
+      "name": "SpaceX",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.ibm.com",
+      "name": "IBM",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.oracle.com",
+      "name": "Oracle",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.sap.com",
+      "name": "SAP",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.cisco.com",
+      "name": "Cisco",
+      "category": "home_services",
+      "source": "seed"
+    },
+    {
+      "url": "https://www.vmware.com",
+      "name": "VMware",
+      "category": "home_services",
+      "source": "seed"
+    }
+  ],
+  "metadata": {
+    "total_restaurants": 510,
+    "total_non_restaurants": 500,
+    "built_at": "2026-05-18T15:46:46.151Z"
+  }
+}

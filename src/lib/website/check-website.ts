@@ -48,8 +48,11 @@ export async function checkWebsite(normalizedUrl: string): Promise<CheckWebsiteR
       redirectChain.push(finalUrl);
     }
 
-    // Only read body for responses that might have HTML
-    if (httpStatus < 400 || httpStatus === 404) {
+    const contentType = (response.headers.get('content-type') ?? '').toLowerCase();
+
+    // Read HTML bodies even on protected/error responses. Cloudflare and other
+    // bot mitigations often return 403 with a useful challenge page.
+    if (httpStatus < 400 || httpStatus === 404 || contentType.includes('text/html')) {
       try {
         html = await response.text();
       } catch {

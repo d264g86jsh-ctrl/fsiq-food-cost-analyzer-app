@@ -174,7 +174,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   }
 
   // ── Step 6: Signal scoring ────────────────────────────────────────────────
-  const scores = signals
+  let scores = signals
     ? computeRestaurantScores(signals, domain)
     : { restaurantSignalScore: 0, negativeSignalScore: 0 };
 
@@ -205,6 +205,23 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
         "This website doesn't appear to match a restaurant or foodservice operation. If this is incorrect, you can still submit and our team will review it.",
       manualReviewRequired: true,
     });
+  }
+
+  const contextualScore = computeProtectedRestaurantContextScore({
+    restaurantName,
+    domain,
+    reachabilityStatus: fetchResult.reachability.status,
+    relationshipScore: relationship.websiteRelationshipScore,
+    scores,
+    signals,
+    nationalChainScore,
+  });
+  if (contextualScore) {
+    scores = {
+      ...scores,
+      restaurantSignalScore: Math.max(scores.restaurantSignalScore, contextualScore.restaurantSignalScore),
+    };
+    internalFlags.push(contextualScore.flag);
   }
 
   // ── Step 7: Country eligibility ───────────────────────────────────────────
@@ -333,6 +350,68 @@ function applyDecisionRules(options: {
   }
   return null;
 }
+
+function computeProtectedRestaurantContextScore(options: {
+  restaurantName: string;
+  domain: string;
+  reachabilityStatus: string;
+  relationshipScore: number;
+  scores: { restaurantSignalScore: number; negativeSignalScore: number };
+  signals: ExtractSignalsResult | null;
+  nationalChainScore: number;
+}): { restaurantSignalScore: number; flag: string } | null {
+  const {
+    restaurantName,
+    domain,
+    reachabilityStatus,
+    relationshipScore,
+    scores,
+    signals,
+    nationalChainScore,
+  } = options;
+
+  const isProtectedOrThin =
+    reachabilityStatus === 'blocked' ||
+    reachabilityStatus === 'thin' ||
+    (signals?.hasBotProtection ?? false);
+
+  if (!isProtectedOrThin) return null;
+  if (scores.negativeSignalScore >= 40 || nationalChainScore >= 50) return null;
+  if (relationshipScore < 50) return null;
+
+  const context = `${restaurantName} ${domain}`.toLowerCase();
+  if (NON_RESTAURANT_CONTEXT_TERMS.some((term) => context.includes(term))) return null;
+
+  const hasRestaurantContext = RESTAURANT_CONTEXT_TERMS.some((term) => context.includes(term));
+  const hasPageRestaurantHint =
+    signals?.hasRestaurantSchema ||
+    signals?.hasAgeGate ||
+    signals?.navLinkTexts.some((text) => RESTAURANT_NAV_HINTS.some((hint) => text.includes(hint)));
+
+  if (!hasRestaurantContext && !hasPageRestaurantHint) return null;
+
+  return {
+    restaurantSignalScore: 60,
+    flag: 'protected_or_thin_restaurant_context',
+  };
+}
+
+const RESTAURANT_CONTEXT_TERMS = [
+  'restaurant', 'food', 'foods', 'dining', 'diner', 'eatery', 'eats',
+  'kitchen', 'cafe', 'coffee', 'bakery', 'bistro', 'bar', 'pub', 'tavern',
+  'grill', 'bbq', 'barbecue', 'pizza', 'pizzeria', 'taco', 'taqueria',
+  'sushi', 'ramen', 'seafood', 'steakhouse', 'smokehouse', 'catering',
+  'cuisine', 'cantina', 'brasserie', 'trattoria', 'chophouse', 'brewery',
+];
+
+const RESTAURANT_NAV_HINTS = ['menu', 'order', 'reservation', 'catering', 'private dining'];
+
+const NON_RESTAURANT_CONTEXT_TERMS = [
+  'software', 'platform', 'saas', 'pos', 'pointofsale', 'demo', 'supplier',
+  'supplies', 'supply', 'distributor', 'wholesale', 'equipment', 'agency',
+  'consulting', 'logistics', 'manufacturer', 'packaging', 'remodeling',
+  'catering company',
+];
 
 function shouldFlagManualReview(
   reachabilityStatus: string,

@@ -70,6 +70,16 @@ const SAAS_HTML = `
 </html>
 `;
 
+const CLOUDFLARE_CHALLENGE_HTML = `
+<html>
+<head><title>Just a moment...</title></head>
+<body>
+  <div>Enable JavaScript and cookies to continue</div>
+  <script>window._cf_chl_opt = { cType: 'managed' }</script>
+</body>
+</html>
+`;
+
 const baseInput = {
   restaurantName: 'Casa Roberto',
   state: 'TX',
@@ -186,6 +196,35 @@ describe('runValidation — verified_restaurant', () => {
     const r = await runValidation({ ...baseInput, website: 'https://casaroberto.com' });
     expect(r.countryEligibility).toBe('us_verified');
   });
+
+  it('Cloudflare-protected matching restaurant site → verified_restaurant', async () => {
+    mockFetch.mockResolvedValue(makeHtmlResponse(CLOUDFLARE_CHALLENGE_HTML, 403, 'https://spiritscenla.com/'));
+    const r = await runValidation({
+      restaurantName: 'Spirits Food & Friends',
+      website: 'https://spiritscenla.com/',
+      state: 'LA',
+    });
+
+    expect(r.finalDecision).toBe('verified_restaurant');
+    expect(r.httpStatus).toBe(403);
+    expect(r.websiteReachabilityStatus).toBe('blocked');
+    expect(r.restaurantSignalScore).toBe(60);
+    expect(r.internalFlags).toContain('http_403');
+    expect(r.internalFlags).toContain('protected_or_thin_restaurant_context');
+  });
+
+  it('minimal matching restaurant HTML → verified_restaurant', async () => {
+    mockFetch.mockResolvedValue(makeHtmlResponse('<html><head><title>Spirits Food & Friends</title></head><body><nav><a>Menu</a></nav></body></html>', 200, 'https://spiritscenla.com/'));
+    const r = await runValidation({
+      restaurantName: 'Spirits Food & Friends',
+      website: 'https://spiritscenla.com/',
+      state: 'LA',
+    });
+
+    expect(r.finalDecision).toBe('verified_restaurant');
+    expect(r.websiteReachabilityStatus).toBe('thin');
+    expect(r.restaurantSignalScore).toBe(60);
+  });
 });
 
 describe('runValidation — clear_non_fit (vendor/SaaS)', () => {
@@ -201,6 +240,19 @@ describe('runValidation — clear_non_fit (vendor/SaaS)', () => {
     const r = await runValidation({ ...baseInput, website: 'https://foodtechpro.com' });
     expect(r.finalDecision).toBe('clear_non_fit');
     expect(r.negativeSignalScore).toBeGreaterThanOrEqual(60);
+  });
+
+  it('blocked matching non-restaurant context does not get restaurant boost', async () => {
+    mockFetch.mockResolvedValue(makeHtmlResponse(CLOUDFLARE_CHALLENGE_HTML, 403, 'https://foodlogistics.com/'));
+    const r = await runValidation({
+      restaurantName: 'Food Logistics',
+      website: 'https://foodlogistics.com/',
+      state: 'TX',
+    });
+
+    expect(r.finalDecision).not.toBe('verified_restaurant');
+    expect(r.restaurantSignalScore).toBe(0);
+    expect(r.internalFlags).not.toContain('protected_or_thin_restaurant_context');
   });
 });
 

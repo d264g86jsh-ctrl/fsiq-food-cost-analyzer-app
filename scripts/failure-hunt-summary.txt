@@ -1,0 +1,181 @@
+================================================================================
+RESTAURANT VALIDATION FAILURE HUNT — SUMMARY REPORT
+Generated: 2026-05-18T15:45:14.501Z
+Mode: DRY RUN (50 failures max)
+================================================================================
+
+1. TOTALS
+--------------------------------------------------------------------------------
+   URLs collected:        50
+   URLs tested:           50
+   Failures found:        11
+   Passes (discarded):    39
+   Failure rate:          22.0%
+
+2. FAILURE BREAKDOWN BY CATEGORY
+--------------------------------------------------------------------------------
+   low_signal_score                         9  (81.8%)
+   minimal_html                             2  (18.2%)
+
+3. SIGNAL SCORE DISTRIBUTION (failed restaurants)
+--------------------------------------------------------------------------------
+   0-9                                 2  (18.2%) #########
+   10-19                               1  (9.1%) #####
+   30-39                               3  (27.3%) ##############
+   40-49                               3  (27.3%) ##############
+   50-59 (near threshold)              2  (18.2%) #########
+   Threshold for verified_restaurant: restaurantSignalScore >= 60
+
+4. MOST COMMONLY MISSING SIGNALS
+--------------------------------------------------------------------------------
+   restaurant_schema                  11  (100.0% of failures)
+   reservations_nav                   11  (100.0% of failures)
+   order_online_nav                   11  (100.0% of failures)
+   private_dining_nav                 11  (100.0% of failures)
+   happy_hour_text                    11  (100.0% of failures)
+   tasting_menu_text                  11  (100.0% of failures)
+   full_bar_text                      11  (100.0% of failures)
+   yelp_link                          11  (100.0% of failures)
+   doordash_link                      11  (100.0% of failures)
+   ubereats_link                      11  (100.0% of failures)
+   grubhub_link                       11  (100.0% of failures)
+   domain_keyword                     11  (100.0% of failures)
+   age_gate                           11  (100.0% of failures)
+   menu_nav                           10  (90.9% of failures)
+   catering_nav                       10  (90.9% of failures)
+
+5. STATE-BY-STATE FAILURE COUNT
+--------------------------------------------------------------------------------
+   IL         3
+   NY         2
+   CA         2
+   LA         1
+   WA         1
+   OR         1
+   CO         1
+
+6. CUISINE-TYPE FAILURE COUNT
+--------------------------------------------------------------------------------
+   Unknown                       11  (100.0%)
+
+7. TOP 10 FAILURE EXAMPLES (detailed)
+--------------------------------------------------------------------------------
+   [1] Russ & Daughters — https://www.russanddaughters.com/
+       City: New York, NY | Cuisine: 
+       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
+       Scores: restaurant=30 negative=0 chain=0
+       Signals found: dine_in_text, resy_link, phone_number, meta_description, menu_text
+       Category: low_signal_score
+       Reason: restaurantSignalScore 30 below threshold of 60. Found 5 signals: dine_in_text, resy_link, phone_number, meta_description, menu_text. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern
+
+   [2] Via Carota — https://www.viacarota.com/
+       City: New York, NY | Cuisine: 
+       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
+       Scores: restaurant=49 negative=0 chain=0
+       Signals found: resy_link, hours_pattern, og_image, schema_org, meta_description, menu_text, chef_text
+       Category: low_signal_score
+       Reason: restaurantSignalScore 49 below threshold of 60. Found 7 signals: resy_link, hours_pattern, og_image, schema_org, meta_description. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text
+
+   [3] Avec — https://avecchicago.com/
+       City: Chicago, IL | Cuisine: 
+       Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
+       Scores: restaurant=0 negative=0 chain=0
+       Signals found: none
+       Category: low_signal_score
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
+
+   [4] Cassia — https://www.cassiala.com/
+       City: Los Angeles, CA | Cuisine: 
+       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
+       Scores: restaurant=44 negative=0 chain=0
+       Signals found: menu_nav, resy_link, og_image, meta_description, menu_text
+       Category: low_signal_score
+       Reason: restaurantSignalScore 44 below threshold of 60. Found 5 signals: menu_nav, resy_link, og_image, meta_description, menu_text. Missing key signals: restaurant_schema, reservations_nav, cuisine_text, hours_pattern
+
+   [5] Girl & The Goat — https://girlandthegoat.com/
+       City: Chicago, IL | Cuisine: 
+       Decision: plausible_unverified | HTTP: 200 | Reachability: thin
+       Scores: restaurant=16 negative=0 chain=0
+       Signals found: meta_description, chef_text
+       Category: minimal_html
+       Reason: restaurantSignalScore 16 below threshold of 60. Found 2 signals: meta_description, chef_text. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: thin
+
+   [6] Commander's Palace — https://www.commanderspalace.com/
+       City: New Orleans, LA | Cuisine: 
+       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
+       Scores: restaurant=56 negative=0 chain=0
+       Signals found: brunch_text, phone_number, menu_text
+       Category: low_signal_score
+       Reason: restaurantSignalScore 56 below threshold of 60. Found 3 signals: brunch_text, phone_number, menu_text. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern
+
+   [7] Monteverde — https://monteverdechicago.com/
+       City: Chicago, IL | Cuisine: 
+       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
+       Scores: restaurant=55 negative=0 chain=0
+       Signals found: resy_link, hours_pattern, phone_number, schema_org, meta_description, cuisine_text, menu_text, chef_text
+       Category: low_signal_score
+       Reason: restaurantSignalScore 55 below threshold of 60. Found 8 signals: resy_link, hours_pattern, phone_number, schema_org, meta_description. Missing key signals: restaurant_schema, menu_nav, reservations_nav
+
+   [8] Mamnoon — https://mamnoonrestaurant.com/
+       City: Seattle, WA | Cuisine: 
+       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
+       Scores: restaurant=42 negative=0 chain=0
+       Signals found: catering_nav, outdoor_seating_text, og_image, meta_description, chef_text
+       Category: low_signal_score
+       Reason: restaurantSignalScore 42 below threshold of 60. Found 5 signals: catering_nav, outdoor_seating_text, og_image, meta_description, chef_text. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern
+
+   [9] Eem — https://www.eemportland.com/
+       City: Portland, OR | Cuisine: 
+       Decision: plausible_unverified | HTTP: 200 | Reachability: thin
+       Scores: restaurant=0 negative=0 chain=0
+       Signals found: none
+       Category: minimal_html
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: thin
+
+   [10] State Bird Provisions — https://statebirdsf.com/
+       City: San Francisco, CA | Cuisine: 
+       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
+       Scores: restaurant=36 negative=0 chain=0
+       Signals found: hours_pattern, phone_number, og_image, schema_org, meta_description, menu_text, chef_text
+       Category: low_signal_score
+       Reason: restaurantSignalScore 36 below threshold of 60. Found 7 signals: hours_pattern, phone_number, og_image, schema_org, meta_description. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text
+
+8. RECOMMENDED THRESHOLD AND SCORING CHANGES
+--------------------------------------------------------------------------------
+
+   FIX 1: Add og:type=restaurant.restaurant as a strong positive signal (+15)
+     Would fix: ~7 of 11 failures
+     Risk:       Very low — og:type is set by the site owner
+     Complexity: Low — add check in computeRestaurantScores()
+
+   FIX 2: Lower verified_restaurant threshold from 60 to 45
+     Would fix: ~5 of 11 failures
+     Risk:       Medium — could let through some borderline non-restaurants
+     Complexity: Low — single constant change in applyDecisionRules()
+
+   FIX 3: Award points for phone number in body (+8 instead of +6)
+     Would fix: ~4 of 11 failures
+     Risk:       Low — local restaurants almost always display phone number
+     Complexity: Low — single constant change
+
+   FIX 4: Increase weight of hours-of-operation pattern from 12 to 20
+     Would fix: ~3 of 11 failures
+     Risk:       Low — hours with day names are very restaurant-specific
+     Complexity: Low — single constant change
+
+   FIX 5: Award bonus points for blocked/thin sites with restaurant context (name, domain keywords)
+     Would fix: ~2 of 11 failures
+     Risk:       Low — protected_restaurant_context already exists; expand coverage
+     Complexity: Medium — extend computeProtectedRestaurantContextScore()
+
+   FIX 6: Increase weight of menu nav link from 15 to 25 (strongest restaurant signal)
+     Would fix: ~1 of 11 failures
+     Risk:       Low — menu link is highly specific to restaurants
+     Complexity: Low — single constant change in classify-restaurant.ts
+
+   COMBINED ESTIMATE: Applying all fixes above could resolve ~6 of 11 failures.
+   (Overlap between categories means not all numbers are additive.)
+
+================================================================================
+END OF REPORT
+================================================================================
