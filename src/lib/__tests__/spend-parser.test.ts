@@ -186,4 +186,93 @@ describe('parseSpend', () => {
     expect(r.rawInput).toBe('  $1M  ');
     expect(r.annualSpend).toBe(1_000_000);
   });
+
+  // ── Decimal bare numbers ────────────────────────────────────────────────────
+  it('"0.5" → $500,000 (decimal < 1 treated as millions)', () => {
+    const r = parseSpend('0.5');
+    expect(r.annualSpend).toBe(500_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"1.5" → $1,500,000 (decimal in 0<n<100 range → millions)', () => {
+    const r = parseSpend('1.5');
+    expect(r.annualSpend).toBe(1_500_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"99.9" → $99,900,000 (decimal just under 100 → millions)', () => {
+    const r = parseSpend('99.9');
+    expect(r.annualSpend).toBe(99_900_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  // ── "N hundred thousand" ────────────────────────────────────────────────────
+  it('"five hundred thousand" → $500,000', () => {
+    const r = parseSpend('five hundred thousand');
+    expect(r.annualSpend).toBe(500_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"three hundred thousand" → $300,000', () => {
+    const r = parseSpend('three hundred thousand');
+    expect(r.annualSpend).toBe(300_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"2.5 hundred thousand" → $250,000 (numeric N)', () => {
+    const r = parseSpend('2.5 hundred thousand');
+    expect(r.annualSpend).toBe(250_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  // ── "N thousand" word form ──────────────────────────────────────────────────
+  it('"500 thousand" → $500,000', () => {
+    const r = parseSpend('500 thousand');
+    expect(r.annualSpend).toBe(500_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"2.5 thousand" → $2,500', () => {
+    const r = parseSpend('2.5 thousand');
+    expect(r.annualSpend).toBe(2_500);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  // ── Decimal ranges ──────────────────────────────────────────────────────────
+  it('"1.5-2M" → $1,750,000 (decimal range)', () => {
+    const r = parseSpend('1.5-2M');
+    expect(r.annualSpend).toBe(1_750_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"0.5-1M" → $750,000 (decimal lo end)', () => {
+    const r = parseSpend('0.5-1M');
+    expect(r.annualSpend).toBe(750_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"$1.5M–$3M" → $2,250,000 (currency + decimal range)', () => {
+    const r = parseSpend('$1.5M–$3M');
+    expect(r.annualSpend).toBe(2_250_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  // ── Large bare numbers ──────────────────────────────────────────────────────
+  it('"10" → $10,000,000 (bare 10 → millions)', () => {
+    const r = parseSpend('10');
+    expect(r.annualSpend).toBe(10_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"50" → $50,000,000 (bare 50 → millions)', () => {
+    const r = parseSpend('50');
+    expect(r.annualSpend).toBe(50_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"100" → $100,000 (bare 100 → thousands)', () => {
+    const r = parseSpend('100');
+    expect(r.annualSpend).toBe(100_000);
+    expect(r.parseFallback).toBe(false);
+  });
 });

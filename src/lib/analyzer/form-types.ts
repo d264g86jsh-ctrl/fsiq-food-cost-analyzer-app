@@ -125,16 +125,16 @@ export const ANNUAL_FOOD_SPEND_OPTIONS = [
   '$7M+',
 ] as const;
 
-export const DISTRIBUTOR_TYPE_OPTIONS = [
-  'National broadliners (Sysco, US Foods)',
-  'Regional distributor',
-  'Local/specialty only',
-  'Combination',
-] as const;
+export const DISTRIBUTOR_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'national_broadliners', label: 'National broadliners (Sysco, US Foods)' },
+  { value: 'combination',          label: 'Combination of distributors' },
+  { value: 'regional',             label: 'Regional distributor' },
+  { value: 'local_specialty',      label: 'Local/specialty only' },
+];
 
-export const PROCUREMENT_STRATEGY_OPTIONS = [
-  'Market price, single distributor',
-  'Market price, multiple distributors',
-  'GPO or Group Purchasing Organization',
-  'Negotiated cost-plus agreement',
-] as const;
+export const PROCUREMENT_STRATEGY_OPTIONS: { value: string; label: string }[] = [
+  { value: 'market_price_single',    label: 'Market price, single distributor' },
+  { value: 'market_price_multiple',  label: 'Market price, multiple distributors' },
+  { value: 'gpo',                    label: 'GPO or Group Purchasing Organization' },
+  { value: 'negotiated_cost_plus',   label: 'Negotiated cost-plus agreement' },
+];

@@ -21,7 +21,6 @@ import {
   STATE_OPTIONS,
   CONCEPT_TYPE_OPTIONS,
   LOCATIONS_OPTIONS,
-  ANNUAL_FOOD_SPEND_OPTIONS,
   DISTRIBUTOR_TYPE_OPTIONS,
   PROCUREMENT_STRATEGY_OPTIONS,
 } from '@/lib/analyzer/form-types';
@@ -49,6 +48,40 @@ const STEP_TITLES: Record<number, string> = {
   3: 'Where your dollars go.',
   4: 'Where do we send your report?',
 };
+
+// ── Radio card group ──────────────────────────────────────────────────────────
+
+function RadioCardGroup({
+  name,
+  options,
+  value,
+  onChange,
+}: {
+  name: string;
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="radio-card-grid">
+      {options.map((opt) => (
+        <label key={opt.value} className="radio-card">
+          <input
+            type="radio"
+            name={name}
+            value={opt.value}
+            checked={value === opt.value}
+            onChange={() => onChange(opt.value)}
+          />
+          <span className="radio-card-inner">
+            <span className="radio-card-dot" aria-hidden="true" />
+            {opt.label}
+          </span>
+        </label>
+      ))}
+    </div>
+  );
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -355,16 +388,14 @@ export function AnalyzerForm() {
             </FormField>
 
             <FormField label="Estimated annual food spend" required>
-              <select
+              <input
+                type="text"
+                placeholder="e.g. $1.5M, $800K, or $800,000"
+                className="field-underline"
                 value={formData.annual_food_spend ?? ''}
                 onChange={(e) => update('annual_food_spend', e.target.value)}
-                className={selectCls(false)}
-              >
-                <option value="">Select annual food spend</option>
-                {ANNUAL_FOOD_SPEND_OPTIONS.map((o) => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </select>
+              />
+              <p className="text-[11px] text-[#64748b] mt-1">Enter your total annual food &amp; beverage spend</p>
             </FormField>
           </div>
         )}
@@ -373,29 +404,21 @@ export function AnalyzerForm() {
         {step === 3 && (
           <div key="step-3" className="mt-6 space-y-6 fsiq-step-in">
             <FormField label="Primary distributor type" required>
-              <select
+              <RadioCardGroup
+                name="distributor_type"
+                options={DISTRIBUTOR_TYPE_OPTIONS}
                 value={formData.distributor_type ?? ''}
-                onChange={(e) => update('distributor_type', e.target.value)}
-                className={selectCls(false)}
-              >
-                <option value="">Select distributor type</option>
-                {DISTRIBUTOR_TYPE_OPTIONS.map((o) => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </select>
+                onChange={(v) => update('distributor_type', v)}
+              />
             </FormField>
 
             <FormField label="Procurement strategy" required>
-              <select
+              <RadioCardGroup
+                name="procurement_strategy"
+                options={PROCUREMENT_STRATEGY_OPTIONS}
                 value={formData.procurement_strategy ?? ''}
-                onChange={(e) => update('procurement_strategy', e.target.value)}
-                className={selectCls(false)}
-              >
-                <option value="">Select procurement strategy</option>
-                {PROCUREMENT_STRATEGY_OPTIONS.map((o) => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </select>
+                onChange={(v) => update('procurement_strategy', v)}
+              />
             </FormField>
 
             <FormField label="Top SKUs / spend categories" required>
