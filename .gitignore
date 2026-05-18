@@ -43,3 +43,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 .vercel
+
+# design handoffs and local assets
+*.zip
+design_handoff_admin_panel/
+design_handoff_food_cost_analyzer/
+.codex/
+AGENTS.md

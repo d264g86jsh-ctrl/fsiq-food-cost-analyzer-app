@@ -18,32 +18,33 @@ export function WorkflowTimeline({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-3">
-        <span className="text-sm text-[#475569]">
-          Stage: <span className="font-medium text-[#143225]">{workflowStage ?? '—'}</span>
+        <span className="text-[13px] text-[#64748b]">
+          Stage:{' '}
+          <span className="font-mono text-[#143225]">{workflowStage ?? '—'}</span>
         </span>
         <WorkflowStatusBadge status={workflowStatus} />
       </div>
 
       {errors.length > 0 ? (
         <div className="space-y-2">
-          <p className="text-xs font-medium text-[#64748b] uppercase tracking-wide">
+          <p className="text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[#64748b]">
             Workflow Errors ({errors.length})
           </p>
           {errors.map((err, i) => (
             <div
               key={i}
-              className="rounded-lg border border-red-200 bg-red-50 p-3 space-y-1"
+              className="rounded-2xl border border-red-200/70 bg-red-50/60 p-4 space-y-1"
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-semibold text-red-800">{err.stage}</span>
-                <span className="text-xs text-red-600">{err.timestamp}</span>
+                <span className="text-[12px] font-semibold text-[#991b1b]">{err.stage}</span>
+                <span className="text-[11px] text-[#dc2626]">{err.timestamp}</span>
               </div>
-              <p className="text-xs text-red-700 font-mono break-all">{err.error}</p>
+              <p className="text-[11.5px] font-mono text-[#b91c1c] break-all">{err.error}</p>
             </div>
           ))}
         </div>
       ) : (
-        <p className="text-sm text-[#94a3b8]">No workflow errors.</p>
+        <p className="text-[13px] text-[#52C275]">No workflow errors.</p>
       )}
     </div>
   );

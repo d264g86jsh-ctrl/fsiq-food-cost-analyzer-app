@@ -24,27 +24,37 @@ export default async function SubmissionsPage({
 
   return (
     <AdminShell title="Submissions">
-      <QaSummaryBar {...counts} />
-      <div className="mt-6">
+      <div className="fsiq-in">
+        <QaSummaryBar {...counts} />
+      </div>
+
+      <div className="mt-7 fsiq-in" style={{ animationDelay: '40ms' }}>
         <SubmissionFilters activeFilter={filter} />
-        <div className="bg-white border border-[#e2e8f0] rounded-xl overflow-hidden">
-          <div className="px-4 py-3 border-b border-[#e2e8f0] flex items-center justify-between">
-            <p className="text-sm text-[#475569]">
-              {total} submission{total !== 1 ? 's' : ''}{filter !== 'all' ? ` matching filter` : ''}
+
+        <div className="card-solid rounded-3xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-[#eef0ea] flex items-center justify-between">
+            <p className="text-[14px] font-semibold text-[#143225]">
+              {total} submission{total !== 1 ? 's' : ''}
+              {filter !== 'all' && (
+                <span className="ml-2 pill pill-neutral">Filtered</span>
+              )}
             </p>
-            <AdminAutoRefresh />
+            <div className="flex items-center gap-3">
+              <AdminAutoRefresh />
+            </div>
           </div>
           <SubmissionTable items={items} />
         </div>
+
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-4 text-sm">
+          <div className="flex items-center justify-between mt-5 text-[13px]">
             <p className="text-[#64748b]">Page {page} of {totalPages}</p>
             <div className="flex gap-2">
               {page > 1 && (
                 <Link
                   href={`/admin/submissions?${new URLSearchParams({ ...(filter !== 'all' ? { filter } : {}), page: String(page - 1) })}`}
-                  className="px-3 py-1.5 border border-[#e2e8f0] rounded text-[#475569] hover:bg-[#f8fafc]"
+                  className="chip"
                 >
                   Previous
                 </Link>
@@ -52,7 +62,7 @@ export default async function SubmissionsPage({
               {page < totalPages && (
                 <Link
                   href={`/admin/submissions?${new URLSearchParams({ ...(filter !== 'all' ? { filter } : {}), page: String(page + 1) })}`}
-                  className="px-3 py-1.5 border border-[#e2e8f0] rounded text-[#475569] hover:bg-[#f8fafc]"
+                  className="chip"
                 >
                   Next
                 </Link>

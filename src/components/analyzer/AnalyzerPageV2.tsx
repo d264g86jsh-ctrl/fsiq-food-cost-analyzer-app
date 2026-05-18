@@ -108,13 +108,15 @@ export function AnalyzerPageV2() {
     <div className="min-h-screen bg-sage">
 
         {/* Top bar */}
-        <header className="relative z-10 px-6 py-5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/brand/fsiq-logo-white-transparent.png"
-            alt="FoodServiceIQ"
-            className="h-8"
-          />
+        <header className="relative z-10 px-5 sm:px-8 py-5">
+          <div className="max-w-[640px] mx-auto">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/fsiq-logo-dark-transparent.png"
+              alt="FoodServiceIQ"
+              className="h-8 w-auto"
+            />
+          </div>
         </header>
 
         {/* Main content */}

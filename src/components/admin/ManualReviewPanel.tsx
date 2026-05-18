@@ -19,6 +19,12 @@ const STATUS_OPTIONS: { value: ManualReviewStatus; label: string }[] = [
   { value: 'not_required', label: 'Not Required' },
 ];
 
+const RefreshIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M13.5 7A5.5 5.5 0 1 1 8 1.5c1.7 0 3.2.77 4.2 1.97M13 1v3h-3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+  </svg>
+);
+
 export function ManualReviewPanel({
   submissionId,
   currentStatus,
@@ -39,14 +45,14 @@ export function ManualReviewPanel({
   }
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-3">
+    <div className="space-y-4 max-w-2xl">
+      <div className="space-y-4">
         <div>
-          <label className="block text-xs font-medium text-[#475569] mb-1">Review status</label>
+          <label className="block text-[12px] font-medium text-[#64748b] mb-1.5">Review status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as ManualReviewStatus)}
-            className="w-full sm:w-64 px-3 py-2 text-sm border border-[#e2e8f0] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#52C275]/30 focus:border-[#52C275]"
+            className="field-select"
           >
             {STATUS_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>
@@ -57,13 +63,13 @@ export function ManualReviewPanel({
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-[#475569] mb-1">Notes</label>
+          <label className="block text-[12px] font-medium text-[#64748b] mb-1.5">Notes</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="Internal review notes…"
-            className="w-full px-3 py-2 text-sm border border-[#e2e8f0] rounded-lg bg-white resize-none focus:outline-none focus:ring-2 focus:ring-[#52C275]/30 focus:border-[#52C275]"
+            className="field-textarea"
           />
         </div>
 
@@ -71,44 +77,37 @@ export function ManualReviewPanel({
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="px-4 py-2 bg-[#143225] text-white text-sm font-semibold rounded-lg hover:bg-[#1a4632] disabled:opacity-60 transition-colors"
+            className="btn-primary"
           >
             {isPending ? 'Saving…' : 'Save review'}
           </button>
 
           {result?.success && (
-            <span className="text-sm text-green-700">Saved successfully.</span>
+            <span className="text-[13px] text-[#52C275] font-medium">Saved.</span>
           )}
           {result?.error && (
-            <span className="text-sm text-red-600">{result.error}</span>
+            <span className="text-[13px] text-[#dc2626]">{result.error}</span>
           )}
         </div>
 
         {reviewedAt && (
-          <p className="text-xs text-[#94a3b8]">Last reviewed: {formatDate(reviewedAt)}</p>
+          <p className="text-[11px] text-[#94a3b8]">Last reviewed: {formatDate(reviewedAt)}</p>
         )}
       </div>
 
-      <div className="border-t border-[#e2e8f0] pt-4">
-        <p className="text-xs font-medium text-[#64748b] mb-2">Phase 11 actions</p>
+      <div className="border-t border-[#f1f3ee] pt-5">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748b] mb-3">
+          Phase 11 actions
+        </p>
         <div className="flex flex-wrap gap-2">
-          <button
-            disabled
-            className="px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#94a3b8] cursor-not-allowed"
-          >
-            Retry PDF
+          <button disabled className="btn-ghost opacity-40 cursor-not-allowed">
+            <RefreshIcon /> Retry PDF
           </button>
-          <button
-            disabled
-            className="px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#94a3b8] cursor-not-allowed"
-          >
-            Re-sync GHL
+          <button disabled className="btn-ghost opacity-40 cursor-not-allowed">
+            <RefreshIcon /> Re-sync GHL
           </button>
-          <button
-            disabled
-            className="px-3 py-1.5 text-xs border border-[#e2e8f0] rounded-lg text-[#94a3b8] cursor-not-allowed"
-          >
-            Retry Meta CAPI
+          <button disabled className="btn-ghost opacity-40 cursor-not-allowed">
+            <RefreshIcon /> Retry Meta CAPI
           </button>
         </div>
       </div>

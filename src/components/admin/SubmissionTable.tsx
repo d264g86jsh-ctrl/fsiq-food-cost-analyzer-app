@@ -10,6 +10,25 @@ import {
 } from './SubmissionStatusBadge';
 import { finalDecisionLabel, formatDate } from '@/lib/admin/submission-formatters';
 
+const AVATAR_PALETTE = [
+  'linear-gradient(135deg, #52C275, #143225)',
+  'linear-gradient(135deg, #1a4632, #52C275)',
+  'linear-gradient(135deg, #0e2418, #1a4632)',
+  'linear-gradient(135deg, #475569, #143225)',
+];
+
+function RestaurantAvatar({ name }: { name: string | null }) {
+  if (!name) return null;
+  const sum = [...name].reduce((a, c) => a + c.charCodeAt(0), 0);
+  const bg = AVATAR_PALETTE[sum % AVATAR_PALETTE.length];
+  const initials = name.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  return (
+    <span className="avatar shrink-0" style={{ background: bg }} aria-hidden="true">
+      {initials}
+    </span>
+  );
+}
+
 function Truncate({ text, maxWidth = 'max-w-[120px]' }: { text: string | null; maxWidth?: string }) {
   if (!text) return <span className="text-[#94a3b8]">—</span>;
   return (
@@ -22,17 +41,17 @@ function Truncate({ text, maxWidth = 'max-w-[120px]' }: { text: string | null; m
 export function SubmissionTable({ items }: { items: SubmissionListItem[] }) {
   if (items.length === 0) {
     return (
-      <div className="px-6 py-12 text-center text-sm text-[#94a3b8]">
-        No submissions found.
+      <div className="px-6 py-16 text-center">
+        <p className="text-[14px] text-[#64748b]">No submissions match this filter.</p>
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-xs">
+    <div className="scroll-x">
+      <table className="tbl">
         <thead>
-          <tr className="bg-[#f8fafc] border-b border-[#e2e8f0]">
+          <tr>
             {[
               'Created',
               'Restaurant',
@@ -46,22 +65,14 @@ export function SubmissionTable({ items }: { items: SubmissionListItem[] }) {
               'Workflow',
               'Manual Review',
             ].map((col) => (
-              <th
-                key={col}
-                className="px-3 py-2.5 text-left text-[#64748b] font-medium whitespace-nowrap"
-              >
-                {col}
-              </th>
+              <th key={col}>{col}</th>
             ))}
           </tr>
         </thead>
         <tbody>
           {items.map((item) => (
-            <tr
-              key={item.id}
-              className="border-b border-[#e2e8f0] hover:bg-[#f8fafc] transition-colors"
-            >
-              <td className="px-3 py-2.5 whitespace-nowrap text-[#475569]">
+            <tr key={item.id}>
+              <td className="text-[#64748b] whitespace-nowrap">
                 <Link
                   href={`/admin/submissions/${item.id}`}
                   className="hover:text-[#143225] hover:underline"
@@ -69,42 +80,59 @@ export function SubmissionTable({ items }: { items: SubmissionListItem[] }) {
                   {formatDate(item.createdAt)}
                 </Link>
               </td>
-              <td className="px-3 py-2.5">
+
+              <td>
                 <Link
                   href={`/admin/submissions/${item.id}`}
-                  className="font-medium text-[#143225] hover:underline"
+                  className="inline-flex items-center gap-2.5 hover:opacity-90 transition-opacity"
                 >
-                  <Truncate text={item.restaurantName} maxWidth="max-w-[150px]" />
+                  <RestaurantAvatar name={item.restaurantName} />
+                  <span className="font-medium text-[#143225]">
+                    <Truncate text={item.restaurantName} maxWidth="max-w-[140px]" />
+                  </span>
                 </Link>
               </td>
-              <td className="px-3 py-2.5">
-                <Truncate text={item.fullName} maxWidth="max-w-[100px]" />
-                <span className="block text-[#94a3b8]">
-                  <Truncate text={item.email} maxWidth="max-w-[140px]" />
-                </span>
+
+              <td>
+                <div className="leading-snug">
+                  <p className="font-medium text-[#143225]">
+                    <Truncate text={item.fullName} maxWidth="max-w-[100px]" />
+                  </p>
+                  <p className="text-[12px] text-[#64748b]">
+                    <Truncate text={item.email} maxWidth="max-w-[140px]" />
+                  </p>
+                </div>
               </td>
-              <td className="px-3 py-2.5">
+
+              <td>
                 <Truncate text={item.website} maxWidth="max-w-[130px]" />
               </td>
-              <td className="px-3 py-2.5">
+
+              <td>
                 <QualifiedBadge qualified={item.qualified} />
               </td>
-              <td className="px-3 py-2.5 whitespace-nowrap text-[#475569]">
+
+              <td className="text-[#475569] whitespace-nowrap">
                 {finalDecisionLabel(item.finalDecision)}
               </td>
-              <td className="px-3 py-2.5">
+
+              <td>
                 <PdfStatusBadge status={item.pdfStatus} />
               </td>
-              <td className="px-3 py-2.5">
+
+              <td>
                 <CrmSyncBadge status={item.crmSyncStatus} />
               </td>
-              <td className="px-3 py-2.5">
+
+              <td>
                 <MetaStatusBadge status={item.metaStatus} />
               </td>
-              <td className="px-3 py-2.5">
+
+              <td>
                 <WorkflowStatusBadge status={item.workflowStatus} />
               </td>
-              <td className="px-3 py-2.5">
+
+              <td>
                 <ManualReviewBadge
                   status={item.manualReviewStatus}
                   required={item.manualReviewRequired}

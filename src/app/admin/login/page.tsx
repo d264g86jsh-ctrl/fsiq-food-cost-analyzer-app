@@ -7,34 +7,50 @@ export default async function LoginPage({
 }) {
   const { error } = await searchParams;
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-white border border-[#e2e8f0] rounded-xl p-8">
+    <div className="min-h-screen bg-sage flex items-center justify-center p-4">
+      <div className="w-full max-w-sm glass-card rounded-[28px] p-8">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/brand/fsiq-logo-black-transparent.png" alt="FoodServiceIQ" className="h-7 mb-6" />
-        <h1 className="text-lg font-semibold text-[#143225] mb-1">Admin Access</h1>
-        <p className="text-sm text-[#64748b] mb-6">Enter your access token to continue.</p>
-        <form action={adminLogin} className="space-y-4">
+        <img
+          src="/brand/fsiq-logo-black-transparent.png"
+          alt="FoodServiceIQ"
+          className="h-7 mb-7"
+        />
+
+        <h1 className="text-[22px] font-bold tracking-[-0.02em] text-[#143225] mb-1">
+          Admin Access
+        </h1>
+        <p className="text-[14px] text-[#475569] mb-7">
+          Enter your access token to continue.
+        </p>
+
+        <form action={adminLogin} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-[#143225] mb-1.5">Access token</label>
+            <label className="block text-[11px] font-semibold uppercase tracking-[0.1em] text-[#64748b] mb-2">
+              Access token
+            </label>
             <input
               type="password"
               name="token"
               required
               autoComplete="current-password"
-              className="w-full px-3 py-2.5 border border-[#e2e8f0] rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#52C275]/30 focus:border-[#52C275]"
+              className="field-underline"
               placeholder="••••••••••••"
             />
           </div>
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            className="w-full px-4 py-2.5 bg-[#143225] text-white text-sm font-semibold rounded-lg hover:bg-[#1a4632] transition-colors"
-          >
+
+          {error && (
+            <p className="text-[13px] text-[#dc2626]">{error}</p>
+          )}
+
+          <button type="submit" className="cta-pill mt-1">
             Sign in
           </button>
         </form>
       </div>
-      <p className="absolute bottom-6 text-xs text-[#94a3b8]">FoodServiceIQ — Admin</p>
+
+      <p className="absolute bottom-6 text-[11px] text-[#94a3b8]">
+        FoodServiceIQ · Admin
+      </p>
     </div>
   );
 }

@@ -1,63 +1,73 @@
-type BadgeVariant = 'green' | 'red' | 'amber' | 'gray' | 'blue';
+type PillKind = 'success' | 'error' | 'warn' | 'muted' | 'neutral';
 
-function Badge({ label, variant }: { label: string; variant: BadgeVariant }) {
-  const cls: Record<BadgeVariant, string> = {
-    green: 'bg-green-100 text-green-800',
-    red:   'bg-red-100 text-red-800',
-    amber: 'bg-amber-100 text-amber-800',
-    gray:  'bg-gray-100 text-gray-600',
-    blue:  'bg-blue-100 text-blue-800',
-  };
+const DOT: Record<PillKind, string> = {
+  success: '#52C275',
+  error:   '#dc2626',
+  warn:    '#ca8a04',
+  muted:   '#94a3b8',
+  neutral: '#475569',
+};
+
+const CLS: Record<PillKind, string> = {
+  success: 'pill-success',
+  error:   'pill-error',
+  warn:    'pill-warn',
+  muted:   'pill-muted',
+  neutral: 'pill-neutral',
+};
+
+function Pill({ kind, label }: { kind: PillKind; label: string }) {
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${cls[variant]}`}>
+    <span className={`pill ${CLS[kind]}`}>
+      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: DOT[kind] }} />
       {label}
     </span>
   );
 }
 
 export function QualifiedBadge({ qualified }: { qualified: boolean | null }) {
-  if (qualified === true)  return <Badge label="Qualified" variant="green" />;
-  if (qualified === false) return <Badge label="DQ" variant="gray" />;
-  return <Badge label="—" variant="gray" />;
+  if (qualified === true)  return <Pill kind="success" label="Qualified" />;
+  if (qualified === false) return <Pill kind="muted"   label="DQ" />;
+  return <Pill kind="muted" label="—" />;
 }
 
 export function WorkflowStatusBadge({ status }: { status: string | null }) {
   switch (status) {
-    case 'complete':    return <Badge label="Complete" variant="green" />;
-    case 'failed':      return <Badge label="Failed" variant="red" />;
-    case 'partial':     return <Badge label="Partial" variant="amber" />;
-    case 'in_progress': return <Badge label="In Progress" variant="blue" />;
-    case 'pending':     return <Badge label="Pending" variant="gray" />;
-    default:            return <Badge label={status ?? '—'} variant="gray" />;
+    case 'complete':    return <Pill kind="success" label="Complete" />;
+    case 'failed':      return <Pill kind="error"   label="Failed" />;
+    case 'partial':     return <Pill kind="warn"    label="Partial" />;
+    case 'in_progress': return <Pill kind="neutral" label="In Progress" />;
+    case 'pending':     return <Pill kind="muted"   label="Pending" />;
+    default:            return <Pill kind="muted"   label={status ?? '—'} />;
   }
 }
 
 export function PdfStatusBadge({ status }: { status: string | null }) {
   switch (status) {
-    case 'complete':   return <Badge label="Complete" variant="green" />;
-    case 'error':      return <Badge label="Error" variant="red" />;
-    case 'skipped':    return <Badge label="Skipped" variant="gray" />;
-    case 'generating': return <Badge label="Generating" variant="blue" />;
-    case 'pending':    return <Badge label="Pending" variant="gray" />;
-    default:           return <Badge label={status ?? '—'} variant="gray" />;
+    case 'complete':   return <Pill kind="success" label="Complete" />;
+    case 'error':      return <Pill kind="error"   label="Error" />;
+    case 'skipped':    return <Pill kind="muted"   label="Skipped" />;
+    case 'generating': return <Pill kind="neutral" label="Generating" />;
+    case 'pending':    return <Pill kind="muted"   label="Pending" />;
+    default:           return <Pill kind="muted"   label={status ?? '—'} />;
   }
 }
 
 export function CrmSyncBadge({ status }: { status: string | null }) {
   switch (status) {
-    case 'synced':  return <Badge label="Synced" variant="green" />;
-    case 'error':   return <Badge label="Error" variant="red" />;
-    case 'pending': return <Badge label="Pending" variant="amber" />;
-    default:        return <Badge label={status ?? '—'} variant="gray" />;
+    case 'synced':  return <Pill kind="success" label="Synced" />;
+    case 'error':   return <Pill kind="error"   label="Error" />;
+    case 'pending': return <Pill kind="warn"    label="Pending" />;
+    default:        return <Pill kind="muted"   label={status ?? '—'} />;
   }
 }
 
 export function MetaStatusBadge({ status }: { status: string | null }) {
   switch (status) {
-    case 'fired':   return <Badge label="Fired" variant="green" />;
-    case 'error':   return <Badge label="Error" variant="red" />;
-    case 'skipped': return <Badge label="Skipped" variant="gray" />;
-    default:        return <Badge label={status ?? '—'} variant="gray" />;
+    case 'fired':   return <Pill kind="success" label="Fired" />;
+    case 'error':   return <Pill kind="error"   label="Error" />;
+    case 'skipped': return <Pill kind="muted"   label="Skipped" />;
+    default:        return <Pill kind="muted"   label={status ?? '—'} />;
   }
 }
 
@@ -70,10 +80,10 @@ export function ManualReviewBadge({
 }) {
   if (!required && (status === 'not_required' || !status)) return null;
   switch (status) {
-    case 'pending':      return <Badge label="Pending" variant="amber" />;
-    case 'approved':     return <Badge label="Approved" variant="green" />;
-    case 'rejected':     return <Badge label="Rejected" variant="red" />;
-    case 'not_required': return <Badge label="Not Required" variant="gray" />;
-    default:             return <Badge label={status ?? '—'} variant="gray" />;
+    case 'pending':      return <Pill kind="warn"    label="Pending" />;
+    case 'approved':     return <Pill kind="success" label="Approved" />;
+    case 'rejected':     return <Pill kind="error"   label="Rejected" />;
+    case 'not_required': return <Pill kind="muted"   label="Not Required" />;
+    default:             return <Pill kind="muted"   label={status ?? '—'} />;
   }
 }
