@@ -116,6 +116,58 @@ describe('runValidation — invalid website', () => {
     expect(r.internalFlags).toContain('http_404');
   });
 
+  it('stale restaurant 404 with expired hosting evidence → plausible_unverified', async () => {
+    mockFetch.mockResolvedValue(makeHtmlResponse(
+      '<html><head><title>Squarespace - Website Expired</title></head><body>Squarespace - Website Expired</body></html>',
+      404,
+      'https://www.animalrestaurant.com/',
+    ));
+
+    const r = await runValidation({
+      restaurantName: 'Animal',
+      website: 'https://animalrestaurant.com',
+      state: 'CA',
+    });
+
+    expect(r.finalDecision).toBe('plausible_unverified');
+    expect(r.manualReviewRequired).toBe(true);
+    expect(r.internalFlags).toContain('stale_restaurant_404_plausible');
+  });
+
+  it('generic stale 404 with multi-token matching restaurant brand → plausible_unverified', async () => {
+    mockFetch.mockResolvedValue(makeHtmlResponse(
+      '<html><head><title>Error 404 (Not Found)!!1</title></head><body>404. That’s an error.</body></html>',
+      404,
+      'http://www.tinkerstreet.com/',
+    ));
+
+    const r = await runValidation({
+      restaurantName: 'Tinker Street',
+      website: 'https://www.tinkerstreet.com',
+      state: 'IN',
+    });
+
+    expect(r.finalDecision).toBe('plausible_unverified');
+    expect(r.internalFlags).toContain('stale_restaurant_404_plausible');
+  });
+
+  it('non-restaurant stale 404 remains invalid_website', async () => {
+    mockFetch.mockResolvedValue(makeHtmlResponse(
+      '<html><head><title>Not Found</title></head><body>Not Found HTTP Error 404.</body></html>',
+      404,
+      'http://www.halstead.com/',
+    ));
+
+    const r = await runValidation({
+      restaurantName: 'Halstead',
+      website: 'https://www.halstead.com',
+      state: 'CA',
+    });
+
+    expect(r.finalDecision).toBe('invalid_website');
+    expect(r.internalFlags).not.toContain('stale_restaurant_404_plausible');
+  });
+
   it('DNS failure → invalid_website', async () => {
     const err = new Error('getaddrinfo ENOTFOUND nonexistentsite.com');
     mockFetch.mockRejectedValue(err);
@@ -185,11 +237,27 @@ describe('runValidation — plausible_unverified cases', () => {
     expect(r.httpStatus).toBe(200);
   });
 
-  it('toasttab ordering page → plausible_unverified', async () => {
-    mockFetch.mockResolvedValue(makeHtmlResponse('<html><body>Order online</body></html>', 200, 'https://order.toasttab.com/casaroberto'));
-    const r = await runValidation({ ...baseInput, website: 'https://order.toasttab.com/casaroberto' });
-    expect(['plausible_unverified', 'verified_restaurant']).toContain(r.finalDecision);
-    expect(r.finalDecision).not.toBe('invalid_website');
+  it('https timeout falls back to http/www variants before giving up', async () => {
+    const err = Object.assign(new Error('AbortError'), { name: 'AbortError' });
+    mockFetch
+      .mockRejectedValueOnce(err)
+      .mockRejectedValueOnce(err)
+      .mockResolvedValueOnce(makeHtmlResponse(RESTAURANT_HTML, 200, 'http://casaroberto.com/'));
+
+    const r = await runValidation({ ...baseInput, website: 'https://casaroberto.com' });
+
+    expect(mockFetch.mock.calls[0]?.[0]).toBe('https://casaroberto.com/');
+    expect(mockFetch.mock.calls[1]?.[0]).toBe('https://casaroberto.com/');
+    expect(mockFetch.mock.calls[2]?.[0]).toBe('http://casaroberto.com/');
+    expect(r.finalDecision).toBe('verified_restaurant');
+  });
+
+  it('toasttab merchant ordering page → verified_restaurant without fetching corporate root', async () => {
+    const r = await runValidation({ ...baseInput, website: 'https://order.toasttab.com/online/casaroberto' });
+    expect(r.finalDecision).toBe('verified_restaurant');
+    expect(r.restaurantSignalScore).toBe(60);
+    expect(r.internalFlags).toContain('trusted_platform_toasttab_merchant');
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('instagram page → plausible_unverified', async () => {
@@ -289,6 +357,81 @@ describe('restaurant signal extraction — audited evidence', () => {
     expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(4);
   });
 
+  it('extracts nested @graph schema names and descriptions', () => {
+    const signals = extractSignals(
+      `<html><head><script type="application/ld+json">{
+        "@context":"https://schema.org",
+        "@graph":[
+          {"@type":"LocalBusiness","name":"Generic"},
+          {"@type":"Restaurant","name":"Casa Roberto","description":"Mexican restaurant with dinner menu"}
+        ]
+      }</script></head><body><a href="/menu">Menu</a></body></html>`,
+      'https://casaroberto.com/',
+    );
+    const scores = computeRestaurantScores(signals, 'casaroberto.com');
+
+    expect(signals.schemaOrgTypes).toContain('Restaurant');
+    expect(signals.schemaOrgNames).toContain('Casa Roberto');
+    expect(signals.schemaOrgDescriptions[0]).toContain('Mexican restaurant');
+    expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(60);
+  });
+
+  it('uses restaurant cues beyond the old 5KB body cutoff', () => {
+    const filler = 'x '.repeat(3000);
+    const signals = extractSignals(
+      `<html><body>${filler}<h2>Dinner Menu</h2><p>Restaurant brunch, reservations, happy hour, pasta, seafood, wine.</p><p>(512) 555-0123</p></body></html>`,
+      'https://abstractbrand.com/',
+    );
+    const scores = computeRestaurantScores(signals, 'abstractbrand.com');
+
+    expect(signals.bodyText).toContain('Dinner Menu');
+    expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(50);
+  });
+
+  it('keeps targeted restaurant windows for very large pages', () => {
+    const filler = 'x '.repeat(30_000);
+    const signals = extractSignals(
+      `<html><body>${filler}<section><h2>Reservations</h2><p>Menu, dinner, brunch, restaurant, private dining. Mon 5pm-10pm. 101 Main St, Austin, TX 78701. (512) 555-0123</p></section>${filler}</body></html>`,
+      'https://largepage.com/',
+    );
+    const scores = computeRestaurantScores(signals, 'largepage.com');
+
+    expect(signals.bodyText).toContain('Reservations');
+    expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(60);
+  });
+
+  it('scores non-English restaurant keyword bundles', () => {
+    const signals = extractSignals(
+      '<html><head><title>Casa Linda</title></head><body><h1>Menú</h1><button>Reservación</button><p>Horarios y cocina regional. (512) 555-0123</p></body></html>',
+      'https://casalinda.com/',
+    );
+    const scores = computeRestaurantScores(signals, 'casalinda.com');
+
+    expect(signals.nonEnglishKeywordHits.spanish.length).toBeGreaterThanOrEqual(2);
+    expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(15);
+  });
+
+  it('applies metadata and confidence bundles without changing the verified threshold', () => {
+    const signals = extractSignals(
+      `<html>
+        <head>
+          <title>Union League Cafe Restaurant</title>
+          <meta name="description" content="Dinner menu and reservations in New Haven.">
+          <meta property="og:title" content="Union League Cafe Restaurant">
+          <meta property="og:image" content="https://example.com/dining.jpg">
+        </head>
+        <body>
+          <nav><a href="/menu">Menu</a></nav>
+          <p>Mon 5pm-10pm. 1032 Chapel St, New Haven, CT 06510. (203) 555-0101</p>
+        </body>
+      </html>`,
+      'https://unionleaguecafe.com/',
+    );
+    const scores = computeRestaurantScores(signals, 'unionleaguecafe.com');
+
+    expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(60);
+  });
+
   it('does not treat generic menu links as a new audited signal', () => {
     const signals = extractSignals(
       '<html><body><nav><a href="/menu">Menu</a></nav><p>Marketing services and consulting firm.</p></body></html>',
@@ -315,6 +458,15 @@ describe('runValidation — clear_non_fit (vendor/SaaS)', () => {
     const r = await runValidation({ ...baseInput, website: 'https://foodtechpro.com' });
     expect(r.finalDecision).toBe('clear_non_fit');
     expect(r.negativeSignalScore).toBeGreaterThanOrEqual(60);
+  });
+
+  it.each([
+    ['https://toasttab.com/', 'Toast corporate root'],
+    ['https://squareup.com/', 'Square corporate root'],
+  ])('%s stays non-verified for %s', async (website) => {
+    mockFetch.mockResolvedValue(makeHtmlResponse(SAAS_HTML, 200, website));
+    const r = await runValidation({ ...baseInput, website });
+    expect(r.finalDecision).not.toBe('verified_restaurant');
   });
 
   it('blocked matching non-restaurant context does not get restaurant boost', async () => {

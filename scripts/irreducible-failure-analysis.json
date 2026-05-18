@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-05-18T22:19:04.036Z",
+  "totalRestaurantRows": 510,
+  "hardFalseNegatives": 0,
+  "realisticMaximumTruePositiveRateCurrentStack": 100,
+  "remainingAcceptedButUnverifiedRows": 276,
+  "verifiedRows": 234,
+  "categories": {
+    "fixableWithHeadlessBrowser": {
+      "countEstimate": 41,
+      "expectedImprovement": "Improves verified_restaurant confidence, not hard TPR on this benchmark because hard TPR is already 100%.",
+      "costBenefit": "3-5 engineering days plus browser runtime cost; useful for confidence and automation, not required for 99.99 hard TPR on current dataset."
+    },
+    "fixableWithGooglePlacesApi": {
+      "countEstimate": 194,
+      "expectedImprovement": "Would convert many plausible/manual-review network and stale-domain cases into verified_restaurant using external identity evidence.",
+      "costBenefit": "2-4 engineering days plus per-request API cost; best ROI for verified confidence."
+    },
+    "fixableWithCurrentStack": {
+      "count": 0,
+      "note": "All hard false negatives currently visible in the benchmark have been handled without external services."
+    },
+    "genuinelyAmbiguous": {
+      "count": 276,
+      "note": "Accepted as plausible; cannot all be safely verified without rendering or external evidence."
+    }
+  }
+}

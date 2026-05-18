@@ -1,0 +1,13 @@
+Irreducible Failure Analysis
+============================
+Restaurant benchmark rows: 510
+Hard false negatives: 0
+Realistic maximum hard true positive rate with current stack: 100% on this benchmark
+Accepted but unverified restaurant rows: 276
+Verified restaurant rows: 234
+
+External additions would improve verified confidence, not current hard TPR:
+- Playwright candidate rows: 41
+- Google Places candidate rows: 194
+
+Current-stack hard failures remaining: 0

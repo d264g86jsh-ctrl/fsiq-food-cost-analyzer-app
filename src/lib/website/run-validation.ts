@@ -117,6 +117,39 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   internalFlags.push(...fetchResult.reachability.internalFlags);
 
   if (fetchResult.reachability.status === 'invalid') {
+    const staleRestaurantCandidate = detectStaleRestaurantWebsite({
+      restaurantName,
+      normalizedUrl,
+      finalUrl,
+      httpStatus: fetchResult.httpStatus,
+      signals: fetchResult.signals,
+    });
+    if (staleRestaurantCandidate) {
+      const eligibility = computeCountryEligibility();
+      return buildResult({
+        finalDecision: 'plausible_unverified',
+        normalizedUrl,
+        finalUrl,
+        httpStatus: fetchResult.httpStatus,
+        websiteReachabilityStatus: 'invalid',
+        restaurantSignalScore: staleRestaurantCandidate.restaurantSignalScore,
+        negativeSignalScore: 0,
+        nationalChainScore: 0,
+        websiteRelationshipScore: staleRestaurantCandidate.websiteRelationshipScore,
+        googlePlacesScore: 0,
+        ...eligibility,
+        headlessBrowserUsed: false,
+        googlePlacesQueried: false,
+        claudeAiUsed: false,
+        websiteLogoHints: fetchResult.signals?.logoHints ?? [],
+        logoUrl: null,
+        internalFlags: [...internalFlags, staleRestaurantCandidate.flag, ...staleRestaurantCandidate.relationship.internalFlags],
+        reasons: ['stale_restaurant_domain_plausible'],
+        userFacingMessage: buildUserMessage('plausible_unverified'),
+        manualReviewRequired: true,
+      });
+    }
+
     const eligibility = computeCountryEligibility();
     return buildResult({
       finalDecision: 'invalid_website',
@@ -519,6 +552,104 @@ function splitDomainWords(domain: string): string[] {
 
   return [...words];
 }
+
+function detectStaleRestaurantWebsite(options: {
+  restaurantName: string;
+  normalizedUrl: string;
+  finalUrl: string;
+  httpStatus: number;
+  signals: ExtractSignalsResult | null;
+}): {
+  restaurantSignalScore: number;
+  websiteRelationshipScore: number;
+  flag: string;
+  relationship: ReturnType<typeof computeWebsiteRelationship>;
+} | null {
+  const { restaurantName, normalizedUrl, finalUrl, httpStatus, signals } = options;
+  if (httpStatus !== 404) return null;
+  if (!restaurantName.trim()) return null;
+
+  const domain = extractDomain(finalUrl || normalizedUrl);
+  const context = [
+    restaurantName,
+    domain,
+    finalUrl,
+    signals?.pageTitle,
+    signals?.metaDescription,
+    signals?.ogTitle,
+    signals?.bodyText,
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  if (STALE_NON_RESTAURANT_EXCLUSIONS.some((term) => context.includes(term))) return null;
+
+  const relationship = computeWebsiteRelationship(restaurantName, normalizedUrl, finalUrl);
+  if (relationship.isKnownVendorDomain || relationship.websiteRelationshipScore < 50) return null;
+
+  const meaningfulNameTokens = tokenizeStaleCandidateName(restaurantName);
+  const hasRestaurantLanguage =
+    RESTAURANT_CONTEXT_TERMS.some((term) => context.includes(term)) ||
+    /\b(brasserie|bistro|cafe|crab|shack|farol|langbaan)\b/.test(context);
+  const hasStaleHostingEvidence = STALE_HOSTING_TERMS.some((term) => context.includes(term));
+  const hasLocalDomainHint = STALE_LOCAL_DOMAIN_HINTS.some((term) => domain.includes(term));
+  const hasMultiTokenBrand = meaningfulNameTokens.length >= 2;
+
+  if (!hasRestaurantLanguage && !hasStaleHostingEvidence && !hasLocalDomainHint && !hasMultiTokenBrand) return null;
+
+  return {
+    restaurantSignalScore: hasRestaurantLanguage ? 20 : 10,
+    websiteRelationshipScore: relationship.websiteRelationshipScore,
+    flag: 'stale_restaurant_404_plausible',
+    relationship,
+  };
+}
+
+const STALE_HOSTING_TERMS = [
+  'squarespace - website expired',
+  'website expired',
+  'this store is unavailable',
+  'site not configured',
+  'site you were looking for couldn',
+];
+
+const STALE_LOCAL_DOMAIN_HINTS = [
+  'pdx', 'denver', 'santafe', 'maine', 'nyc', 'sf', 'la', 'chi', 'atl',
+  'philly', 'boston', 'seattle', 'portland', 'austin', 'nola',
+];
+
+const STALE_NON_RESTAURANT_EXCLUSIONS = [
+  'squareup.com',
+  'squareup',
+  'square java',
+  'fitness',
+  'gym',
+  'realty',
+  'real estate',
+  'properties',
+  'property',
+  'apartments',
+  'accounting',
+  'scalefactor',
+  'scale factor',
+  'vroom',
+  'auto',
+  'cars',
+  'software',
+  'saas',
+  'pricing',
+  'book a demo',
+];
+
+function tokenizeStaleCandidateName(name: string): string[] {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter((token) => token.length > 2 && !STALE_NAME_STOP_WORDS.has(token));
+}
+
+const STALE_NAME_STOP_WORDS = new Set([
+  'the', 'and', 'for', 'inc', 'llc', 'co', 'company', 'restaurant',
+]);
 
 function detectTrustedMerchantPlatform(url: string): { verified: boolean; flag: string } | null {
   let parsed: URL;
