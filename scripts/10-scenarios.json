@@ -1,0 +1,1883 @@
+{
+  "generatedAt": "2026-05-18T20:45:48.457Z",
+  "methodology": [
+    "Read validation code paths and parsed scripts/failure-hunt-results.json plus scripts/100-failures.json.",
+    "Ran every scenario example through runValidation() with restaurantName set to an empty string.",
+    "Examples are from seed/failure-hunt data or public web search results noted in verificationSource."
+  ],
+  "scenarios": [
+    {
+      "id": 1,
+      "name": "JS-rendered websites",
+      "description": "The first HTTP response is a shell or thin loader, while menu/location content is rendered by JavaScript after load.",
+      "volume": "high",
+      "examples": [
+        {
+          "name": "Tarbell's",
+          "url": "https://www.tarbell.com",
+          "city": "Phoenix",
+          "state": "AZ",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        },
+        {
+          "name": "The Catfish Hole",
+          "url": "https://www.catfishhole.com",
+          "city": "Fayetteville",
+          "state": "AR",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        },
+        {
+          "name": "Bacchanalia",
+          "url": "https://www.bacchanalia.com",
+          "city": "Atlanta",
+          "state": "GA",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        },
+        {
+          "name": "Girl & the Goat",
+          "url": "https://girlandthegoat.com",
+          "city": "Chicago",
+          "state": "IL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 27,
+          "signalsFound": [
+            "title_tag",
+            "meta_description",
+            "restaurant_text",
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "og_title",
+            "social_or_ordering_links"
+          ],
+          "failureCategory": "minimal_html"
+        }
+      ],
+      "rootCause": "checkWebsite() extracts signals from the raw fetch body only. headlessFetch() is attempted for thin pages, but failures leave extractSignals() with empty or loader HTML, so computeRestaurantScores() sees no schema, menu, hours, or cuisine text.",
+      "affectedVolume": "high",
+      "proposedFix": "Make the headless fallback deterministic for thin/JS shells, persist rendered HTML, and add framework-shell detection for Wix/Squarespace/React loader pages.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Could address most minimal_html/js_rendered rows: about 15-25% of reachable failures in the current failure hunt."
+    },
+    {
+      "id": 2,
+      "name": "Non-English and localized websites",
+      "description": "Restaurant pages use Spanish, Chinese, Vietnamese, or transliterated menu language that is not represented in the English keyword list.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "Pho 79",
+          "url": "https://www.pho79newportnews.com",
+          "city": "Newport News",
+          "state": "VA",
+          "verificationSource": "web/known restaurant",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "title_tag",
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        },
+        {
+          "name": "Pho Bac",
+          "url": "https://www.phobacseattle.com",
+          "city": "Seattle",
+          "state": "WA",
+          "verificationSource": "web/known restaurant",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "title_tag",
+            "meta_description"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "La Casita Mexicana",
+          "url": "https://www.lacasitamex.com",
+          "city": "Bell",
+          "state": "CA",
+          "verificationSource": "web/known restaurant",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 10,
+          "signalsFound": [
+            "title_tag",
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        },
+        {
+          "name": "Chengdu Taste",
+          "url": "https://www.chengdutaste.com",
+          "city": "Alhambra",
+          "state": "CA",
+          "verificationSource": "web/known restaurant",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        }
+      ],
+      "rootCause": "MODERATE_TEXT_KEYWORDS and STRONG_POSITIVE_TEXT are English-only, and extractSignals() does not identify language or translated equivalents such as menu/menú, reservas, pho, dim sum, taqueria variants, or Chinese/Korean/Vietnamese menu labels.",
+      "affectedVolume": "medium",
+      "proposedFix": "Add multilingual restaurant lexicons for common US restaurant languages and score hreflang/lang plus translated menu/reservation/hour terms.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Likely low hundreds in a 5,000 failure set, concentrated in metro markets."
+    },
+    {
+      "id": 3,
+      "name": "Third-party platform pages",
+      "description": "The submitted website is a Toast, Square, Popmenu, BentoBox, or similar hosted ordering/menu page rather than the restaurant root domain.",
+      "volume": "high",
+      "examples": [
+        {
+          "name": "Toast Temecula",
+          "url": "https://order.toasttab.com/online/toast-temecula",
+          "city": "Temecula",
+          "state": "CA",
+          "verificationSource": "web search result",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 403,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "bot_protection",
+            "title_tag",
+            "http_403"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "cloudflare_blocked"
+        },
+        {
+          "name": "The Bagel Bar Cafe",
+          "url": "https://order.toasttab.com/online/the-bagel-bar-cafe",
+          "city": "Unknown",
+          "state": "CA",
+          "verificationSource": "web search result",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 403,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "bot_protection",
+            "title_tag",
+            "http_403"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "cloudflare_blocked"
+        },
+        {
+          "name": "Pho Auntie 7",
+          "url": "https://phoauntie7.square.site",
+          "city": "Unknown",
+          "state": "CA",
+          "verificationSource": "web search result",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        },
+        {
+          "name": "Gyro Hub Verdazo",
+          "url": "https://gyro-hub-verdazo.square.site",
+          "city": "Houston",
+          "state": "TX",
+          "verificationSource": "web search result",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 12,
+          "signalsFound": [
+            "title_tag",
+            "og_title",
+            "restaurant_text"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "social_or_ordering_links"
+          ],
+          "failureCategory": "low_signal_score"
+        }
+      ],
+      "rootCause": "computeWebsiteRelationship() marks some platforms plausible, but platform-specific blocked HTML or thin app shells still score 0 because computeRestaurantScores() does not parse Toast/Square structured menu content or platform metadata.",
+      "affectedVolume": "high",
+      "proposedFix": "Add platform parsers and trusted platform path scoring for Toast/Square/Popmenu/BentoBox menu and merchant pages, with vendor-domain guardrails.",
+      "fixRisk": "medium",
+      "estimatedImpact": "High for SMB restaurants; likely 10-20% of organic submissions that use hosted ordering links."
+    },
+    {
+      "id": 4,
+      "name": "Owner or abstract brand domains with no food signals",
+      "description": "The brand/domain is a person, invented word, or abstract restaurant name and the page has only weak food terms, so domain scoring adds little.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "State Bird Provisions",
+          "url": "https://statebirdsf.com",
+          "city": "San Francisco",
+          "state": "CA",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 53,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "restaurant_text",
+            "phone_number",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Staplehouse",
+          "url": "https://staplehouse.com",
+          "city": "Atlanta",
+          "state": "GA",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 42,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "og_title",
+            "restaurant_nav",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "meta_description"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Alinea",
+          "url": "https://alinearestaurant.com",
+          "city": "Chicago",
+          "state": "IL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 55,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Milktooth",
+          "url": "https://milktoothindy.com",
+          "city": "Indianapolis",
+          "state": "IN",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 21,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "og_title",
+            "restaurant_nav",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "meta_description"
+          ],
+          "failureCategory": "low_signal_score"
+        }
+      ],
+      "rootCause": "Domain scoring only rewards explicit restaurant words. With restaurantName intentionally blank in this validation mode, relationshipScore is low and owner/abstract domains must reach 60 entirely from extracted page text.",
+      "affectedVolume": "medium",
+      "proposedFix": "Add stronger weighting for menu/hours/phone combinations and title/meta restaurant phrases so owner-name domains do not need food words in the hostname.",
+      "fixRisk": "low",
+      "estimatedImpact": "Medium; several baseline low_signal_score rows sit just under threshold."
+    },
+    {
+      "id": 5,
+      "name": "New restaurants with thin web presence",
+      "description": "Newer or recently relaunched restaurants have sparse websites, missing schema, and little crawlable text.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "Tusk Lounge",
+          "url": "https://www.tusklounge.com",
+          "city": "Bentonville",
+          "state": "AR",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "Herbers HQ",
+          "url": "https://www.herbershq.com",
+          "city": "Bentonville",
+          "state": "AR",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "Ondas Kitchen",
+          "url": "https://ondaskitchen.com",
+          "city": "New Castle",
+          "state": "DE",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        }
+      ],
+      "rootCause": "The rule threshold requires 60 points. Thin pages with a title, phone, or a few links often land in the 0-40 range and fall to Claude fallback, which is disabled without an API key.",
+      "affectedVolume": "medium",
+      "proposedFix": "Create a thin-but-plausible restaurant rule for combinations of title/meta/location/phone/menu PDF or social links, plus optional manual-review continuation.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Medium; overlaps with minimal_html and low_signal_score categories."
+    },
+    {
+      "id": 6,
+      "name": "Single-page websites with no navigation",
+      "description": "The site has all information on one page or hidden panels, so nav-link detection sees no Menu/Reservations links.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "The Cellar",
+          "url": "https://www.thecellarcda.com",
+          "city": "Coeur d'Alene",
+          "state": "ID",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "The Dogfish Cafe",
+          "url": "https://www.thedogfish.com",
+          "city": "Portland",
+          "state": "ME",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "bot_protection",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "phone_number"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "cloudflare_blocked"
+        },
+        {
+          "name": "Row 34",
+          "url": "https://www.row34.com",
+          "city": "Boston",
+          "state": "MA",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "verified_restaurant",
+          "httpStatus": 200,
+          "restaurantSignalScore": 65,
+          "signalsFound": [
+            "schema_org",
+            "bot_protection",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav"
+          ],
+          "failureCategory": "currently_verified"
+        },
+        {
+          "name": "Staplehouse",
+          "url": "https://staplehouse.com",
+          "city": "Atlanta",
+          "state": "GA",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 42,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "og_title",
+            "restaurant_nav",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "meta_description"
+          ],
+          "failureCategory": "low_signal_score"
+        }
+      ],
+      "rootCause": "extractNavLinkTexts() reads anchor text, preferably inside nav. It does not score headings, buttons, section IDs, or unlinked menu/hours sections strongly enough.",
+      "affectedVolume": "medium",
+      "proposedFix": "Add section-heading/button text extraction and score body headings for menu, hours, address, call, reserve, and order patterns.",
+      "fixRisk": "low",
+      "estimatedImpact": "Medium; many failure-hunt rows have meta/phone/schema but missing menu_nav and reservations_nav."
+    },
+    {
+      "id": 7,
+      "name": "Rural and small-town restaurants",
+      "description": "Small-town operators often use older hosts, expired domains, PDFs, or very basic sites with little structured markup.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "The Catfish Hole",
+          "url": "https://www.catfishhole.com",
+          "city": "Fayetteville",
+          "state": "AR",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        },
+        {
+          "name": "The Deck",
+          "url": "https://www.thedeckrestaurant.com",
+          "city": "Meredith",
+          "state": "NH",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "Haleiwa Joe's",
+          "url": "https://www.haleiwajoes.com",
+          "city": "Haleiwa",
+          "state": "HI",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        },
+        {
+          "name": "Bancroft on the Green",
+          "url": "https://www.bancroftonthegreen.com",
+          "city": "Wilmington",
+          "state": "DE",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        }
+      ],
+      "rootCause": "Network failures and thin content produce no extractable signals. There is no fallback to HTTP, www/non-www alternates, DNS diagnostics, or external evidence.",
+      "affectedVolume": "medium",
+      "proposedFix": "Add alternate-host retry strategy and score reachable PDF/menu/social fallbacks for small-town style sites.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Medium; many timeout rows are likely stale or alternate-host issues."
+    },
+    {
+      "id": 8,
+      "name": "Food trucks and pop-ups",
+      "description": "Mobile operators use Square/Wix/menu-only pages and often lack fixed-location reservation signals.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "Gyro Hub Verdazo",
+          "url": "https://gyro-hub-verdazo.square.site",
+          "city": "Houston",
+          "state": "TX",
+          "verificationSource": "web search result",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 12,
+          "signalsFound": [
+            "title_tag",
+            "og_title",
+            "restaurant_text"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "social_or_ordering_links"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Mack the Knife",
+          "url": "https://mack-the-knife.square.site",
+          "city": "Margate",
+          "state": "FL",
+          "verificationSource": "web search result",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 6,
+          "signalsFound": [
+            "title_tag",
+            "og_title",
+            "restaurant_text"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "social_or_ordering_links"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Restaurant 51 Food Truck",
+          "url": "https://restaurant-51-food-truck.square.site",
+          "city": "Boston",
+          "state": "MA",
+          "verificationSource": "web search result",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 53,
+          "signalsFound": [
+            "title_tag",
+            "og_title",
+            "restaurant_text",
+            "phone_number"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "social_or_ordering_links"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Cousins Maine Lobster",
+          "url": "https://www.cousinsmainelobster.com",
+          "city": "Los Angeles",
+          "state": "CA",
+          "verificationSource": "web/known food truck brand",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 40,
+          "signalsFound": [
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav"
+          ],
+          "failureCategory": "low_signal_score"
+        }
+      ],
+      "rootCause": "The classifier expects restaurant-style site structure. Food-truck terms and hosted mobile-menu pages are underweighted, and Square/Wix shells are often thin.",
+      "affectedVolume": "medium",
+      "proposedFix": "Add food truck/pop-up lexicon and score hosted menu pages with phone, hours, and menu categories as foodservice operators.",
+      "fixRisk": "low",
+      "estimatedImpact": "Medium for lead sources that accept mobile operators."
+    },
+    {
+      "id": 9,
+      "name": "Restaurants behind login or reservation walls",
+      "description": "Exclusive restaurants and supper clubs expose limited marketing pages while booking or details live behind a reservation workflow.",
+      "volume": "low",
+      "examples": [
+        {
+          "name": "Rao's",
+          "url": "https://raosrestaurants.com",
+          "city": "New York",
+          "state": "NY",
+          "verificationSource": "web/known restaurant",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 57,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "og_title",
+            "restaurant_nav",
+            "restaurant_text",
+            "phone_number",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "meta_description"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Bohemian",
+          "url": "https://www.playearth.jp/bohemian",
+          "city": "New York",
+          "state": "NY",
+          "verificationSource": "web/known restaurant",
+          "finalDecision": "invalid_website",
+          "httpStatus": 404,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "title_tag",
+            "invalid_reachability"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "invalid_or_stale_url"
+        },
+        {
+          "name": "Mosquito Supper Club",
+          "url": "https://www.mosquitosupperclub.com",
+          "city": "New Orleans",
+          "state": "LA",
+          "verificationSource": "web search result",
+          "finalDecision": "verified_restaurant",
+          "httpStatus": 200,
+          "restaurantSignalScore": 100,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "restaurant_nav",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema"
+          ],
+          "failureCategory": "currently_verified"
+        }
+      ],
+      "rootCause": "The fetch path sees the public shell only. Login/reservation widgets are not followed, and reservation-only language does not carry enough score.",
+      "affectedVolume": "low",
+      "proposedFix": "Detect reservation-only/member/login flows as plausible foodservice signals and extract linked Tock/Resy/OpenTable restaurant metadata.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Low overall, high in fine-dining segments."
+    },
+    {
+      "id": 10,
+      "name": "Names resembling national chains",
+      "description": "Independent restaurants or pubs have names/domains that contain terms like Subway, McDonald, or Waffle House.",
+      "volume": "low",
+      "examples": [
+        {
+          "name": "Subway Cafe",
+          "url": "https://subwaycafe.com",
+          "city": "Unknown",
+          "state": "CA",
+          "verificationSource": "web/domain example",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 13,
+          "signalsFound": [
+            "title_tag",
+            "meta_description",
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        },
+        {
+          "name": "McDonald's Pub",
+          "url": "https://mcdonaldspub.com",
+          "city": "Unknown",
+          "state": "CA",
+          "verificationSource": "web/domain example",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "Waffle House Pub",
+          "url": "https://wafflehousepub.com",
+          "city": "Unknown",
+          "state": "CA",
+          "verificationSource": "web/domain example",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        }
+      ],
+      "rootCause": "detectNationalChain() can classify by exact known domain or full alias in title/name. With no submitted name this is less common, but page-title alias collisions remain a risk.",
+      "affectedVolume": "low",
+      "proposedFix": "Require exact brand-domain match or stronger multi-signal chain evidence before national_chain when the user-provided name is empty.",
+      "fixRisk": "low",
+      "estimatedImpact": "Low, but prevents hard false rejections."
+    },
+    {
+      "id": 11,
+      "name": "Network-inaccessible real restaurant domains",
+      "description": "Curated restaurant domains return network errors or never produce HTML from server-side fetch.",
+      "volume": "high",
+      "examples": [
+        {
+          "name": "Ole Bay Cafe",
+          "url": "https://olebaycafe.com",
+          "city": "Mobile",
+          "state": "AL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "Ocean Restaurant",
+          "url": "https://www.oceanrestaurant.net",
+          "city": "Birmingham",
+          "state": "AL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "Bottega",
+          "url": "https://bottegafrombirmingham.com",
+          "city": "Birmingham",
+          "state": "AL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "Marx Bros Cafe",
+          "url": "https://www.marxbroscafe.com",
+          "city": "Anchorage",
+          "state": "AK",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        }
+      ],
+      "rootCause": "checkWebsite() returns signals null on network_error/inaccessible, leaving scores at zero. The current pipeline lets users continue, but cannot verify them.",
+      "affectedVolume": "high",
+      "proposedFix": "Add alternate scheme/host retries, shorter HEAD preflight, DNS classification, and optional external evidence lookup before giving up.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Highest; 54/100 baseline failures and 215/345 failure-hunt rows were inaccessible."
+    },
+    {
+      "id": 12,
+      "name": "Stale, moved, or 404 restaurant domains",
+      "description": "The restaurant is real but the seed/submitted URL has moved, expired, or points at a dead old path.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "Tracy's King Crab Shack",
+          "url": "https://tracyskingcrab.com",
+          "city": "Juneau",
+          "state": "AK",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "invalid_website",
+          "httpStatus": 404,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "title_tag",
+            "invalid_reachability"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "invalid_or_stale_url"
+        },
+        {
+          "name": "Hai Hai",
+          "url": "https://linktr.ee/haihaipdx",
+          "city": "Portland",
+          "state": "OR",
+          "verificationSource": "web/domain example",
+          "finalDecision": "invalid_website",
+          "httpStatus": 404,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "invalid_reachability"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "invalid_or_stale_url"
+        },
+        {
+          "name": "Bohemian",
+          "url": "https://www.playearth.jp/bohemian",
+          "city": "New York",
+          "state": "NY",
+          "verificationSource": "web/known restaurant",
+          "finalDecision": "invalid_website",
+          "httpStatus": 404,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "title_tag",
+            "invalid_reachability"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "invalid_or_stale_url"
+        }
+      ],
+      "rootCause": "classifyReachability() treats 404 as invalid_website and runValidation() exits early, so no plausible continuation is available even if the brand is real elsewhere.",
+      "affectedVolume": "medium",
+      "proposedFix": "For 404 on restaurant-looking domains, offer plausible_unverified/manual review and optionally try search-discovered canonical domains.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Medium; 8 invalid rows in failure-hunt and 3 in the 100-failure sample."
+    },
+    {
+      "id": 13,
+      "name": "Bot-protected pages with no useful metadata",
+      "description": "Cloudflare/security pages return 403 or challenge HTML without the restaurant title/meta/schema.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "The Ravenous Pig",
+          "url": "https://www.theravenouspig.com",
+          "city": "Winter Park",
+          "state": "FL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 403,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "bot_protection",
+            "title_tag",
+            "http_403"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "cloudflare_blocked"
+        },
+        {
+          "name": "Saint Anejo",
+          "url": "https://www.saintanejo.com",
+          "city": "Des Moines",
+          "state": "IA",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 403,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "bot_protection",
+            "title_tag",
+            "http_403"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "cloudflare_blocked"
+        },
+        {
+          "name": "Auberge du Soleil Dining",
+          "url": "https://aubergeresorts.com/aubergedusoleil/dine/",
+          "city": "Rutherford",
+          "state": "CA",
+          "verificationSource": "web/known restaurant",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 403,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "bot_protection",
+            "title_tag",
+            "http_403"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "cloudflare_blocked"
+        }
+      ],
+      "rootCause": "checkWebsite() now reads 403 HTML, but the challenge page has generic title/body. computeProtectedRestaurantContextScore() can only use domain/path/meta and still fails when those are generic.",
+      "affectedVolume": "medium",
+      "proposedFix": "Add richer protected-site heuristics: favicon/domain history, known restaurant terms in brand domain, and optional external SERP/title fallback.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Medium; 7/100 baseline failures and 17/345 failure-hunt rows were bot/cloudflare related."
+    },
+    {
+      "id": 14,
+      "name": "Generic schema.org only",
+      "description": "Pages include Organization/WebSite schema, but not Restaurant/FoodEstablishment schema.",
+      "volume": "high",
+      "examples": [
+        {
+          "name": "State Bird Provisions",
+          "url": "https://statebirdsf.com",
+          "city": "San Francisco",
+          "state": "CA",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 53,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "restaurant_text",
+            "phone_number",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Alinea",
+          "url": "https://alinearestaurant.com",
+          "city": "Chicago",
+          "state": "IL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 55,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Pizzeria Bianco",
+          "url": "https://pizzeriabianco.com",
+          "city": "Phoenix",
+          "state": "AZ",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "verified_restaurant",
+          "httpStatus": 200,
+          "restaurantSignalScore": 82,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "restaurant_text",
+            "phone_number",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav"
+          ],
+          "failureCategory": "currently_verified"
+        }
+      ],
+      "rootCause": "hasRestaurantSchema only recognizes a short allow-list. Generic schema_org was found in 67 failure-hunt rows but restaurant_schema was missing in every failure row.",
+      "affectedVolume": "high",
+      "proposedFix": "Infer restaurant intent from generic schema combined with menu/hours/address/phone and parse nested @graph names/descriptions for food terms.",
+      "fixRisk": "low",
+      "estimatedImpact": "High among reachable low_signal_score pages."
+    },
+    {
+      "id": 15,
+      "name": "OpenGraph/meta-only restaurant pages",
+      "description": "Restaurant evidence exists in title, meta, og:image, or phone number but not enough body/nav text is crawlable.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "The Cellar",
+          "url": "https://www.thecellarcda.com",
+          "city": "Coeur d'Alene",
+          "state": "ID",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "The Dogfish Cafe",
+          "url": "https://www.thedogfish.com",
+          "city": "Portland",
+          "state": "ME",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "bot_protection",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "phone_number"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "cloudflare_blocked"
+        },
+        {
+          "name": "Elway's",
+          "url": "https://www.elways.com",
+          "city": "Denver",
+          "state": "CO",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 15,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "minimal_html"
+        }
+      ],
+      "rootCause": "Metadata contributes only modest points in computeRestaurantScores(), and phone/og/image are weak even when they are the only visible signals.",
+      "affectedVolume": "medium",
+      "proposedFix": "Add a metadata bundle rule: restaurant-like title/meta plus phone/og image/address should reach verified or protected context threshold.",
+      "fixRisk": "low",
+      "estimatedImpact": "Medium; failure-hunt found meta_description in 72 rows and og_image in 65 rows."
+    },
+    {
+      "id": 16,
+      "name": "PDF-only menus and direct PDF URLs",
+      "description": "The submitted site or strongest evidence is a PDF menu hosted by Square, BentoBox, or a restaurant CMS.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "Pho Auntie 7 Menu PDF",
+          "url": "https://phoauntie7.square.site/uploads/b/4827ad00-ab91-11eb-82fa-2b0aaa385d39/PHO%20AUNTIE%207%20MENU.pdf",
+          "city": "Unknown",
+          "state": "CA",
+          "verificationSource": "web search result",
+          "finalDecision": "invalid_website",
+          "httpStatus": 404,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "title_tag",
+            "invalid_reachability"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "invalid_or_stale_url"
+        },
+        {
+          "name": "Jessie Lou's Menu PDF",
+          "url": "https://jessielou757.square.site/uploads/b/bc9c8030-6a4a-11ea-951f-299fd17be793/Menu_summer2020.pdf",
+          "city": "Virginia Beach",
+          "state": "VA",
+          "verificationSource": "web search result",
+          "finalDecision": "invalid_website",
+          "httpStatus": 404,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "title_tag",
+            "invalid_reachability"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "invalid_or_stale_url"
+        },
+        {
+          "name": "Sprout Sandwich Shop Catering PDF",
+          "url": "https://sprout-sandwich-shop.square.site/uploads/b/de15b3a0-db12-11e9-a4b6-a320b8c3151e/74abce80-32fc-11f1-a33c-c9326a2c4e57.pdf",
+          "city": "Unknown",
+          "state": "CA",
+          "verificationSource": "web search result",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "low_signal_score"
+        }
+      ],
+      "rootCause": "checkWebsite() only reads HTML bodies. PDF content-type responses produce no bodyText/signals, so menu terms inside PDFs are invisible.",
+      "affectedVolume": "medium",
+      "proposedFix": "Detect application/pdf, mark as plausible foodservice when URL/path/title has menu or restaurant terms, and optionally extract first-page text with a lightweight PDF parser.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Medium for small-town, food-truck, and catering operators."
+    },
+    {
+      "id": 17,
+      "name": "Huge HTML where restaurant cues are past the 5KB body cutoff",
+      "description": "Some restaurant pages ship large scripts/styles or unrelated boilerplate before the useful content.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "Craigie on Main",
+          "url": "https://www.craigieonmain.com",
+          "city": "Cambridge",
+          "state": "MA",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "DeLorenzo's Tomato Pies",
+          "url": "https://www.delorenzospizza.com",
+          "city": "Robbinsville",
+          "state": "NJ",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Girl & the Goat",
+          "url": "https://girlandthegoat.com",
+          "city": "Chicago",
+          "state": "IL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 27,
+          "signalsFound": [
+            "title_tag",
+            "meta_description",
+            "restaurant_text",
+            "thin_html"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "og_title",
+            "social_or_ordering_links"
+          ],
+          "failureCategory": "minimal_html"
+        }
+      ],
+      "rootCause": "extractSignals() strips HTML and then slices bodyText to 5,000 characters. If menu/location/cuisine appears later, computeRestaurantScores() never sees it.",
+      "affectedVolume": "medium",
+      "proposedFix": "Score full extracted text for keyword presence or keep targeted windows around menu/hours/address terms before truncating for downstream prompts.",
+      "fixRisk": "low",
+      "estimatedImpact": "Medium; failure-hunt rows include very large HTML with score 0 and only meta/schema hints."
+    },
+    {
+      "id": 18,
+      "name": "Hospitality group and hotel restaurant dilution",
+      "description": "Restaurant pages live under hotel or group domains where lodging/private-event content dilutes the restaurant evidence.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "The Capital Hotel Bar",
+          "url": "https://thecappuccinohotel.com",
+          "city": "Little Rock",
+          "state": "AR",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        },
+        {
+          "name": "HoDo Restaurant",
+          "url": "https://www.hoteldonaldson.com",
+          "city": "Fargo",
+          "state": "ND",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "verified_restaurant",
+          "httpStatus": 200,
+          "restaurantSignalScore": 66,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "og_title",
+            "og_description",
+            "restaurant_text"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "social_or_ordering_links"
+          ],
+          "failureCategory": "currently_verified"
+        },
+        {
+          "name": "Auberge du Soleil Dining",
+          "url": "https://aubergeresorts.com/aubergedusoleil/dine/",
+          "city": "Rutherford",
+          "state": "CA",
+          "verificationSource": "web/known restaurant",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 403,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "bot_protection",
+            "title_tag",
+            "http_403"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "cloudflare_blocked"
+        }
+      ],
+      "rootCause": "computeWebsiteRelationship() only has a few hospitality group patterns and no path-specific restaurant context rule for hotel/group domains.",
+      "affectedVolume": "medium",
+      "proposedFix": "Score restaurant-indicating paths under hotel/group domains and avoid penalizing low name-domain match when URL path contains dine/menu/restaurant.",
+      "fixRisk": "medium",
+      "estimatedImpact": "Medium for fine dining and hotel restaurants."
+    },
+    {
+      "id": 19,
+      "name": "Hijacked or unrelated reused domains",
+      "description": "A formerly valid restaurant domain now serves unrelated content, gambling/blog content, or another business.",
+      "volume": "low",
+      "examples": [
+        {
+          "name": "Domaine Hudson",
+          "url": "https://www.domainehudson.com",
+          "city": "Wilmington",
+          "state": "DE",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Milktooth",
+          "url": "https://milktoothindy.com",
+          "city": "Indianapolis",
+          "state": "IN",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 21,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "og_title",
+            "restaurant_nav",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "meta_description"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "John's Restaurant",
+          "url": "https://www.johnsrestaurant.com",
+          "city": "Birmingham",
+          "state": "AL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 0,
+          "restaurantSignalScore": 0,
+          "signalsFound": [
+            "network_error"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description",
+            "og_title",
+            "social_or_ordering_links",
+            "restaurant_text"
+          ],
+          "failureCategory": "timeout_or_network_error"
+        }
+      ],
+      "rootCause": "The pipeline correctly avoids verification, but failure metrics count these as restaurant misses unless stale-domain/hijack is separated from classifier bugs.",
+      "affectedVolume": "low",
+      "proposedFix": "Add stale/hijacked domain failure category using title/meta mismatch and strong non-food topic detection, so benchmarks do not treat them as fixable restaurant false negatives.",
+      "fixRisk": "low",
+      "estimatedImpact": "Low for product conversion, meaningful for benchmark accuracy."
+    },
+    {
+      "id": 20,
+      "name": "Threshold cliff just below verified",
+      "description": "Pages collect several weak-to-moderate restaurant signals but miss one strong signal, leaving them in the 50s rather than verified.",
+      "volume": "medium",
+      "examples": [
+        {
+          "name": "Union League Cafe",
+          "url": "https://www.unionleaguecafe.com",
+          "city": "New Haven",
+          "state": "CT",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 57,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "og_title",
+            "restaurant_nav",
+            "restaurant_text",
+            "phone_number",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "meta_description"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "The Optimist",
+          "url": "https://www.theoptimistrestaurant.com",
+          "city": "Atlanta",
+          "state": "GA",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 23,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "og_title",
+            "restaurant_text",
+            "phone_number",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav",
+            "meta_description"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Boise Fry Company",
+          "url": "https://www.boisefrycompany.com",
+          "city": "Boise",
+          "state": "ID",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 49,
+          "signalsFound": [
+            "title_tag",
+            "restaurant_nav",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "meta_description",
+            "og_title"
+          ],
+          "failureCategory": "low_signal_score"
+        },
+        {
+          "name": "Alinea",
+          "url": "https://alinearestaurant.com",
+          "city": "Chicago",
+          "state": "IL",
+          "verificationSource": "seed/failure-hunt",
+          "finalDecision": "plausible_unverified",
+          "httpStatus": 200,
+          "restaurantSignalScore": 55,
+          "signalsFound": [
+            "schema_org",
+            "title_tag",
+            "meta_description",
+            "og_title",
+            "og_description",
+            "restaurant_text",
+            "social_or_ordering_links"
+          ],
+          "signalsMissing": [
+            "restaurant_schema",
+            "restaurant_nav"
+          ],
+          "failureCategory": "low_signal_score"
+        }
+      ],
+      "rootCause": "applyDecisionRules() uses a hard restaurantSignalScore >= 60 threshold. Pages with title/meta/menu/phone/schema_org but no Restaurant schema or reservations link can stall at 50-59.",
+      "affectedVolume": "medium",
+      "proposedFix": "Add a confidence bundle rule for 50-59 scores when three independent restaurant signals are present and negativeSignalScore is low.",
+      "fixRisk": "low",
+      "estimatedImpact": "Medium; this directly targets reachable false negatives with strong but sub-threshold evidence."
+    }
+  ],
+  "summary": {
+    "highestVolumeScenario": "Network-inaccessible real restaurant domains",
+    "easiestFix": "Single-page websites with no navigation",
+    "highestImpactSingleChange": "Add alternate-host/network fallback plus platform-specific parsing for hosted ordering/menu pages.",
+    "recommendedPriority": [
+      11,
+      3,
+      1,
+      7,
+      12,
+      4,
+      6,
+      2,
+      5,
+      8,
+      13,
+      14,
+      15,
+      16,
+      9,
+      17,
+      18,
+      10,
+      19,
+      20
+    ]
+  }
+}

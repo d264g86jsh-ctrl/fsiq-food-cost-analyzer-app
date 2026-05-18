@@ -1,0 +1,2578 @@
+{
+  "generatedAt": "2026-05-18T16:58:14.453Z",
+  "source": "scripts/validation-dataset.json seed restaurant URLs",
+  "note": "Each URL is from the curated restaurant seed dataset and was run with restaurantName set to an empty string.",
+  "failures": [
+    {
+      "url": "https://sawsbbq.com",
+      "name": "Saw's BBQ",
+      "city": "Birmingham, AL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 56,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "saws",
+        "bbq"
+      ],
+      "titleTag": "SAW&#039;s BBQ - Best Barbecue in Alabama | Authentic Southern BBQ",
+      "metaDescription": "Discover SAW&#039;s BBQ, Alabama&#039;s top destination for authentic Southern barbecue. Enjoy smoked pulled pork, ribs, and more at our Homewood, Southside, Crestline, Avondale, Leeds, and Hoover locations, or book our Street Kitchen food truck for your next event!",
+      "ogTitle": "SAW&#039;s BBQ - Best Barbecue in Alabama | Authentic Southern BBQ"
+    },
+    {
+      "url": "https://bigbobgibson.com",
+      "name": "Big Bob Gibson BBQ",
+      "city": "Decatur, AL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 57,
+      "signalsFound": [
+        "title_tag",
+        "og_title",
+        "og_description",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "meta_description"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "bigbobgibson"
+      ],
+      "titleTag": "Big Bob Gibson",
+      "metaDescription": "",
+      "ogTitle": "Big Bob Gibson"
+    },
+    {
+      "url": "https://olebaycafe.com",
+      "name": "Ole Bay Cafe",
+      "city": "Mobile, AL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "olebay",
+        "cafe"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.johnsrestaurant.com",
+      "name": "John's Restaurant",
+      "city": "Birmingham, AL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "johns",
+        "restaurant"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.rodneyscottsbbq.com",
+      "name": "Rodney Scott's BBQ",
+      "city": "Birmingham, AL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 8,
+      "signalsFound": [
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "rodneyscotts",
+        "bbq"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.oceanrestaurant.net",
+      "name": "Ocean Restaurant",
+      "city": "Birmingham, AL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "ocean",
+        "restaurant"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://bottegafrombirmingham.com",
+      "name": "Bottega",
+      "city": "Birmingham, AL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "bottegafrombirmingham"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.marxbroscafe.com",
+      "name": "Marx Bros Cafe",
+      "city": "Anchorage, AK",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "marxbros",
+        "cafe"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.kinleyrestaurant.com",
+      "name": "Kinley",
+      "city": "Anchorage, AK",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "kinley",
+        "restaurant"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.orsalaska.com",
+      "name": "Orso",
+      "city": "Anchorage, AK",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "orsalaska"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.beartoothmovies.net",
+      "name": "Bear Tooth Theatrepub",
+      "city": "Anchorage, AK",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "beartoothmovies"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.pangalaska.com",
+      "name": "Pangea Restaurant",
+      "city": "Juneau, AK",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "pangalaska"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://tracyskingcrab.com",
+      "name": "Tracy's King Crab Shack",
+      "city": "Juneau, AK",
+      "finalDecision": "invalid_website",
+      "httpStatus": 404,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "title_tag"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "tracyskingcrab"
+      ],
+      "titleTag": "This store is unavailable",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://pizzeriabianco.com",
+      "name": "Pizzeria Bianco",
+      "city": "Phoenix, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 37,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "pizzeriabianco"
+      ],
+      "titleTag": "Pizzeria Bianco - Phoenix wood fired pizzas",
+      "metaDescription": "When Chris Bianco started Pizzeria Bianco in the back corner of a Phoenix grocery store in 1988, he had no idea that he would become a driving force in the artisanal pizza movement. Learn more about our restaurants or order pizzas and merchandise.",
+      "ogTitle": "Pizzeria Bianco - Phoenix wood fired pizzas"
+    },
+    {
+      "url": "https://barriocafe.com",
+      "name": "Barrio Cafe",
+      "city": "Phoenix, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 16,
+      "signalsFound": [
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "rio",
+        "cafe",
+        "bar"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.cafemonarch.com",
+      "name": "Cafe Monarch",
+      "city": "Scottsdale, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 403,
+      "restaurantSignalScore": 8,
+      "signalsFound": [
+        "bot_protection",
+        "title_tag",
+        "http_403"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "cloudflare_blocked",
+      "domainWords": [
+        "monarch",
+        "cafe"
+      ],
+      "titleTag": "Just a moment...",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.tocamadera.com",
+      "name": "Toca Madera",
+      "city": "Scottsdale, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 46,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "tocamadera"
+      ],
+      "titleTag": "Toca Madera",
+      "metaDescription": "Acclaimed Mexican inspired steakhouse featuring bold flavors and high quality, sustainable, and organic ingredients.",
+      "ogTitle": "Toca Madera"
+    },
+    {
+      "url": "https://www.lonsdalefour.com",
+      "name": "LON's at The Hermosa",
+      "city": "Paradise Valley, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "lonsdalefour"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.quelintaqueria.com",
+      "name": "Quelin Taqueria",
+      "city": "Tucson, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "quelin",
+        "taqueria"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.cafeportagul.com",
+      "name": "Cafe Poca Cosa",
+      "city": "Tucson, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "portagul",
+        "cafe"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.elcharro.com",
+      "name": "El Charro Cafe",
+      "city": "Tucson, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "elcharro"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.binkscafe.com",
+      "name": "Bink's Midtown",
+      "city": "Phoenix, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "binks",
+        "cafe"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.tarbell.com",
+      "name": "Tarbell's",
+      "city": "Phoenix, AZ",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "tarbell"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://doeseatplace.com",
+      "name": "Doe's Eat Place",
+      "city": "Little Rock, AR",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 51,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "doeseatplace"
+      ],
+      "titleTag": "Home - Doe's Eat Place",
+      "metaDescription": "Doe’s Eat Place, founded in 1941 by Dominick “Doe” Signa and his wife Mamie",
+      "ogTitle": "Home - Doe&#039;s Eat Place"
+    },
+    {
+      "url": "https://www.pressroombentonville.com",
+      "name": "Pressroom",
+      "city": "Bentonville, AR",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "pressroombentonville"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.catfishhole.com",
+      "name": "The Catfish Hole",
+      "city": "Fayetteville, AR",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "catfishhole"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.mocojackson.com",
+      "name": "Mojo on Center",
+      "city": "Little Rock, AR",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "mocojackson"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://thecappuccinohotel.com",
+      "name": "The Capital Hotel Bar",
+      "city": "Little Rock, AR",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "thecappuccinohotel"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.brunoscafeandgrill.com",
+      "name": "Bruno's Little Italy",
+      "city": "Little Rock, AR",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "brunos",
+        "and",
+        "grill",
+        "cafe"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.tusklounge.com",
+      "name": "Tusk Lounge",
+      "city": "Bentonville, AR",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "tusklounge"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.herbershq.com",
+      "name": "Herbers HQ",
+      "city": "Rogers, AR",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "herbershq"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.tartinebakery.com",
+      "name": "Tartine Bakery",
+      "city": "San Francisco, CA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 8,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "social_or_ordering_links",
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "tartinebakery"
+      ],
+      "titleTag": "Tartine",
+      "metaDescription": "Tartine is a thoughtful expression of modern craft through good food and warm experiences. We are a product of our communities and our friends.",
+      "ogTitle": "Tartine"
+    },
+    {
+      "url": "https://statebirdsf.com",
+      "name": "State Bird Provisions",
+      "city": "San Francisco, CA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 36,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "statebirdsf"
+      ],
+      "titleTag": "State Bird Provisions",
+      "metaDescription": "State Bird Provisions is a James Beard award winning and Michelin rated restaurant in San Francisco, California. It is an adventurous, inventive, and delicious contemporary American restaurant that started as a recipe for serving quail. It has slowly evolved into a restaurant without any programmed elements.",
+      "ogTitle": "State Bird Provisions"
+    },
+    {
+      "url": "https://animalrestaurant.com",
+      "name": "Animal",
+      "city": "Los Angeles, CA",
+      "finalDecision": "invalid_website",
+      "httpStatus": 404,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "title_tag"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "js_rendered",
+      "domainWords": [
+        "animal",
+        "restaurant"
+      ],
+      "titleTag": "Squarespace - Website Expired",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.cassiala.com",
+      "name": "Cassia",
+      "city": "Los Angeles, CA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 44,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "cassiala"
+      ],
+      "titleTag": "Cassia &#8211; Santa Monica, Calif.",
+      "metaDescription": "Cassia celebrates the fresh, vibrant flavors of Southeast Asia, striking a unique balance of soulful, ancestral cuisine and a California sensibility, tilizing the best quality ingredients from local farmers.",
+      "ogTitle": "Cassia, Santa Monica, Calif."
+    },
+    {
+      "url": "https://www.tartinemanufactory.com",
+      "name": "Tartine Manufactory",
+      "city": "San Francisco, CA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 8,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "social_or_ordering_links",
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "tartinebakery"
+      ],
+      "titleTag": "Tartine",
+      "metaDescription": "Tartine is a thoughtful expression of modern craft through good food and warm experiences. We are a product of our communities and our friends.",
+      "ogTitle": "Tartine"
+    },
+    {
+      "url": "https://www.saftarestaurant.com",
+      "name": "Safta",
+      "city": "Denver, CO",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "safta",
+        "restaurant"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.guardandgrace.com",
+      "name": "Guard and Grace",
+      "city": "Denver, CO",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 34,
+      "signalsFound": [
+        "title_tag",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "guardandgrace"
+      ],
+      "titleTag": "guardandgrace.com",
+      "metaDescription": "",
+      "ogTitle": "guardandgrace.com"
+    },
+    {
+      "url": "https://www.denveracorn.com",
+      "name": "Acorn",
+      "city": "Denver, CO",
+      "finalDecision": "invalid_website",
+      "httpStatus": 404,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "title_tag"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "js_rendered",
+      "domainWords": [
+        "denveracorn"
+      ],
+      "titleTag": "Error 404",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.riojadenvcer.com",
+      "name": "Rioja",
+      "city": "Denver, CO",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "riojadenvcer"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.elways.com",
+      "name": "Elway's",
+      "city": "Denver, CO",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 5,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "elways"
+      ],
+      "titleTag": "Home - Elway&#039;s",
+      "metaDescription": "Elevate your dining experience at Elway&#039;s Steakhouse. Our dedication to culinary excellence ensures that every meal is a celebration of flavor. Immerse yourself in a world of refined taste, where premium cuisine and impeccable service converge.",
+      "ogTitle": "Home - Elway&#039;s"
+    },
+    {
+      "url": "https://www.mizuna-denver.com",
+      "name": "Mizuna",
+      "city": "Denver, CO",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "mizuna",
+        "denver"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://pepespizzeria.com",
+      "name": "Frank Pepe's",
+      "city": "New Haven, CT",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 40,
+      "signalsFound": [
+        "title_tag",
+        "restaurant_nav"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "pepespizzeria"
+      ],
+      "titleTag": "Home - Frank Pepe Pizzeria Napoletana",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.unionleaguecafe.com",
+      "name": "Union League Cafe",
+      "city": "New Haven, CT",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 45,
+      "signalsFound": [
+        "title_tag",
+        "og_title",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "meta_description"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "unionleague"
+      ],
+      "titleTag": "Union League",
+      "metaDescription": "",
+      "ogTitle": "Union League"
+    },
+    {
+      "url": "https://www.oysterclubnorwalk.com",
+      "name": "Oyster Club",
+      "city": "Norwalk, CT",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "oysterclubnorwalk"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.thomashenkelmancatering.com",
+      "name": "Thomas Henkelmann",
+      "city": "Greenwich, CT",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "thomashenkelmancatering"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.grandbycorner.com",
+      "name": "Millwright's",
+      "city": "Simsbury, CT",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "grandbycorner"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.burgerbar-hartford.com",
+      "name": "Plan B Burger Bar",
+      "city": "Hartford, CT",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "burger",
+        "bar",
+        "hartford"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.ondaskitchen.com",
+      "name": "Ondas Kitchen",
+      "city": "Bridgeport, CT",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "ondas",
+        "kitchen"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.domainehudson.com",
+      "name": "Domaine Hudson",
+      "city": "Wilmington, DE",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 6,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "domainehudson"
+      ],
+      "titleTag": "DOMAINEHUDSON - Portal Berita Game Terkini di Indonesia dengan Informasi Paling Lengkap",
+      "metaDescription": "DOMAINEHUDSON hadir sebagai blog berita game terpopuler di Indonesia, memberikan update tercepat dan lengkap untuk para gamer sejati. Jangan lewatkan!",
+      "ogTitle": "DOMAINEHUDSON - Portal Berita Game Terkini di Indonesia dengan Informasi Paling Lengkap"
+    },
+    {
+      "url": "https://www.henlopen-city-oyster-house.com",
+      "name": "Henlopen City Oyster House",
+      "city": "Rehoboth Beach, DE",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "henlopen",
+        "city",
+        "oyster",
+        "house"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.bancroft-on-the-green.com",
+      "name": "Bancroft on the Green",
+      "city": "Wilmington, DE",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "bancroft",
+        "on",
+        "the",
+        "green"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.jessopstavern.com",
+      "name": "Jessop's Tavern",
+      "city": "New Castle, DE",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "jessops",
+        "tavern"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.pizzabythesea.com",
+      "name": "Pizza by the Sea",
+      "city": "Rehoboth Beach, DE",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 403,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "bot_protection",
+        "title_tag",
+        "http_403"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "cloudflare_blocked",
+      "domainWords": [
+        "pizzabythesea"
+      ],
+      "titleTag": "Just a moment...",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.lupositaliankit.com",
+      "name": "Lupo Italian Kitchen",
+      "city": "Georgetown, DE",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "lupositaliankit"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.harrysseafood.com",
+      "name": "Harry's Seafood",
+      "city": "Wilmington, DE",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "harrysseafood"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.boiaderestaurant.com",
+      "name": "Boia De",
+      "city": "Miami, FL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 58,
+      "signalsFound": [
+        "bot_protection",
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema"
+      ],
+      "failureCategory": "cloudflare_blocked",
+      "domainWords": [
+        "boiade",
+        "restaurant"
+      ],
+      "titleTag": "Boia De | Italian Restaurant in Miami, FL",
+      "metaDescription": "Italian Restaurant located in Miami, FL.",
+      "ogTitle": "Boia De | Italian Restaurant in Miami, FL"
+    },
+    {
+      "url": "https://bernssteakhouse.com",
+      "name": "Bern's Steak House",
+      "city": "Tampa, FL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 54,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "bernssteakhouse"
+      ],
+      "titleTag": "Premium Steaks in Tampa | Largest Wine Collection | Bern&#039;s Steak House",
+      "metaDescription": "Perfectly-aged steaks, one of the largest wine collections in the world, and an internationally famous dessert room. Schedule your tour or reservation.",
+      "ogTitle": "Premium Steaks in Tampa | Largest Wine Collection | Bern&#039;s Steak House"
+    },
+    {
+      "url": "https://www.theravenouspig.com",
+      "name": "The Ravenous Pig",
+      "city": "Winter Park, FL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 403,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "bot_protection",
+        "title_tag",
+        "http_403"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "cloudflare_blocked",
+      "domainWords": [
+        "theravenouspig"
+      ],
+      "titleTag": "Just a moment...",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.mignonetteuptown.com",
+      "name": "Mignonette",
+      "city": "Miami, FL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "mignonetteuptown"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://foxbrosbbq.com",
+      "name": "Fox Bros BBQ",
+      "city": "Atlanta, GA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 403,
+      "restaurantSignalScore": 8,
+      "signalsFound": [
+        "bot_protection",
+        "title_tag",
+        "http_403"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "cloudflare_blocked",
+      "domainWords": [
+        "foxbros",
+        "bbq"
+      ],
+      "titleTag": "Just a moment...",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.theoptimistrestaurant.com",
+      "name": "The Optimist",
+      "city": "Atlanta, GA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 6,
+      "signalsFound": [
+        "title_tag",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "theoptimist",
+        "restaurant"
+      ],
+      "titleTag": "The Optimist Restaurant",
+      "metaDescription": "",
+      "ogTitle": "The Optimist Restaurant"
+    },
+    {
+      "url": "https://staplehouse.com",
+      "name": "Staplehouse",
+      "city": "Atlanta, GA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 36,
+      "signalsFound": [
+        "title_tag",
+        "og_title",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "meta_description"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "staplehouse"
+      ],
+      "titleTag": "Staplehouse",
+      "metaDescription": "",
+      "ogTitle": "Staplehouse"
+    },
+    {
+      "url": "https://www.empirestatesouthrestaurant.com",
+      "name": "Empire State South",
+      "city": "Atlanta, GA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "empirestatesouth",
+        "restaurant"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.canoeatlanta.com",
+      "name": "Canoe",
+      "city": "Atlanta, GA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "canoeatlanta"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.bacchanalia.com",
+      "name": "Bacchanalia",
+      "city": "Atlanta, GA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "bacchanalia"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.mamasfishhouse.com",
+      "name": "Mama's Fish House",
+      "city": "Paia, HI",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 30,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "mamasfishhouse"
+      ],
+      "titleTag": "Mama&#39;s Fish House Restaurant | North Shore Maui Hawaii",
+      "metaDescription": "World famous restaurant on Maui&#39;s North Shore, featuring Hawaiian fish brought to us daily by our fishermen.",
+      "ogTitle": "Mama&#39;s Fish House Restaurant | North Shore Maui Hawaii"
+    },
+    {
+      "url": "https://tinroofmaui.com",
+      "name": "Tin Roof",
+      "city": "Kahului, HI",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 50,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "tinroofmaui"
+      ],
+      "titleTag": "TINROOF   /   Maui",
+      "metaDescription": "Tin Roof Maui is a casual lunch shop by Chef Sheldon Simeon in Kahalui, Maui. Dishes include mochiko chicken, poke bowl, and pork belly.",
+      "ogTitle": "TINROOF   /   Maui"
+    },
+    {
+      "url": "https://www.rainbowdrivein.com",
+      "name": "Rainbow Drive-In",
+      "city": "Honolulu, HI",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 27,
+      "signalsFound": [
+        "title_tag",
+        "og_title",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "meta_description"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "rainbowdrivein"
+      ],
+      "titleTag": "Home | Rainbow Drive-In",
+      "metaDescription": "",
+      "ogTitle": "Home | Rainbow Drive-In"
+    },
+    {
+      "url": "https://www.mw-restaurant.com",
+      "name": "MW Restaurant",
+      "city": "Honolulu, HI",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "mw",
+        "restaurant"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.onoseafood.com",
+      "name": "Ono Seafood",
+      "city": "Honolulu, HI",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "onoseafood"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.highwayin-haleiwa.com",
+      "name": "Haleiwa Joe's",
+      "city": "Haleiwa, HI",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "highwayin",
+        "haleiwa"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.giovannisshrimptruck.com",
+      "name": "Giovanni's Shrimp Truck",
+      "city": "Kahuku, HI",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 50,
+      "signalsFound": [
+        "title_tag",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "meta_description",
+        "og_title"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "giovannisshrimptruck"
+      ],
+      "titleTag": "Giovanni's Shrimp Truck",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.boisefrycompany.com",
+      "name": "Boise Fry Company",
+      "city": "Boise, ID",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 37,
+      "signalsFound": [
+        "title_tag",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "meta_description",
+        "og_title"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "boisefrycompany"
+      ],
+      "titleTag": "Boise Fry Company",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://forkboise.com",
+      "name": "Fork",
+      "city": "Boise, ID",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "forkboise"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.barbacoa.com",
+      "name": "Barbacoa",
+      "city": "Boise, ID",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 8,
+      "signalsFound": [
+        "title_tag",
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "bacoa",
+        "bar"
+      ],
+      "titleTag": "barbacoa.com",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.richardsdining.com",
+      "name": "Richard's",
+      "city": "Boise, ID",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "richardsdining"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.juniperboise.com",
+      "name": "Juniper",
+      "city": "Boise, ID",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "juniperboise"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.goldy-s.com",
+      "name": "Goldy's",
+      "city": "Boise, ID",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "goldy"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.thecellarcda.com",
+      "name": "The Cellar",
+      "city": "Coeur d'Alene, ID",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "bot_protection",
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "cloudflare_blocked",
+      "domainWords": [
+        "hugedomains"
+      ],
+      "titleTag": "TheCellarCda.com is for sale | HugeDomains",
+      "metaDescription": "Providing a surprisingly human shopping experience. Trusted and secure. Millions of domains to choose from.",
+      "ogTitle": "TheCellarCda.com is for sale | HugeDomains"
+    },
+    {
+      "url": "https://www.boisedeli.com",
+      "name": "Guru Donuts",
+      "city": "Boise, ID",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "boisedeli"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.kbsboise.com",
+      "name": "KIN",
+      "city": "Boise, ID",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "kbsboise"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://alinearestaurant.com",
+      "name": "Alinea",
+      "city": "Chicago, IL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 38,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "og_description",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "alinea",
+        "restaurant"
+      ],
+      "titleTag": "Alinea",
+      "metaDescription": "Alinea has been universally praised for its innovative approach to modernist cuisine. Every night, chef Grant Achatz and his team offer three distinct experiences at Alinea: the Kitchen Table, The Gallery, and The Salon.",
+      "ogTitle": "Alinea"
+    },
+    {
+      "url": "https://girlandthegoat.com",
+      "name": "Girl & the Goat",
+      "city": "Chicago, IL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 16,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "girlandthegoat"
+      ],
+      "titleTag": "Girl &amp; The Goat | Los Angeles &amp; Chicago | Chef Stephanie Izard",
+      "metaDescription": "Discover bold, globally-inspired cuisine at Girl &amp; The Goat in Los Angeles and Chicago. Experience seasonal flavors that harmonize global influences, creating an unforgettable culinary adventure crafted by Chef Stephanie Izard in partnership with Boka Restaurant Group.",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://monteverdechicago.com",
+      "name": "Monteverde",
+      "city": "Chicago, IL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 55,
+      "signalsFound": [
+        "title_tag",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "monteverdechicago"
+      ],
+      "titleTag": "Home - Monteverde Chicago",
+      "metaDescription": "Located in Chicago’s West Loop neighborhood, Monteverde is an Italian restaurant that blends the traditions of Italian culture and cooking with influences from Chef Sarah Grueneberg’s trips around the world, as well as her family heritage.",
+      "ogTitle": "Home - Monteverde Chicago"
+    },
+    {
+      "url": "https://avecchicago.com",
+      "name": "Avec",
+      "city": "Chicago, IL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "avecchicago"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://smythandtheloyal.com",
+      "name": "Smyth",
+      "city": "Chicago, IL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "smythandtheloyal"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.fronteragrill.net",
+      "name": "Frontera Grill",
+      "city": "Chicago, IL",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 8,
+      "signalsFound": [
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "frontera",
+        "grill"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://milktoothindy.com",
+      "name": "Milktooth",
+      "city": "Indianapolis, IN",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 21,
+      "signalsFound": [
+        "title_tag",
+        "og_title",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "meta_description"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "milktoothindy"
+      ],
+      "titleTag": "arlene&#39;s",
+      "metaDescription": "",
+      "ogTitle": "arlene&#39;s"
+    },
+    {
+      "url": "https://www.liveryindy.com",
+      "name": "Livery",
+      "city": "Indianapolis, IN",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "liveryindy"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.tinkerstreet.com",
+      "name": "Tinker Street",
+      "city": "Indianapolis, IN",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "tinkerstreet"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.blackmarketindy.com",
+      "name": "Black Market",
+      "city": "Indianapolis, IN",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "blackmarketindy"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.theeagle-indy.com",
+      "name": "The Eagle",
+      "city": "Indianapolis, IN",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "theeagle",
+        "indy"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.oceanprimeindy.com",
+      "name": "Late Harvest Kitchen",
+      "city": "Indianapolis, IN",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "oceanprimeindy"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.louvoguepistro.com",
+      "name": "Bru Burger",
+      "city": "Indianapolis, IN",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "louvoguepistro"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.albastpizza.com",
+      "name": "Eatery A",
+      "city": "Des Moines, IA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "network_error"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "albastpizza"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.zombieburgerdm.com",
+      "name": "Zombie Burger",
+      "city": "Des Moines, IA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 32,
+      "signalsFound": [
+        "title_tag",
+        "og_title",
+        "restaurant_nav",
+        "social_or_ordering_links"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "meta_description"
+      ],
+      "failureCategory": "low_signal_score",
+      "domainWords": [
+        "zombieburgerdm"
+      ],
+      "titleTag": "Zombie Burger",
+      "metaDescription": "",
+      "ogTitle": "Zombie Burger"
+    },
+    {
+      "url": "https://www.pullmandining.com",
+      "name": "Pullman Bar & Diner",
+      "city": "Iowa City, IA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 0,
+      "restaurantSignalScore": 0,
+      "signalsFound": [],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "timeout",
+      "domainWords": [
+        "pullmandining"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.aposto.us",
+      "name": "Aposto",
+      "city": "Des Moines, IA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 200,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "thin_html"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "minimal_html",
+      "domainWords": [
+        "aposto"
+      ],
+      "titleTag": "",
+      "metaDescription": "",
+      "ogTitle": ""
+    },
+    {
+      "url": "https://www.saintanejo.com",
+      "name": "Saint Anejo",
+      "city": "Des Moines, IA",
+      "finalDecision": "plausible_unverified",
+      "httpStatus": 403,
+      "restaurantSignalScore": 0,
+      "signalsFound": [
+        "bot_protection",
+        "title_tag",
+        "http_403"
+      ],
+      "signalsMissing": [
+        "restaurant_schema",
+        "restaurant_nav",
+        "meta_description",
+        "og_title",
+        "social_or_ordering_links"
+      ],
+      "failureCategory": "cloudflare_blocked",
+      "domainWords": [
+        "saintanejonashville"
+      ],
+      "titleTag": "Just a moment...",
+      "metaDescription": "",
+      "ogTitle": ""
+    }
+  ]
+}

@@ -11,6 +11,7 @@
  * Usage:
  *   npx tsx scripts/failure-hunt.ts            # full run (5,000 failures target)
  *   npx tsx scripts/failure-hunt.ts --dry-run   # quick test (50 failures then stop)
+ *   npx tsx scripts/failure-hunt.ts --resume    # append to existing failure-hunt-results.json
  */
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
@@ -44,21 +45,37 @@ loadEnvFile(path.join(process.cwd(), '.env'));
 // ── CLI flags & constants ────────────────────────────────────────────────
 
 const DRY_RUN = process.argv.includes('--dry-run');
+const RESUME = process.argv.includes('--resume');
 const TARGET_FAILURES = DRY_RUN ? 50 : 5000;
 const CONCURRENCY = 10;
 const PROGRESS_INTERVAL = DRY_RUN ? 10 : 500;
-const SCRAPE_DELAY_MS = 800;
+const DRY_RUN_FALSE_POSITIVE_LIMIT = 50;
+const SCRAPE_DELAY_MS = 200;
 const SCRAPE_TIMEOUT_MS = 12_000;
 
 const RESULTS_PATH = path.join(process.cwd(), 'scripts', 'failure-hunt-results.json');
 const SUMMARY_PATH = path.join(process.cwd(), 'scripts', 'failure-hunt-summary.txt');
 
-const BROWSER_UA =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
+const BROWSER_USER_AGENTS = [
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:124.0) Gecko/20100101 Firefox/124.0',
+];
 
 // ── Types ────────────────────────────────────────────────────────────────
 
-type UrlSource = 'yelp' | 'opentable' | 'eater' | 'infatuation' | 'seed';
+type UrlSource =
+  | 'yelp'
+  | 'opentable'
+  | 'eater'
+  | 'infatuation'
+  | 'tripadvisor'
+  | 'google'
+  | 'state_association'
+  | 'newspaper'
+  | 'foursquare'
+  | 'seed';
 
 interface RestaurantCandidate {
   url: string;
@@ -250,13 +267,23 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+const lastScrapeByDomain = new Map<string, number>();
+
 async function scrapeFetch(url: string): Promise<string | null> {
+  const domain = extractDomainFromUrl(url);
+  if (domain) {
+    const elapsed = Date.now() - (lastScrapeByDomain.get(domain) ?? 0);
+    if (elapsed < SCRAPE_DELAY_MS) await sleep(SCRAPE_DELAY_MS - elapsed);
+    lastScrapeByDomain.set(domain, Date.now());
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), SCRAPE_TIMEOUT_MS);
   try {
+    const ua = BROWSER_USER_AGENTS[Math.floor(Math.random() * BROWSER_USER_AGENTS.length)];
     const res = await fetch(url, {
       headers: {
-        'User-Agent': BROWSER_UA,
+        'User-Agent': ua,
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.5',
         'Cache-Control': 'no-cache',
@@ -270,6 +297,19 @@ async function scrapeFetch(url: string): Promise<string | null> {
   } catch {
     clearTimeout(timer);
     return null;
+  }
+}
+
+function canonicalUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    parsed.hash = '';
+    parsed.search = '';
+    parsed.hostname = parsed.hostname.replace(/^www\./, '').toLowerCase();
+    parsed.pathname = parsed.pathname.replace(/\/+$/, '') || '/';
+    return parsed.toString().replace(/\/$/, '');
+  } catch {
+    return url.trim().replace(/\/+$/, '').toLowerCase();
   }
 }
 
@@ -503,40 +543,51 @@ async function collectFromYelp(
 ): Promise<RestaurantCandidate[]> {
   const candidates: RestaurantCandidate[] = [];
   let totalScraped = 0;
+  let failedSearchPages = 0;
 
   for (const city of cities) {
-    const searchUrl = `https://www.yelp.com/search?find_desc=Restaurants&find_loc=${city.yelpLoc}`;
-    const searchHtml = await scrapeFetch(searchUrl);
-    if (!searchHtml) { await sleep(SCRAPE_DELAY_MS); continue; }
+    for (let start = 0; start <= 90; start += 10) {
+      const searchUrl = `https://www.yelp.com/search?find_desc=Restaurants&find_loc=${city.yelpLoc}&start=${start}`;
+      const searchHtml = await scrapeFetch(searchUrl);
+      if (!searchHtml) {
+        failedSearchPages++;
+        onProgress('yelp', totalScraped);
+        if (failedSearchPages >= 25 && totalScraped === 0) {
+          console.log('\n[COLLECT] yelp: stopping early after 25 blocked/empty search pages.');
+          return candidates;
+        }
+        continue;
+      }
+      failedSearchPages = 0;
 
-    const bizSlugs = extractYelpBizSlugs(searchHtml);
-    for (const slug of bizSlugs) {
-      await sleep(SCRAPE_DELAY_MS);
-      const bizUrl = `https://www.yelp.com/biz/${slug}`;
-      const bizHtml = await scrapeFetch(bizUrl);
-      if (!bizHtml) continue;
+      const bizSlugs = extractYelpBizSlugs(searchHtml);
+      for (const slug of bizSlugs) {
+        await sleep(SCRAPE_DELAY_MS);
+        const bizUrl = `https://www.yelp.com/biz/${slug}`;
+        const bizHtml = await scrapeFetch(bizUrl);
+        if (!bizHtml) continue;
 
-      const externalUrl = extractYelpExternalUrl(bizHtml);
-      if (!externalUrl || !isDirectRestaurantUrl(externalUrl)) continue;
+        const externalUrl = extractYelpExternalUrl(bizHtml);
+        if (!externalUrl || !isDirectRestaurantUrl(externalUrl)) continue;
 
-      const domain = extractDomainFromUrl(externalUrl);
-      if (!domain || seenDomains.has(domain)) continue;
-      seenDomains.add(domain);
+        const domain = extractDomainFromUrl(externalUrl);
+        if (!domain || seenDomains.has(domain)) continue;
+        seenDomains.add(domain);
 
-      const name = extractYelpBizName(bizHtml);
-      candidates.push({
-        url: externalUrl,
-        name: name || slug.replace(/-/g, ' '),
-        city: city.city,
-        state: city.stateCode,
-        cuisine: inferCuisine(name || slug),
-        source: 'yelp',
-        address: `${city.city}, ${city.stateCode}`,
-      });
-      totalScraped++;
+        const name = extractYelpBizName(bizHtml);
+        candidates.push({
+          url: externalUrl,
+          name: name || slug.replace(/-/g, ' '),
+          city: city.city,
+          state: city.stateCode,
+          cuisine: inferCuisine(name || slug),
+          source: 'yelp',
+          address: `${city.city}, ${city.stateCode}`,
+        });
+        totalScraped++;
+      }
+      onProgress('yelp', totalScraped);
     }
-    onProgress('yelp', totalScraped);
-    await sleep(SCRAPE_DELAY_MS);
   }
   return candidates;
 }
@@ -596,8 +647,11 @@ async function collectFromOpenTable(
   const candidates: RestaurantCandidate[] = [];
   let total = 0;
 
-  for (const metro of OPENTABLE_METROS) {
-    const searchUrl = `https://www.opentable.com/s?metroId=${metro.id}`;
+  const knownMetros = new Map(OPENTABLE_METROS.map((metro) => [metro.id, metro]));
+
+  for (let metroId = 1; metroId <= 200; metroId++) {
+    const metro = knownMetros.get(metroId) ?? { id: metroId, city: `Metro ${metroId}`, stateCode: '' };
+    const searchUrl = `https://www.opentable.com/s/?metroId=${metro.id}&covers=2`;
     const html = await scrapeFetch(searchUrl);
     if (!html) { await sleep(SCRAPE_DELAY_MS); continue; }
 
@@ -653,6 +707,8 @@ async function collectFromEater(
 
   const eaterCities = cities.filter((c) => c.eaterSlug);
   const guidePatterns = [
+    (slug: string) => `https://www.eater.com/maps/best-restaurants-${slug}`,
+    (slug: string) => `https://www.eater.com/maps/best-new-restaurants-${slug}`,
     (slug: string) => `https://www.eater.com/${slug}/maps/best-restaurants-${slug}`,
     (slug: string) => `https://www.eater.com/${slug}/maps/best-new-restaurants-${slug}`,
     (slug: string) => `https://www.eater.com/${slug}/maps/best-restaurants`,
@@ -700,6 +756,7 @@ async function collectFromInfatuation(
     (slug: string) => `https://www.theinfatuation.com/${slug}/guides/best-${slug}-restaurants`,
     (slug: string) => `https://www.theinfatuation.com/${slug}/guides/best-new-restaurants-${slug}`,
     (slug: string) => `https://www.theinfatuation.com/${slug}/guides/best-restaurants`,
+    (slug: string) => `https://www.theinfatuation.com/${slug}/guides`,
   ];
 
   for (const city of infCities) {
@@ -736,15 +793,22 @@ function loadSeedUrls(): RestaurantCandidate[] {
   if (existsSync(datasetPath)) {
     try {
       const dataset = JSON.parse(readFileSync(datasetPath, 'utf8')) as {
-        restaurants: Array<{ url: string; name: string; city?: string }>;
+        restaurants: Array<{
+          url: string;
+          name: string;
+          city?: string;
+          state?: string;
+          cuisine?: string;
+          source?: string;
+        }>;
       };
       for (const entry of dataset.restaurants) {
-        const parts = (entry.city ?? '').split(',').map((s) => s.trim());
         seeds.push({
           url: entry.url, name: entry.name,
-          city: parts[0] || '', state: parts[1] || '',
-          cuisine: inferCuisine(entry.name), source: 'seed',
-          address: entry.city ?? '',
+          city: entry.city ?? '', state: entry.state ?? '',
+          cuisine: entry.cuisine ?? inferCuisine(entry.name),
+          source: (entry.source as UrlSource | undefined) ?? 'seed',
+          address: [entry.city, entry.state].filter(Boolean).join(', '),
         });
       }
     } catch { /* ignore */ }
@@ -757,6 +821,177 @@ function loadSeedUrls(): RestaurantCandidate[] {
     } catch { /* ignore */ }
   }
   return seeds;
+}
+
+function loadDatasetCities(): CityEntry[] {
+  const datasetPath = path.join(process.cwd(), 'scripts', 'validation-dataset.json');
+  if (!existsSync(datasetPath)) return [];
+  try {
+    const dataset = JSON.parse(readFileSync(datasetPath, 'utf8')) as {
+      restaurants?: Array<{ city?: string; state?: string }>;
+    };
+    const cities = new Map<string, CityEntry>();
+    for (const entry of dataset.restaurants ?? []) {
+      if (!entry.city || !entry.state) continue;
+      const key = `${entry.city},${entry.state}`.toLowerCase();
+      if (cities.has(key)) continue;
+      cities.set(key, {
+        city: entry.city,
+        stateCode: entry.state,
+        yelpLoc: `${encodeURIComponent(entry.city).replace(/%20/g, '+')}+${entry.state}`,
+        eaterSlug: null,
+        infatuationSlug: null,
+      });
+    }
+    return [...cities.values()];
+  } catch {
+    return [];
+  }
+}
+
+function buildExpandedCities(limit = 300): CityEntry[] {
+  const cities = new Map<string, CityEntry>();
+  for (const city of [...US_CITIES, ...loadDatasetCities()]) {
+    const key = `${city.city},${city.stateCode}`.toLowerCase();
+    if (!cities.has(key)) cities.set(key, city);
+    if (cities.size >= limit) break;
+  }
+  return [...cities.values()];
+}
+
+function addCandidate(
+  candidates: RestaurantCandidate[],
+  seenDomains: Set<string>,
+  candidate: RestaurantCandidate,
+): boolean {
+  if (!candidate.url || !isDirectRestaurantUrl(candidate.url)) return false;
+  const domain = extractDomainFromUrl(candidate.url);
+  if (!domain || seenDomains.has(domain)) return false;
+  seenDomains.add(domain);
+  candidates.push(candidate);
+  return true;
+}
+
+function extractGoogleResultUrls(html: string): string[] {
+  const urls: string[] = [];
+  const redirectMatches = html.matchAll(/\/url\?q=(https?:\/\/[^&"']+)/g);
+  for (const match of redirectMatches) {
+    try { urls.push(decodeURIComponent(match[1])); } catch { /* ignore */ }
+  }
+  const directMatches = html.matchAll(/href=["'](https?:\/\/[^"']+)["']/g);
+  for (const match of directMatches) urls.push(match[1]);
+  return [...new Set(urls)]
+    .filter((url) => isDirectRestaurantUrl(url))
+    .filter((url) => !/[?&](utm_|fbclid=|gclid=)/i.test(url));
+}
+
+async function collectFromGoogleSearch(
+  cities: CityEntry[],
+  seenDomains: Set<string>,
+  source: UrlSource,
+  queryBuilders: Array<(city: CityEntry) => string>,
+  onProgress: (source: string, count: number) => void,
+  maxCities = 300,
+): Promise<RestaurantCandidate[]> {
+  const candidates: RestaurantCandidate[] = [];
+  let total = 0;
+  for (const city of cities.slice(0, maxCities)) {
+    for (const buildQuery of queryBuilders) {
+      const query = buildQuery(city);
+      const url = `https://www.google.com/search?q=${encodeURIComponent(query)}&num=20`;
+      const html = await scrapeFetch(url);
+      if (!html) continue;
+      for (const resultUrl of extractGoogleResultUrls(html)) {
+        const name = extractDomainFromUrl(resultUrl).split('.')[0]?.replace(/[-_]/g, ' ') || 'Restaurant';
+        if (addCandidate(candidates, seenDomains, {
+          url: resultUrl,
+          name,
+          city: city.city,
+          state: city.stateCode,
+          cuisine: inferCuisine(name),
+          source,
+          address: `${city.city}, ${city.stateCode}`,
+        })) {
+          total++;
+        }
+      }
+    }
+    onProgress(source, total);
+  }
+  return candidates;
+}
+
+const TRIPADVISOR_CITY_PAGES = [
+  { city: 'New York', stateCode: 'NY', url: 'https://www.tripadvisor.com/Restaurants-g60763-New_York_City_New_York.html' },
+  { city: 'Los Angeles', stateCode: 'CA', url: 'https://www.tripadvisor.com/Restaurants-g32655-Los_Angeles_California.html' },
+  { city: 'Chicago', stateCode: 'IL', url: 'https://www.tripadvisor.com/Restaurants-g35805-Chicago_Illinois.html' },
+  { city: 'Houston', stateCode: 'TX', url: 'https://www.tripadvisor.com/Restaurants-g56003-Houston_Texas.html' },
+  { city: 'Phoenix', stateCode: 'AZ', url: 'https://www.tripadvisor.com/Restaurants-g31310-Phoenix_Arizona.html' },
+  { city: 'Philadelphia', stateCode: 'PA', url: 'https://www.tripadvisor.com/Restaurants-g60795-Philadelphia_Pennsylvania.html' },
+  { city: 'San Antonio', stateCode: 'TX', url: 'https://www.tripadvisor.com/Restaurants-g60956-San_Antonio_Texas.html' },
+  { city: 'San Diego', stateCode: 'CA', url: 'https://www.tripadvisor.com/Restaurants-g60750-San_Diego_California.html' },
+  { city: 'Dallas', stateCode: 'TX', url: 'https://www.tripadvisor.com/Restaurants-g55711-Dallas_Texas.html' },
+  { city: 'Austin', stateCode: 'TX', url: 'https://www.tripadvisor.com/Restaurants-g30196-Austin_Texas.html' },
+  { city: 'Seattle', stateCode: 'WA', url: 'https://www.tripadvisor.com/Restaurants-g60878-Seattle_Washington.html' },
+  { city: 'Denver', stateCode: 'CO', url: 'https://www.tripadvisor.com/Restaurants-g33388-Denver_Colorado.html' },
+  { city: 'Nashville', stateCode: 'TN', url: 'https://www.tripadvisor.com/Restaurants-g55229-Nashville_Davidson_County_Tennessee.html' },
+  { city: 'Portland', stateCode: 'OR', url: 'https://www.tripadvisor.com/Restaurants-g52024-Portland_Oregon.html' },
+  { city: 'Atlanta', stateCode: 'GA', url: 'https://www.tripadvisor.com/Restaurants-g60898-Atlanta_Georgia.html' },
+  { city: 'Miami', stateCode: 'FL', url: 'https://www.tripadvisor.com/Restaurants-g34438-Miami_Florida.html' },
+  { city: 'New Orleans', stateCode: 'LA', url: 'https://www.tripadvisor.com/Restaurants-g60864-New_Orleans_Louisiana.html' },
+  { city: 'Boston', stateCode: 'MA', url: 'https://www.tripadvisor.com/Restaurants-g60745-Boston_Massachusetts.html' },
+  { city: 'Minneapolis', stateCode: 'MN', url: 'https://www.tripadvisor.com/Restaurants-g43323-Minneapolis_Minnesota.html' },
+  { city: 'Las Vegas', stateCode: 'NV', url: 'https://www.tripadvisor.com/Restaurants-g45963-Las_Vegas_Nevada.html' },
+];
+
+function extractTripAdvisorRestaurantLinks(html: string, baseUrl: string): string[] {
+  const links = [...html.matchAll(/href=["']([^"']*Restaurant_Review[^"']+)["']/g)]
+    .map((match) => resolveHref(match[1], baseUrl))
+    .filter(Boolean);
+  return [...new Set(links)].slice(0, 40);
+}
+
+function extractTripAdvisorExternalUrl(html: string): string | null {
+  const redirect = html.match(/redirectTo=([^&"']+)/i);
+  if (redirect) {
+    try { return decodeURIComponent(redirect[1]); } catch { /* ignore */ }
+  }
+  const website = html.match(/"website"\s*:\s*"([^"]+)"/i)
+    ?? html.match(/"url"\s*:\s*"(https?:\/\/(?!www\.tripadvisor\.com)[^"]+)"/i);
+  return website?.[1]?.replace(/\\\//g, '/') ?? null;
+}
+
+async function collectFromTripAdvisor(
+  seenDomains: Set<string>,
+  onProgress: (source: string, count: number) => void,
+): Promise<RestaurantCandidate[]> {
+  const candidates: RestaurantCandidate[] = [];
+  let total = 0;
+  for (const city of TRIPADVISOR_CITY_PAGES) {
+    const html = await scrapeFetch(city.url);
+    if (!html) continue;
+    for (const reviewUrl of extractTripAdvisorRestaurantLinks(html, city.url)) {
+      const reviewHtml = await scrapeFetch(reviewUrl);
+      if (!reviewHtml) continue;
+      const externalUrl = extractTripAdvisorExternalUrl(reviewHtml);
+      if (!externalUrl) continue;
+      const title = reviewHtml.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.replace(/[-|].*$/, '').trim();
+      const name = title || extractDomainFromUrl(externalUrl).split('.')[0]?.replace(/[-_]/g, ' ') || 'Restaurant';
+      if (addCandidate(candidates, seenDomains, {
+        url: externalUrl,
+        name,
+        city: city.city,
+        state: city.stateCode,
+        cuisine: inferCuisine(name),
+        source: 'tripadvisor',
+        address: `${city.city}, ${city.stateCode}`,
+      })) {
+        total++;
+      }
+    }
+    onProgress('tripadvisor', total);
+  }
+  return candidates;
 }
 
 // ── Independent signal detectors (broader than pipeline, for benchmarks) ─
@@ -1236,12 +1471,189 @@ function generateSummary(
 
 // ── Main orchestrator ────────────────────────────────────────────────────
 
+interface PreviousRunState {
+  failures: FailureRecord[];
+  passCount: number;
+  testedCount: number;
+}
+
+function loadPreviousRunState(): PreviousRunState {
+  const empty = { failures: [], passCount: 0, testedCount: 0 };
+  if (!RESUME || !existsSync(RESULTS_PATH)) return empty;
+
+  try {
+    const failures = JSON.parse(readFileSync(RESULTS_PATH, 'utf8')) as FailureRecord[];
+    let passCount = 0;
+    let testedCount = failures.length;
+    if (existsSync(SUMMARY_PATH)) {
+      const summary = readFileSync(SUMMARY_PATH, 'utf8');
+      const testedMatch = summary.match(/URLs tested:\s+(\d+)/);
+      const passMatch = summary.match(/Passes \(discarded\):\s+(\d+)/);
+      testedCount = testedMatch ? Number(testedMatch[1]) : testedCount;
+      passCount = passMatch ? Number(passMatch[1]) : Math.max(0, testedCount - failures.length);
+    }
+    return { failures, passCount, testedCount };
+  } catch {
+    return empty;
+  }
+}
+
+class ValidationQueue {
+  private queue: RestaurantCandidate[] = [];
+  private closed = false;
+  private workerPromises: Promise<void>[] = [];
+
+  failures: FailureRecord[];
+  passes: LightPassRecord[];
+  failureDiagnostics = new Map<string, DiagnosticSignals>();
+  seenUrls = new Set<string>();
+  totalCollected = 0;
+  totalTested = 0;
+  skippedPreviouslyTested = 0;
+
+  constructor(
+    private readonly pipeline: ReturnType<typeof loadPipeline>,
+    previous: PreviousRunState,
+  ) {
+    this.failures = [...previous.failures];
+    this.passes = Array.from({ length: previous.passCount }, (_, idx) => ({
+      url: `previous-pass-${idx}`,
+      restaurantSignalScore: 60,
+      negativeSignalScore: 0,
+    }));
+    this.totalTested = previous.testedCount;
+    for (const failure of previous.failures) this.seenUrls.add(canonicalUrl(failure.url));
+  }
+
+  start(): void {
+    this.workerPromises = Array.from({ length: CONCURRENCY }, () => this.worker());
+  }
+
+  enqueueBatch(candidates: RestaurantCandidate[], source: string): number {
+    let accepted = 0;
+    for (const candidate of candidates) {
+      if (this.failures.length >= TARGET_FAILURES) break;
+      const key = canonicalUrl(candidate.url);
+      if (this.seenUrls.has(key)) {
+        this.skippedPreviouslyTested++;
+        continue;
+      }
+      this.seenUrls.add(key);
+      this.queue.push(candidate);
+      this.totalCollected++;
+      accepted++;
+      if (accepted % 100 === 0) {
+        console.log(`[QUEUE] ${source}: queued ${accepted} candidates (${this.queue.length} pending)`);
+      }
+    }
+    if (accepted > 0) console.log(`[QUEUE] ${source}: accepted ${accepted} candidates`);
+    return accepted;
+  }
+
+  async closeAndWait(): Promise<void> {
+    this.closed = true;
+    await Promise.all(this.workerPromises);
+  }
+
+  private async worker(): Promise<void> {
+    while (!this.closed || this.queue.length > 0) {
+      if (this.failures.length >= TARGET_FAILURES) {
+        this.closed = true;
+        break;
+      }
+      const candidate = this.queue.shift();
+      if (!candidate) {
+        await sleep(250);
+        continue;
+      }
+      await this.processCandidate(candidate);
+    }
+  }
+
+  private async processCandidate(candidate: RestaurantCandidate): Promise<void> {
+    const startedAt = Date.now();
+    try {
+      const result = await this.pipeline.runValidation({
+        website: candidate.url,
+        restaurantName: candidate.name,
+        state: candidate.state || 'TX',
+      });
+      this.totalTested++;
+
+      if (result.finalDecision === 'verified_restaurant') {
+        this.passes.push({
+          url: candidate.url,
+          restaurantSignalScore: result.restaurantSignalScore,
+          negativeSignalScore: result.negativeSignalScore,
+        });
+        return;
+      }
+
+      let diag: CheckWebsiteResult | null = null;
+      try {
+        const norm = this.pipeline.normalizeUrl(candidate.url);
+        if (norm.isValid) diag = await this.pipeline.checkWebsite(norm.normalizedUrl);
+      } catch { /* diagnostic fetch failed */ }
+
+      if (this.failures.length >= TARGET_FAILURES) return;
+      const record = await diagnoseFailure(candidate, result, diag, Date.now() - startedAt);
+      this.failures.push(record);
+
+      if (diag?.html) {
+        const html = diag.html;
+        const signals = diag.signals;
+        this.failureDiagnostics.set(candidate.url, {
+          html,
+          pipelineDetectedSchema: signals?.hasRestaurantSchema ?? false,
+          pipelineDetectedMenu: signals?.navLinkTexts?.some((t) => t.includes('menu')) ?? false,
+          pipelineDetectedReservations: signals?.navLinkTexts?.some((t) => t.includes('reservation')) ?? false,
+          independentSchema: independentlyHasSchemaOrg(html),
+          independentMenu: independentlyHasMenuNav(html),
+          independentReservations: independentlyHasReservations(html),
+        });
+      }
+
+      if (this.failures.length % PROGRESS_INTERVAL === 0) {
+        console.log(`\n[PROGRESS] ${this.failures.length}/${TARGET_FAILURES} failures (${this.totalTested} tested, ${((this.failures.length / Math.max(1, this.totalTested)) * 100).toFixed(1)}% failure rate)`);
+      }
+    } catch (err) {
+      this.totalTested++;
+      if (this.failures.length >= TARGET_FAILURES) return;
+      this.failures.push({
+        url: candidate.url, restaurantName: candidate.name,
+        city: candidate.city, state: candidate.state, cuisine: candidate.cuisine,
+        thirdPartySource: candidate.source, finalDecision: 'error', httpStatus: 0,
+        restaurantSignalScore: 0, negativeSignalScore: 0,
+        signalsFound: [], signalsMissing: ALL_SIGNAL_NAMES,
+        fetchSucceeded: false, htmlLength: 0, hasCloudflare: false,
+        hasSchemaOrg: false, hasOpenGraph: false, failureCategory: 'timeout',
+        specificFailureReason: `Exception: ${err instanceof Error ? err.message : String(err)}`,
+        reachabilityStatus: 'inaccessible', nationalChainScore: 0,
+        internalFlags: ['exception'], reasons: ['exception'],
+        timeTakenMs: Date.now() - startedAt,
+      });
+    }
+  }
+}
+
+async function runSource(
+  name: string,
+  runner: ValidationQueue,
+  collect: () => Promise<RestaurantCandidate[]>,
+): Promise<void> {
+  if (runner.failures.length >= TARGET_FAILURES) return;
+  const candidates = await collect();
+  runner.enqueueBatch(candidates, name);
+  console.log(`\n[COLLECT] ${name}: ${candidates.length} collected`);
+}
+
 async function main(): Promise<void> {
   console.log('='.repeat(70));
   console.log('RESTAURANT VALIDATION FAILURE HUNTER');
   console.log(`Mode: ${DRY_RUN ? 'DRY RUN (50 failures)' : 'FULL RUN (5,000 failures)'}`);
+  console.log(`Resume: ${RESUME ? 'yes' : 'no'}`);
   console.log(`Concurrency: ${CONCURRENCY}`);
-  console.log('Sources: Yelp, OpenTable, Eater, Infatuation, seed URLs');
+  console.log('Sources: Yelp, OpenTable, Eater, TripAdvisor, Google, associations, newspapers, Infatuation, Foursquare, seed URLs');
   console.log('API keys required: NONE');
   console.log('='.repeat(70));
 
@@ -1249,133 +1661,68 @@ async function main(): Promise<void> {
   const pipeline = loadPipeline();
   console.log('[INIT] Pipeline loaded.');
 
-  // ── Collect URLs ────────────────────────────────────────────────────
+  const previous = loadPreviousRunState();
+  if (RESUME) {
+    console.log(`[RESUME] Loaded ${previous.failures.length} existing failures; skipping those URLs.`);
+  }
+
+  const runner = new ValidationQueue(pipeline, previous);
+  runner.start();
+
+  // ── Collect URLs while validation workers run ──────────────────────
   console.log('\n[COLLECT] Gathering restaurant URLs from free sources...');
   const seenDomains = new Set<string>();
-  const allCandidates: RestaurantCandidate[] = [];
+  for (const url of runner.seenUrls) {
+    const domain = extractDomainFromUrl(url);
+    if (domain) seenDomains.add(domain);
+  }
+  const expandedCities = buildExpandedCities(DRY_RUN ? 60 : 300);
+  const yelpCities = expandedCities.slice(0, DRY_RUN ? 20 : 200);
 
   const progress = (source: string, count: number) => {
     process.stdout.write(`\r[COLLECT] ${source}: ${count} URLs`);
   };
 
-  // Source 5 first (fast, local)
   const seedUrls = loadSeedUrls();
-  for (const s of seedUrls) {
+  const seedCandidates = seedUrls.filter((s) => {
     const d = extractDomainFromUrl(s.url);
-    if (d && !seenDomains.has(d)) { seenDomains.add(d); allCandidates.push(s); }
-  }
-  console.log(`[COLLECT] seed: ${allCandidates.length} URLs`);
+    if (!d || seenDomains.has(d)) return false;
+    seenDomains.add(d);
+    return true;
+  });
+  runner.enqueueBatch(seedCandidates, 'seed');
+  console.log(`[COLLECT] seed: ${seedCandidates.length} URLs`);
 
   if (!DRY_RUN) {
-    // Source 3: Eater (editorial — high success rate)
-    const eaterUrls = await collectFromEater(US_CITIES, seenDomains, progress);
-    allCandidates.push(...eaterUrls);
-    console.log(`\n[COLLECT] eater: ${eaterUrls.length} URLs`);
-
-    // Source 4: Infatuation (editorial — high success rate)
-    const infUrls = await collectFromInfatuation(US_CITIES, seenDomains, progress);
-    allCandidates.push(...infUrls);
-    console.log(`\n[COLLECT] infatuation: ${infUrls.length} URLs`);
-
-    // Source 1: Yelp (may be blocked)
-    const yelpUrls = await collectFromYelp(US_CITIES, seenDomains, progress);
-    allCandidates.push(...yelpUrls);
-    console.log(`\n[COLLECT] yelp: ${yelpUrls.length} URLs`);
-
-    // Source 2: OpenTable (may be blocked)
-    const otUrls = await collectFromOpenTable(seenDomains, progress);
-    allCandidates.push(...otUrls);
-    console.log(`\n[COLLECT] opentable: ${otUrls.length} URLs`);
+    await runSource('eater', runner, () => collectFromEater(expandedCities, seenDomains, progress));
+    await runSource('infatuation', runner, () => collectFromInfatuation(expandedCities, seenDomains, progress));
+    await runSource('yelp', runner, () => collectFromYelp(yelpCities, seenDomains, progress));
+    await runSource('opentable', runner, () => collectFromOpenTable(seenDomains, progress));
+    await runSource('tripadvisor', runner, () => collectFromTripAdvisor(seenDomains, progress));
+    await runSource('google', runner, () => collectFromGoogleSearch(expandedCities, seenDomains, 'google', [
+      (city) => `best independent restaurants ${city.city} ${city.stateCode} -chain -franchise`,
+      (city) => `local restaurants ${city.city} ${city.stateCode} site:.com -mcdonald -subway -chipotle -starbucks`,
+    ], progress, 300));
+    await runSource('state_association', runner, () => collectFromGoogleSearch(expandedCities, seenDomains, 'state_association', [
+      (city) => `${city.stateCode} restaurant association member directory restaurant website`,
+    ], progress, 100));
+    await runSource('newspaper', runner, () => collectFromGoogleSearch(expandedCities, seenDomains, 'newspaper', [
+      (city) => `best restaurants ${city.city} ${city.stateCode} 2024 local newspaper`,
+    ], progress, 100));
+    await runSource('foursquare', runner, () => collectFromGoogleSearch(expandedCities, seenDomains, 'foursquare', [
+      (city) => `site:foursquare.com/v restaurant ${city.city} ${city.stateCode} official website`,
+    ], progress, 100));
   }
 
-  console.log(`[COLLECT] Total unique candidates: ${allCandidates.length}`);
-  if (allCandidates.length === 0) {
+  console.log(`[COLLECT] Total queued candidates this run: ${runner.totalCollected}`);
+  console.log(`[COLLECT] Skipped previously tested URLs: ${runner.skippedPreviouslyTested}`);
+  if (runner.totalCollected === 0) {
     console.error('[ERROR] No URLs collected. Add restaurants to scripts/seed-urls.json.');
     process.exit(1);
   }
 
-  // ── Run validation ─────────────────────────────────────────────────
-  console.log(`\n[VALIDATE] Running pipeline on ${allCandidates.length} URLs (concurrency ${CONCURRENCY})...`);
-  const failures: FailureRecord[] = [];
-  const passes: LightPassRecord[] = [];
-  const failureDiagnostics = new Map<string, DiagnosticSignals>();
-  let totalTested = 0;
-  let queueIndex = 0;
-  let stopped = false;
-
-  async function worker(): Promise<void> {
-    while (!stopped) {
-      const idx = queueIndex++;
-      if (idx >= allCandidates.length) break;
-      const candidate = allCandidates[idx];
-      const startedAt = Date.now();
-
-      try {
-        const result = await pipeline.runValidation({
-          website: candidate.url,
-          restaurantName: candidate.name,
-          state: candidate.state || 'TX',
-        });
-        totalTested++;
-
-        if (result.finalDecision === 'verified_restaurant') {
-          passes.push({
-            url: candidate.url,
-            restaurantSignalScore: result.restaurantSignalScore,
-            negativeSignalScore: result.negativeSignalScore,
-          });
-        } else {
-          // Failure — diagnostic fetch for signal-level details + benchmarks
-          let diag: CheckWebsiteResult | null = null;
-          try {
-            const norm = pipeline.normalizeUrl(candidate.url);
-            if (norm.isValid) diag = await pipeline.checkWebsite(norm.normalizedUrl);
-          } catch { /* diagnostic fetch failed */ }
-
-          const record = await diagnoseFailure(candidate, result, diag, Date.now() - startedAt);
-          failures.push(record);
-
-          // Benchmark diagnostics
-          if (diag?.html) {
-            const html = diag.html;
-            const signals = diag.signals;
-            failureDiagnostics.set(candidate.url, {
-              html,
-              pipelineDetectedSchema: signals?.hasRestaurantSchema ?? false,
-              pipelineDetectedMenu: signals?.navLinkTexts?.some((t) => t.includes('menu')) ?? false,
-              pipelineDetectedReservations: signals?.navLinkTexts?.some((t) => t.includes('reservation')) ?? false,
-              independentSchema: independentlyHasSchemaOrg(html),
-              independentMenu: independentlyHasMenuNav(html),
-              independentReservations: independentlyHasReservations(html),
-            });
-          }
-
-          if (failures.length % PROGRESS_INTERVAL === 0) {
-            console.log(`\n[PROGRESS] ${failures.length}/${TARGET_FAILURES} failures (${totalTested} tested, ${((failures.length / totalTested) * 100).toFixed(1)}% failure rate)`);
-          }
-          if (failures.length >= TARGET_FAILURES) { stopped = true; break; }
-        }
-      } catch (err) {
-        totalTested++;
-        failures.push({
-          url: candidate.url, restaurantName: candidate.name,
-          city: candidate.city, state: candidate.state, cuisine: candidate.cuisine,
-          thirdPartySource: candidate.source, finalDecision: 'error', httpStatus: 0,
-          restaurantSignalScore: 0, negativeSignalScore: 0,
-          signalsFound: [], signalsMissing: ALL_SIGNAL_NAMES,
-          fetchSucceeded: false, htmlLength: 0, hasCloudflare: false,
-          hasSchemaOrg: false, hasOpenGraph: false, failureCategory: 'timeout',
-          specificFailureReason: `Exception: ${err instanceof Error ? err.message : String(err)}`,
-          reachabilityStatus: 'inaccessible', nationalChainScore: 0,
-          internalFlags: ['exception'], reasons: ['exception'],
-          timeTakenMs: Date.now() - startedAt,
-        });
-      }
-      if (totalTested % 10 === 0) process.stdout.write('.');
-    }
-  }
-
-  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, allCandidates.length) }, worker));
+  console.log(`\n[VALIDATE] Waiting for validation queue to drain...`);
+  await runner.closeAndWait();
   console.log('');
 
   // ── False positive check (B6) — run non-restaurants from dataset ────
@@ -1388,27 +1735,40 @@ async function main(): Promise<void> {
       const ds = JSON.parse(readFileSync(datasetPath, 'utf8')) as {
         non_restaurants?: Array<{ url: string; name: string }>;
       };
-      const nonRestaurants = ds.non_restaurants ?? [];
-      for (const nr of nonRestaurants) {
-        try {
-          const r = await pipeline.runValidation({ website: nr.url, restaurantName: nr.name, state: 'TX' });
-          fpTotal++;
-          if (r.finalDecision === 'verified_restaurant') fpCount++;
-        } catch { fpTotal++; }
+      const nonRestaurants = DRY_RUN
+        ? (ds.non_restaurants ?? []).slice(0, DRY_RUN_FALSE_POSITIVE_LIMIT)
+        : (ds.non_restaurants ?? []);
+      let fpIndex = 0;
+      async function fpWorker(): Promise<void> {
+        while (fpIndex < nonRestaurants.length) {
+          const nr = nonRestaurants[fpIndex++];
+          if (!nr) continue;
+          try {
+            const r = await pipeline.runValidation({ website: nr.url, restaurantName: nr.name, state: 'TX' });
+            fpTotal++;
+            if (r.finalDecision === 'verified_restaurant') fpCount++;
+          } catch {
+            fpTotal++;
+          }
+        }
+      }
+      await Promise.all(Array.from({ length: Math.min(CONCURRENCY, nonRestaurants.length) }, fpWorker));
+      if (DRY_RUN && (ds.non_restaurants?.length ?? 0) > DRY_RUN_FALSE_POSITIVE_LIMIT) {
+        console.log(`[BENCHMARK] Dry-run capped false-positive check at ${DRY_RUN_FALSE_POSITIVE_LIMIT}/${ds.non_restaurants?.length ?? 0} rows.`);
       }
     } catch { /* ignore */ }
   }
   console.log(`[BENCHMARK] False positives: ${fpCount}/${fpTotal}`);
 
   // ── Compute benchmarks ──────────────────────────────────────────────
-  const benchmarks = computeBenchmarks(failures, passes, failureDiagnostics, fpCount, fpTotal);
+  const benchmarks = computeBenchmarks(runner.failures, runner.passes, runner.failureDiagnostics, fpCount, fpTotal);
 
   // ── Write output ────────────────────────────────────────────────────
-  console.log(`\n[RESULTS] ${failures.length} failures from ${totalTested} URLs tested.`);
-  await writeFile(RESULTS_PATH, `${JSON.stringify(failures, null, 2)}\n`, 'utf8');
+  console.log(`\n[RESULTS] ${runner.failures.length} failures from ${runner.totalTested} URLs tested.`);
+  await writeFile(RESULTS_PATH, `${JSON.stringify(runner.failures, null, 2)}\n`, 'utf8');
   console.log(`[WRITE] ${RESULTS_PATH}`);
 
-  const summary = generateSummary(failures, passes, allCandidates.length, benchmarks);
+  const summary = generateSummary(runner.failures, runner.passes, runner.totalCollected + previous.testedCount, benchmarks);
   await writeFile(SUMMARY_PATH, `${summary}\n`, 'utf8');
   console.log(`[WRITE] ${SUMMARY_PATH}`);
 

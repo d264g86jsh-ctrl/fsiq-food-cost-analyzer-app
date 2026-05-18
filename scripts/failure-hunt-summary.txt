@@ -1,180 +1,255 @@
 ================================================================================
 RESTAURANT VALIDATION FAILURE HUNT — SUMMARY REPORT
-Generated: 2026-05-18T15:45:14.501Z
-Mode: DRY RUN (50 failures max)
+Generated: 2026-05-18T20:47:02.646Z
+Mode: FULL RUN (5,000 failures target)
 ================================================================================
+
+BENCHMARK SCORECARD
+--------------------------------------------------------------------------------
+
+   ID  Metric                          Current   Target   Gap      Status
+   ----------------------------------------------------------------------------
+   B1  True Positive Rate                47.4%     95%   -47.63  FAIL
+   B2  Signal Score >= 50                51.0%     95%   -44.03  FAIL
+   B3  Schema.org Detection Rate         33.3%     80%   -46.67  FAIL
+   B4  Menu Nav Detection Rate           40.0%     90%   -50.00  FAIL
+   B5  Reservations Detection Rate        0.0%     85%   -85.00  FAIL
+   B6  False Positive Rate                0.2%      2%     0.00  PASS
+
+   B1: 342 verified out of 722 real restaurants tested
+   B2: 368 of 722 restaurants scored 50 or above
+   B3: 1 of 3 failed sites with Schema.org markup were detected by pipeline (failures only)
+   B4: 2 of 5 failed sites with menu links were detected (failures only)
+   B5: 0 of 2 failed sites with reservation features were detected (failures only)
+   B6: 1 of 500 non-restaurants incorrectly verified
+
+   FIXES NEEDED TO CLOSE GAPS:
+     B1: Lower verified_restaurant threshold from 60 to 45 in applyDecisionRules()
+     B1: Expand computeProtectedRestaurantContextScore() for blocked/thin sites
+     B2: Increase menu nav weight from 15 to 25
+     B2: Increase hours pattern weight from 12 to 20
+     B2: Add og:type restaurant as strong positive (+15)
+     B3: Extend extractSchemaOrgTypes() to handle nested @graph with "Restaurant" subnodes
+     B3: Add broader microdata itemtype detection patterns
+     B4: Extend extractNavLinkTexts() to search full page, not just first <nav>
+     B4: Add href-based detection: /menu, /food, /drinks paths
+     B4: Detect "food", "drinks", "cuisine" as menu-equivalent nav text
+     B5: Detect OpenTable/Resy script tags and embeds as strong reservation signals
+     B5: Add "book", "book a table", "book now" as nav-equivalent reservation text
 
 1. TOTALS
 --------------------------------------------------------------------------------
-   URLs collected:        50
-   URLs tested:           50
-   Failures found:        11
-   Passes (discarded):    39
-   Failure rate:          22.0%
+   URLs collected:        722
+   URLs tested:           722
+   Failures found:        380
+   Passes (discarded):    342
+   Failure rate:          52.6%
+   Sources:
+     seed            357 failures
+     eater           21 failures
+     infatuation     2 failures
 
 2. FAILURE BREAKDOWN BY CATEGORY
 --------------------------------------------------------------------------------
-   low_signal_score                         9  (81.8%)
-   minimal_html                             2  (18.2%)
+   low_signal_score                       317  (83.4%)
+   minimal_html                            28  (7.4%)
+   cloudflare_blocked                      25  (6.6%)
+   timeout                                  8  (2.1%)
+   non_english                              2  (0.5%)
 
 3. SIGNAL SCORE DISTRIBUTION (failed restaurants)
 --------------------------------------------------------------------------------
-   0-9                                 2  (18.2%) #########
-   10-19                               1  (9.1%) #####
-   30-39                               3  (27.3%) ##############
-   40-49                               3  (27.3%) ##############
-   50-59 (near threshold)              2  (18.2%) #########
+   0-9                               294  (77.4%) #######################################
+   10-19                              12  (3.2%) ##
+   20-29                              10  (2.6%) #
+   30-39                              19  (5.0%) ###
+   40-49                              19  (5.0%) ###
+   50-59 (near threshold)             26  (6.8%) ###
    Threshold for verified_restaurant: restaurantSignalScore >= 60
 
 4. MOST COMMONLY MISSING SIGNALS
 --------------------------------------------------------------------------------
-   restaurant_schema                  11  (100.0% of failures)
-   reservations_nav                   11  (100.0% of failures)
-   order_online_nav                   11  (100.0% of failures)
-   private_dining_nav                 11  (100.0% of failures)
-   happy_hour_text                    11  (100.0% of failures)
-   tasting_menu_text                  11  (100.0% of failures)
-   full_bar_text                      11  (100.0% of failures)
-   yelp_link                          11  (100.0% of failures)
-   doordash_link                      11  (100.0% of failures)
-   ubereats_link                      11  (100.0% of failures)
-   grubhub_link                       11  (100.0% of failures)
-   domain_keyword                     11  (100.0% of failures)
-   age_gate                           11  (100.0% of failures)
-   menu_nav                           10  (90.9% of failures)
-   catering_nav                       10  (90.9% of failures)
+   private_dining_nav                380  (100.0% of failures)
+   ubereats_link                     380  (100.0% of failures)
+   grubhub_link                      380  (100.0% of failures)
+   domain_keyword                    380  (100.0% of failures)
+   restaurant_schema                 379  (99.7% of failures)
+   doordash_link                     379  (99.7% of failures)
+   happy_hour_text                   378  (99.5% of failures)
+   tasting_menu_text                 378  (99.5% of failures)
+   full_bar_text                     378  (99.5% of failures)
+   outdoor_seating_text              377  (99.2% of failures)
+   yelp_link                         377  (99.2% of failures)
+   age_gate                          377  (99.2% of failures)
+   reservations_nav                  376  (98.9% of failures)
+   dine_in_text                      376  (98.9% of failures)
+   brunch_text                       376  (98.9% of failures)
 
 5. STATE-BY-STATE FAILURE COUNT
 --------------------------------------------------------------------------------
-   IL         3
-   NY         2
-   CA         2
-   LA         1
-   WA         1
-   OR         1
-   CO         1
+   MO        27
+   AZ        10
+   VT        10
+   WV        10
+   ID         9
+   IA         9
+   ME         9
+   NJ         9
+   NM         9
+   ND         9
+   OK         9
+   AR         8
+   KS         8
+   KY         8
+   MD         8
+   MS         8
+   NV         8
+   NH         8
+   NY         8
+   OH         8
+   TN         8
+   VA         8
+   WI         8
+   AL         7
+   CT         7
 
 6. CUISINE-TYPE FAILURE COUNT
 --------------------------------------------------------------------------------
-   Unknown                       11  (100.0%)
+   American                     125  (32.9%)
+   Italian                       25  (6.6%)
+   Seafood                       21  (5.5%)
+   Fine Dining                   20  (5.3%)
+   BBQ                           19  (5.0%)
+   French                        17  (4.5%)
+   Mexican                       16  (4.2%)
+   Pizza                         14  (3.7%)
+   Steak                         12  (3.2%)
+   Southern                      11  (2.9%)
+   Mediterranean                  7  (1.8%)
+   Bakery                         7  (1.8%)
+   Burger                         5  (1.3%)
+   Hawaiian                       4  (1.1%)
+   Brunch                         4  (1.1%)
 
-7. TOP 10 FAILURE EXAMPLES (detailed)
+7. TOP 10 FAILURE EXAMPLES
 --------------------------------------------------------------------------------
-   [1] Russ & Daughters — https://www.russanddaughters.com/
-       City: New York, NY | Cuisine: 
-       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
-       Scores: restaurant=30 negative=0 chain=0
-       Signals found: dine_in_text, resy_link, phone_number, meta_description, menu_text
-       Category: low_signal_score
-       Reason: restaurantSignalScore 30 below threshold of 60. Found 5 signals: dine_in_text, resy_link, phone_number, meta_description, menu_text. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern
-
-   [2] Via Carota — https://www.viacarota.com/
-       City: New York, NY | Cuisine: 
-       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
-       Scores: restaurant=49 negative=0 chain=0
-       Signals found: resy_link, hours_pattern, og_image, schema_org, meta_description, menu_text, chef_text
-       Category: low_signal_score
-       Reason: restaurantSignalScore 49 below threshold of 60. Found 7 signals: resy_link, hours_pattern, og_image, schema_org, meta_description. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text
-
-   [3] Avec — https://avecchicago.com/
-       City: Chicago, IL | Cuisine: 
+   [1] Ole Bay Cafe — https://olebaycafe.com
+       City: Mobile, AL | Cuisine: Seafood | Source: seed
        Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
        Scores: restaurant=0 negative=0 chain=0
        Signals found: none
        Category: low_signal_score
        Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
 
-   [4] Cassia — https://www.cassiala.com/
-       City: Los Angeles, CA | Cuisine: 
-       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
-       Scores: restaurant=44 negative=0 chain=0
-       Signals found: menu_nav, resy_link, og_image, meta_description, menu_text
-       Category: low_signal_score
-       Reason: restaurantSignalScore 44 below threshold of 60. Found 5 signals: menu_nav, resy_link, og_image, meta_description, menu_text. Missing key signals: restaurant_schema, reservations_nav, cuisine_text, hours_pattern
-
-   [5] Girl & The Goat — https://girlandthegoat.com/
-       City: Chicago, IL | Cuisine: 
-       Decision: plausible_unverified | HTTP: 200 | Reachability: thin
-       Scores: restaurant=16 negative=0 chain=0
-       Signals found: meta_description, chef_text
-       Category: minimal_html
-       Reason: restaurantSignalScore 16 below threshold of 60. Found 2 signals: meta_description, chef_text. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: thin
-
-   [6] Commander's Palace — https://www.commanderspalace.com/
-       City: New Orleans, LA | Cuisine: 
-       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
-       Scores: restaurant=56 negative=0 chain=0
-       Signals found: brunch_text, phone_number, menu_text
-       Category: low_signal_score
-       Reason: restaurantSignalScore 56 below threshold of 60. Found 3 signals: brunch_text, phone_number, menu_text. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern
-
-   [7] Monteverde — https://monteverdechicago.com/
-       City: Chicago, IL | Cuisine: 
-       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
-       Scores: restaurant=55 negative=0 chain=0
-       Signals found: resy_link, hours_pattern, phone_number, schema_org, meta_description, cuisine_text, menu_text, chef_text
-       Category: low_signal_score
-       Reason: restaurantSignalScore 55 below threshold of 60. Found 8 signals: resy_link, hours_pattern, phone_number, schema_org, meta_description. Missing key signals: restaurant_schema, menu_nav, reservations_nav
-
-   [8] Mamnoon — https://mamnoonrestaurant.com/
-       City: Seattle, WA | Cuisine: 
-       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
-       Scores: restaurant=42 negative=0 chain=0
-       Signals found: catering_nav, outdoor_seating_text, og_image, meta_description, chef_text
-       Category: low_signal_score
-       Reason: restaurantSignalScore 42 below threshold of 60. Found 5 signals: catering_nav, outdoor_seating_text, og_image, meta_description, chef_text. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern
-
-   [9] Eem — https://www.eemportland.com/
-       City: Portland, OR | Cuisine: 
-       Decision: plausible_unverified | HTTP: 200 | Reachability: thin
+   [2] Bottega — https://bottegafrombirmingham.com
+       City: Birmingham, AL | Cuisine: Italian | Source: seed
+       Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
        Scores: restaurant=0 negative=0 chain=0
        Signals found: none
-       Category: minimal_html
-       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: thin
-
-   [10] State Bird Provisions — https://statebirdsf.com/
-       City: San Francisco, CA | Cuisine: 
-       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
-       Scores: restaurant=36 negative=0 chain=0
-       Signals found: hours_pattern, phone_number, og_image, schema_org, meta_description, menu_text, chef_text
        Category: low_signal_score
-       Reason: restaurantSignalScore 36 below threshold of 60. Found 7 signals: hours_pattern, phone_number, og_image, schema_org, meta_description. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
 
-8. RECOMMENDED THRESHOLD AND SCORING CHANGES
+   [3] Ocean Restaurant — https://www.oceanrestaurant.net
+       City: Birmingham, AL | Cuisine: Seafood | Source: seed
+       Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
+       Scores: restaurant=0 negative=0 chain=0
+       Signals found: none
+       Category: low_signal_score
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
+
+   [4] John's Restaurant — https://www.johnsrestaurant.com
+       City: Birmingham, AL | Cuisine: Southern | Source: seed
+       Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
+       Scores: restaurant=0 negative=0 chain=0
+       Signals found: none
+       Category: low_signal_score
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
+
+   [5] Marx Bros Cafe — https://www.marxbroscafe.com
+       City: Anchorage, AK | Cuisine: Fine Dining | Source: seed
+       Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
+       Scores: restaurant=0 negative=0 chain=0
+       Signals found: none
+       Category: low_signal_score
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
+
+   [6] Kinley — https://www.kinleyrestaurant.com
+       City: Anchorage, AK | Cuisine: American | Source: seed
+       Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
+       Scores: restaurant=0 negative=0 chain=0
+       Signals found: none
+       Category: low_signal_score
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
+
+   [7] Big Bob Gibson BBQ — https://bigbobgibson.com
+       City: Decatur, AL | Cuisine: BBQ | Source: seed
+       Decision: plausible_unverified | HTTP: 200 | Reachability: reachable
+       Scores: restaurant=57 negative=0 chain=0
+       Signals found: menu_nav, catering_nav, og_image, schema_org, cuisine_text, menu_text
+       Category: low_signal_score
+       Reason: restaurantSignalScore 57 below threshold of 60. Found 6 signals: menu_nav, catering_nav, og_image, schema_org, cuisine_text. Missing key signals: restaurant_schema, reservations_nav, hours_pattern
+
+   [8] Orso — https://www.orsalaska.com
+       City: Anchorage, AK | Cuisine: Italian | Source: seed
+       Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
+       Scores: restaurant=0 negative=0 chain=0
+       Signals found: none
+       Category: low_signal_score
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
+
+   [9] Pangea Restaurant — https://www.pangalaska.com
+       City: Juneau, AK | Cuisine: American | Source: seed
+       Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
+       Scores: restaurant=0 negative=0 chain=0
+       Signals found: none
+       Category: low_signal_score
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
+
+   [10] Bear Tooth Theatrepub — https://www.beartoothmovies.net
+       City: Anchorage, AK | Cuisine: Pub | Source: seed
+       Decision: plausible_unverified | HTTP: 0 | Reachability: inaccessible
+       Scores: restaurant=0 negative=0 chain=0
+       Signals found: none
+       Category: low_signal_score
+       Reason: restaurantSignalScore 0 below threshold of 60. Missing key signals: restaurant_schema, menu_nav, reservations_nav, cuisine_text, hours_pattern. reachability: inaccessible
+
+8. PRIORITIZED FIX LIST
 --------------------------------------------------------------------------------
 
-   FIX 1: Add og:type=restaurant.restaurant as a strong positive signal (+15)
-     Would fix: ~7 of 11 failures
-     Risk:       Very low — og:type is set by the site owner
+   FIX 1: Add og:type restaurant.restaurant as strong positive (+15)
+     Would fix:  ~104 of 380 failures
+     Risk:       Very low
      Complexity: Low — add check in computeRestaurantScores()
+     Benchmarks: B1, B2
+     Est. TPR after fix: 61.77%
 
-   FIX 2: Lower verified_restaurant threshold from 60 to 45
-     Would fix: ~5 of 11 failures
-     Risk:       Medium — could let through some borderline non-restaurants
-     Complexity: Low — single constant change in applyDecisionRules()
-
-   FIX 3: Award points for phone number in body (+8 instead of +6)
-     Would fix: ~4 of 11 failures
-     Risk:       Low — local restaurants almost always display phone number
-     Complexity: Low — single constant change
-
-   FIX 4: Increase weight of hours-of-operation pattern from 12 to 20
-     Would fix: ~3 of 11 failures
-     Risk:       Low — hours with day names are very restaurant-specific
-     Complexity: Low — single constant change
-
-   FIX 5: Award bonus points for blocked/thin sites with restaurant context (name, domain keywords)
-     Would fix: ~2 of 11 failures
-     Risk:       Low — protected_restaurant_context already exists; expand coverage
+   FIX 2: Expand blocked/thin restaurant context boost coverage
+     Would fix:  ~61 of 380 failures
+     Risk:       Low
      Complexity: Medium — extend computeProtectedRestaurantContextScore()
+     Benchmarks: B1
+     Est. TPR after fix: 55.82%
 
-   FIX 6: Increase weight of menu nav link from 15 to 25 (strongest restaurant signal)
-     Would fix: ~1 of 11 failures
-     Risk:       Low — menu link is highly specific to restaurants
-     Complexity: Low — single constant change in classify-restaurant.ts
+   FIX 3: Lower verified_restaurant threshold from 60 to 45
+     Would fix:  ~45 of 380 failures
+     Risk:       Medium
+     Complexity: Low — single constant in applyDecisionRules()
+     Benchmarks: B1, B2
+     Est. TPR after fix: 53.6%
 
-   COMBINED ESTIMATE: Applying all fixes above could resolve ~6 of 11 failures.
-   (Overlap between categories means not all numbers are additive.)
+   FIX 4: Increase hours pattern weight from 12 to 20
+     Would fix:  ~30 of 380 failures
+     Risk:       Low
+     Complexity: Low — single constant
+     Benchmarks: B1, B2
+     Est. TPR after fix: 51.52%
+
+   FIX 5: Increase menu nav weight from 15 to 25
+     Would fix:  ~29 of 380 failures
+     Risk:       Low
+     Complexity: Low — single constant in classify-restaurant.ts
+     Benchmarks: B1, B2, B4
+     Est. TPR after fix: 51.39%
 
 ================================================================================
 END OF REPORT

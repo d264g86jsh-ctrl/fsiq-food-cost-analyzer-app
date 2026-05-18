@@ -9,10 +9,21 @@ export interface WebsiteSignals {
   ogSiteName: string;
   ogImage: string | null;
   schemaOrgTypes: string[];
+  schemaOrgNames: string[];
+  schemaOrgDescriptions: string[];
   navLinkTexts: string[];
-  bodyText: string; // stripped HTML, up to 5000 chars
+  headingTexts: string[];
+  buttonTexts: string[];
+  urlPathSegments: string[];
+  bodyText: string; // stripped/scoring HTML text; large pages keep targeted signal windows
   logoHints: string[]; // candidate logo URLs (verbatim)
   socialLinks: string[];
+  imageAltTexts: string[];
+  nonEnglishKeywordHits: Record<string, string[]>;
+  hasReservationWidget: boolean;
+  hasOrderingWidget: boolean;
+  hasAddressPhoneBlock: boolean;
+  hasFoodImageAltText: boolean;
   hasRestaurantSchema: boolean;
   hasVendorSchema: boolean;
   hasBotProtection: boolean;
@@ -37,6 +48,23 @@ const RESTAURANT_SCHEMA_TYPES = [
 
 const VENDOR_SCHEMA_TYPES = ['SoftwareApplication', 'WebApplication', 'MobileApplication'];
 
+const TARGET_WINDOW_KEYWORDS = [
+  'menu', 'menus', 'hours', 'reservation', 'reservations', 'reserve', 'address',
+  'order online', 'dining', 'restaurant', 'cafe', 'bar', 'brunch', 'lunch',
+  'dinner', 'catering', 'private dining', 'phone', 'contact',
+  'menú', 'reservación', 'horarios', 'platillos', 'cocina',
+  '菜单', '预订', '营业时间', '餐厅',
+  'thực đơn', 'đặt bàn', 'nhà hàng',
+  '메뉴', '예약', '레스토랑',
+];
+
+const NON_ENGLISH_KEYWORDS: Record<string, string[]> = {
+  spanish: ['menú', 'reservación', 'reservaciones', 'horarios', 'platillos', 'cocina'],
+  chinese: ['菜单', '预订', '营业时间', '餐厅'],
+  vietnamese: ['thực đơn', 'dat ban', 'đặt bàn', 'nhà hàng'],
+  korean: ['메뉴', '예약', '레스토랑'],
+};
+
 export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
   const pageTitle = extractTag(html, 'title') ?? '';
   const metaDescription = extractMeta(html, 'description') ?? '';
@@ -46,17 +74,38 @@ export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
   const ogSiteName = extractOg(html, 'og:site_name') ?? '';
   const ogImage = extractOg(html, 'og:image') ?? null;
 
-  const schemaOrgTypes = extractSchemaOrgTypes(html);
+  const schemaOrg = extractSchemaOrg(html);
+  const schemaOrgTypes = schemaOrg.types;
   const navLinkTexts = extractNavLinkTexts(html);
-  const bodyText = stripHtml(html).slice(0, 5000);
+  const headingTexts = extractHeadingTexts(html);
+  const buttonTexts = extractButtonTexts(html);
+  const urlPathSegments = extractUrlPathSegments(pageUrl);
+  const bodyText = extractScoringBodyText(html);
   const logoHints = extractLogoHints(html, pageUrl, ogImage);
   const socialLinks = extractSocialLinks(html);
+  const imageAltTexts = extractImageAltTexts(html);
+  const nonEnglishKeywordHits = extractNonEnglishKeywordHits(`${bodyText} ${pageTitle} ${metaDescription} ${ogTitle} ${ogDescription} ${navLinkTexts.join(' ')} ${headingTexts.join(' ')} ${buttonTexts.join(' ')}`);
 
   const hasRestaurantSchema = schemaOrgTypes.some((t) => RESTAURANT_SCHEMA_TYPES.includes(t));
   const hasVendorSchema = schemaOrgTypes.some((t) => VENDOR_SCHEMA_TYPES.includes(t));
 
   const htmlLower = html.toLowerCase();
   const textLower = bodyText.toLowerCase();
+  const linkedAssetsLower = [htmlLower, ...extractAttributeValues(html, 'href'), ...extractAttributeValues(html, 'src'), ...extractAttributeValues(html, 'data-src')]
+    .join(' ')
+    .toLowerCase();
+
+  const hasReservationWidget = /opentable|resy|exploretock|sevenrooms|reservewithgoogle|wisely/.test(linkedAssetsLower);
+
+  const hasOrderingWidget = /toasttab|chownow|popmenu|olo\.com|squareup|doordash|ubereats|grubhub|slice\.life/.test(linkedAssetsLower);
+
+  const hasAddressPhoneBlock =
+    /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/.test(bodyText) &&
+    /\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b/.test(bodyText);
+
+  const hasFoodImageAltText = imageAltTexts.some((text) =>
+    /\b(pasta|burger|cocktail|entree|entrée|pizza|taco|sushi|bbq|barbecue|steak|seafood|oyster|brunch|dessert|sandwich|salad|wine|beer|dish|plate)\b/i.test(text),
+  );
 
   const hasBotProtection =
     /captcha|cloudflare.*checking|just a moment|ddos.*protection|security.*check/i.test(textLower) ||
@@ -98,10 +147,21 @@ export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
     ogSiteName,
     ogImage,
     schemaOrgTypes,
+    schemaOrgNames: schemaOrg.names,
+    schemaOrgDescriptions: schemaOrg.descriptions,
     navLinkTexts,
+    headingTexts,
+    buttonTexts,
+    urlPathSegments,
     bodyText,
     logoHints,
     socialLinks,
+    imageAltTexts,
+    nonEnglishKeywordHits,
+    hasReservationWidget,
+    hasOrderingWidget,
+    hasAddressPhoneBlock,
+    hasFoodImageAltText,
     hasRestaurantSchema,
     hasVendorSchema,
     hasBotProtection,
@@ -111,6 +171,19 @@ export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
     hasAgeGate,
     hasCookieGate,
   };
+}
+
+function extractUrlPathSegments(pageUrl: string): string[] {
+  try {
+    const url = new URL(pageUrl);
+    return url.pathname
+      .split('/')
+      .map((segment) => segment.trim().toLowerCase())
+      .filter(Boolean)
+      .slice(0, 20);
+  } catch {
+    return [];
+  }
 }
 
 function extractTag(html: string, tag: string): string | null {
@@ -130,32 +203,17 @@ function extractOg(html: string, property: string): string | null {
   return m ? m[1].trim() : null;
 }
 
-function extractSchemaOrgTypes(html: string): string[] {
+function extractSchemaOrg(html: string): { types: string[]; names: string[]; descriptions: string[] } {
   const types: string[] = [];
+  const names: string[] = [];
+  const descriptions: string[] = [];
 
   // JSON-LD blocks
   const jsonLdBlocks = html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi);
   for (const block of jsonLdBlocks) {
     try {
       const data = JSON.parse(block[1]);
-      const items = Array.isArray(data) ? data : [data];
-      for (const item of items) {
-        if (item['@type']) {
-          const t = item['@type'];
-          if (Array.isArray(t)) types.push(...t);
-          else types.push(String(t));
-        }
-        // Check nested @graph
-        if (item['@graph'] && Array.isArray(item['@graph'])) {
-          for (const node of item['@graph']) {
-            if (node['@type']) {
-              const t = node['@type'];
-              if (Array.isArray(t)) types.push(...t);
-              else types.push(String(t));
-            }
-          }
-        }
-      }
+      collectSchemaNode(data, types, names, descriptions);
     } catch {
       // Malformed JSON-LD — skip
     }
@@ -167,7 +225,38 @@ function extractSchemaOrgTypes(html: string): string[] {
     types.push(m[1]);
   }
 
-  return [...new Set(types)];
+  return {
+    types: [...new Set(types)],
+    names: [...new Set(names)].slice(0, 20),
+    descriptions: [...new Set(descriptions)].slice(0, 20),
+  };
+}
+
+function collectSchemaNode(
+  value: unknown,
+  types: string[],
+  names: string[],
+  descriptions: string[],
+): void {
+  if (!value) return;
+
+  if (Array.isArray(value)) {
+    for (const item of value) collectSchemaNode(item, types, names, descriptions);
+    return;
+  }
+
+  if (typeof value !== 'object') return;
+  const item = value as Record<string, unknown>;
+  const type = item['@type'];
+  if (Array.isArray(type)) types.push(...type.map(String));
+  else if (type) types.push(String(type));
+
+  if (typeof item.name === 'string') names.push(item.name);
+  if (typeof item.description === 'string') descriptions.push(item.description);
+
+  for (const child of Object.values(item)) {
+    if (child && typeof child === 'object') collectSchemaNode(child, types, names, descriptions);
+  }
 }
 
 function extractNavLinkTexts(html: string): string[] {
@@ -180,6 +269,33 @@ function extractNavLinkTexts(html: string): string[] {
     if (text && text.length < 40) texts.push(text);
   }
   return [...new Set(texts)].slice(0, 30);
+}
+
+function extractHeadingTexts(html: string): string[] {
+  const texts: string[] = [];
+  const headings = html.matchAll(/<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/gi);
+  for (const m of headings) {
+    const text = stripHtmlTags(m[1]).trim().toLowerCase();
+    if (text && text.length < 120) texts.push(text);
+  }
+  return [...new Set(texts)].slice(0, 40);
+}
+
+function extractButtonTexts(html: string): string[] {
+  const texts: string[] = [];
+  const buttons = html.matchAll(/<button[^>]*>([\s\S]*?)<\/button>/gi);
+  for (const m of buttons) {
+    const text = stripHtmlTags(m[1]).trim().toLowerCase();
+    if (text && text.length < 80) texts.push(text);
+  }
+
+  const buttonInputs = html.matchAll(/<(?:input|a)[^>]+(?:type=["']button["'][^>]+)?(?:aria-label|title|value)=["']([^"']+)["'][^>]*>/gi);
+  for (const m of buttonInputs) {
+    const text = stripHtmlTags(m[1]).trim().toLowerCase();
+    if (text && text.length < 80) texts.push(text);
+  }
+
+  return [...new Set(texts)].slice(0, 40);
 }
 
 function extractLogoHints(html: string, pageUrl: string, ogImage: string | null): string[] {
@@ -220,9 +336,7 @@ function extractLogoHints(html: string, pageUrl: string, ogImage: string | null)
 function extractSocialLinks(html: string): string[] {
   const social: string[] = [];
   const SOCIAL_PATTERNS = ['instagram.com', 'facebook.com', 'twitter.com', 'x.com', 'tiktok.com', 'yelp.com', 'tripadvisor.com', 'opentable.com', 'resy.com', 'doordash.com', 'ubereats.com', 'grubhub.com'];
-  const hrefs = html.matchAll(/href=["']([^"']+)["']/gi);
-  for (const m of hrefs) {
-    const href = m[1];
+  for (const href of extractAttributeValues(html, 'href')) {
     if (SOCIAL_PATTERNS.some((p) => href.includes(p))) {
       social.push(href);
     }
@@ -230,14 +344,55 @@ function extractSocialLinks(html: string): string[] {
   return [...new Set(social)].slice(0, 10);
 }
 
+function extractAttributeValues(html: string, attribute: string): string[] {
+  const values: string[] = [];
+  const matches = html.matchAll(new RegExp(`${attribute}=["']([^"']+)["']`, 'gi'));
+  for (const m of matches) values.push(m[1]);
+  return values;
+}
+
+function extractImageAltTexts(html: string): string[] {
+  const alts: string[] = [];
+  const matches = html.matchAll(/<img[^>]+alt=["']([^"']+)["'][^>]*>/gi);
+  for (const m of matches) alts.push(stripHtmlTags(m[1]).trim());
+  return alts;
+}
+
 function stripHtml(html: string): string {
   return stripHtmlTags(html).replace(/\s+/g, ' ').trim();
+}
+
+function extractScoringBodyText(html: string): string {
+  const stripped = stripHtml(html);
+  if (stripped.length <= 50_000) return stripped;
+
+  const windows: string[] = [stripped.slice(0, 5000), stripped.slice(-2000)];
+  const lower = stripped.toLowerCase();
+  for (const keyword of TARGET_WINDOW_KEYWORDS) {
+    const index = lower.indexOf(keyword.toLowerCase());
+    if (index === -1) continue;
+    const start = Math.max(0, index - 800);
+    const end = Math.min(stripped.length, index + keyword.length + 1200);
+    windows.push(stripped.slice(start, end));
+  }
+
+  return [...new Set(windows)].join(' ').replace(/\s+/g, ' ').trim();
 }
 
 function stripHtmlTags(s: string): string {
   return s.replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<[^>]+>/g, ' ');
+}
+
+function extractNonEnglishKeywordHits(text: string): Record<string, string[]> {
+  const lower = text.toLowerCase();
+  const hits: Record<string, string[]> = {};
+  for (const [language, keywords] of Object.entries(NON_ENGLISH_KEYWORDS)) {
+    const matched = keywords.filter((keyword) => lower.includes(keyword.toLowerCase()));
+    if (matched.length > 0) hits[language] = [...new Set(matched)];
+  }
+  return hits;
 }
 
 function resolveUrl(href: string, base: string): string {

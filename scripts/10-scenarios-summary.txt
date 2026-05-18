@@ -1,0 +1,243 @@
+20 Website Validation Failure Scenarios
+=======================================
+
+Generated: 2026-05-18T20:45:48.470Z
+
+Combined Priority Ranking
+-------------------------
+1. 11. Network-inaccessible real restaurant domains (high volume, medium risk)
+2. 3. Third-party platform pages (high volume, medium risk)
+3. 1. JS-rendered websites (high volume, medium risk)
+4. 7. Rural and small-town restaurants (medium volume, medium risk)
+5. 12. Stale, moved, or 404 restaurant domains (medium volume, medium risk)
+6. 4. Owner or abstract brand domains with no food signals (medium volume, low risk)
+7. 6. Single-page websites with no navigation (medium volume, low risk)
+8. 2. Non-English and localized websites (medium volume, medium risk)
+9. 5. New restaurants with thin web presence (medium volume, medium risk)
+10. 8. Food trucks and pop-ups (medium volume, low risk)
+11. 13. Bot-protected pages with no useful metadata (medium volume, medium risk)
+12. 14. Generic schema.org only (high volume, low risk)
+13. 15. OpenGraph/meta-only restaurant pages (medium volume, low risk)
+14. 16. PDF-only menus and direct PDF URLs (medium volume, medium risk)
+15. 9. Restaurants behind login or reservation walls (low volume, medium risk)
+16. 17. Huge HTML where restaurant cues are past the 5KB body cutoff (medium volume, low risk)
+17. 18. Hospitality group and hotel restaurant dilution (medium volume, medium risk)
+18. 10. Names resembling national chains (low volume, low risk)
+19. 19. Hijacked or unrelated reused domains (low volume, low risk)
+20. 20. Threshold cliff just below verified (medium volume, low risk)
+
+Scenario Summaries
+------------------
+
+1. JS-rendered websites
+Volume/Risk: high/medium
+Current examples still not verified: 4/4
+Estimated impact: Could address most minimal_html/js_rendered rows: about 15-25% of reachable failures in the current failure hunt.
+Fix: Make the headless fallback deterministic for thin/JS shells, persist rendered HTML, and add framework-shell detection for Wix/Squarespace/React loader pages.
+Examples:
+- Tarbell's (https://www.tarbell.com) -> plausible_unverified, score 0, minimal_html
+- The Catfish Hole (https://www.catfishhole.com) -> plausible_unverified, score 0, minimal_html
+- Bacchanalia (https://www.bacchanalia.com) -> plausible_unverified, score 0, minimal_html
+- Girl & the Goat (https://girlandthegoat.com) -> plausible_unverified, score 27, minimal_html
+
+2. Non-English and localized websites
+Volume/Risk: medium/medium
+Current examples still not verified: 4/4
+Estimated impact: Likely low hundreds in a 5,000 failure set, concentrated in metro markets.
+Fix: Add multilingual restaurant lexicons for common US restaurant languages and score hreflang/lang plus translated menu/reservation/hour terms.
+Examples:
+- Pho 79 (https://www.pho79newportnews.com) -> plausible_unverified, score 0, minimal_html
+- Pho Bac (https://www.phobacseattle.com) -> plausible_unverified, score 0, timeout_or_network_error
+- La Casita Mexicana (https://www.lacasitamex.com) -> plausible_unverified, score 10, minimal_html
+- Chengdu Taste (https://www.chengdutaste.com) -> plausible_unverified, score 0, minimal_html
+
+3. Third-party platform pages
+Volume/Risk: high/medium
+Current examples still not verified: 4/4
+Estimated impact: High for SMB restaurants; likely 10-20% of organic submissions that use hosted ordering links.
+Fix: Add platform parsers and trusted platform path scoring for Toast/Square/Popmenu/BentoBox menu and merchant pages, with vendor-domain guardrails.
+Examples:
+- Toast Temecula (https://order.toasttab.com/online/toast-temecula) -> plausible_unverified, score 0, cloudflare_blocked
+- The Bagel Bar Cafe (https://order.toasttab.com/online/the-bagel-bar-cafe) -> plausible_unverified, score 0, cloudflare_blocked
+- Pho Auntie 7 (https://phoauntie7.square.site) -> plausible_unverified, score 0, minimal_html
+- Gyro Hub Verdazo (https://gyro-hub-verdazo.square.site) -> plausible_unverified, score 12, low_signal_score
+
+4. Owner or abstract brand domains with no food signals
+Volume/Risk: medium/low
+Current examples still not verified: 4/4
+Estimated impact: Medium; several baseline low_signal_score rows sit just under threshold.
+Fix: Add stronger weighting for menu/hours/phone combinations and title/meta restaurant phrases so owner-name domains do not need food words in the hostname.
+Examples:
+- State Bird Provisions (https://statebirdsf.com) -> plausible_unverified, score 53, low_signal_score
+- Staplehouse (https://staplehouse.com) -> plausible_unverified, score 42, low_signal_score
+- Alinea (https://alinearestaurant.com) -> plausible_unverified, score 55, low_signal_score
+- Milktooth (https://milktoothindy.com) -> plausible_unverified, score 21, low_signal_score
+
+5. New restaurants with thin web presence
+Volume/Risk: medium/medium
+Current examples still not verified: 3/3
+Estimated impact: Medium; overlaps with minimal_html and low_signal_score categories.
+Fix: Create a thin-but-plausible restaurant rule for combinations of title/meta/location/phone/menu PDF or social links, plus optional manual-review continuation.
+Examples:
+- Tusk Lounge (https://www.tusklounge.com) -> plausible_unverified, score 0, timeout_or_network_error
+- Herbers HQ (https://www.herbershq.com) -> plausible_unverified, score 0, timeout_or_network_error
+- Ondas Kitchen (https://ondaskitchen.com) -> plausible_unverified, score 0, timeout_or_network_error
+
+6. Single-page websites with no navigation
+Volume/Risk: medium/low
+Current examples still not verified: 3/4
+Estimated impact: Medium; many failure-hunt rows have meta/phone/schema but missing menu_nav and reservations_nav.
+Fix: Add section-heading/button text extraction and score body headings for menu, hours, address, call, reserve, and order patterns.
+Examples:
+- The Cellar (https://www.thecellarcda.com) -> plausible_unverified, score 0, timeout_or_network_error
+- The Dogfish Cafe (https://www.thedogfish.com) -> plausible_unverified, score 0, cloudflare_blocked
+- Row 34 (https://www.row34.com) -> verified_restaurant, score 65, currently_verified
+- Staplehouse (https://staplehouse.com) -> plausible_unverified, score 42, low_signal_score
+
+7. Rural and small-town restaurants
+Volume/Risk: medium/medium
+Current examples still not verified: 4/4
+Estimated impact: Medium; many timeout rows are likely stale or alternate-host issues.
+Fix: Add alternate-host retry strategy and score reachable PDF/menu/social fallbacks for small-town style sites.
+Examples:
+- The Catfish Hole (https://www.catfishhole.com) -> plausible_unverified, score 0, minimal_html
+- The Deck (https://www.thedeckrestaurant.com) -> plausible_unverified, score 0, timeout_or_network_error
+- Haleiwa Joe's (https://www.haleiwajoes.com) -> plausible_unverified, score 0, minimal_html
+- Bancroft on the Green (https://www.bancroftonthegreen.com) -> plausible_unverified, score 0, timeout_or_network_error
+
+8. Food trucks and pop-ups
+Volume/Risk: medium/low
+Current examples still not verified: 4/4
+Estimated impact: Medium for lead sources that accept mobile operators.
+Fix: Add food truck/pop-up lexicon and score hosted menu pages with phone, hours, and menu categories as foodservice operators.
+Examples:
+- Gyro Hub Verdazo (https://gyro-hub-verdazo.square.site) -> plausible_unverified, score 12, low_signal_score
+- Mack the Knife (https://mack-the-knife.square.site) -> plausible_unverified, score 6, low_signal_score
+- Restaurant 51 Food Truck (https://restaurant-51-food-truck.square.site) -> plausible_unverified, score 53, low_signal_score
+- Cousins Maine Lobster (https://www.cousinsmainelobster.com) -> plausible_unverified, score 40, low_signal_score
+
+9. Restaurants behind login or reservation walls
+Volume/Risk: low/medium
+Current examples still not verified: 2/3
+Estimated impact: Low overall, high in fine-dining segments.
+Fix: Detect reservation-only/member/login flows as plausible foodservice signals and extract linked Tock/Resy/OpenTable restaurant metadata.
+Examples:
+- Rao's (https://raosrestaurants.com) -> plausible_unverified, score 57, low_signal_score
+- Bohemian (https://www.playearth.jp/bohemian) -> invalid_website, score 0, invalid_or_stale_url
+- Mosquito Supper Club (https://www.mosquitosupperclub.com) -> verified_restaurant, score 100, currently_verified
+
+10. Names resembling national chains
+Volume/Risk: low/low
+Current examples still not verified: 3/3
+Estimated impact: Low, but prevents hard false rejections.
+Fix: Require exact brand-domain match or stronger multi-signal chain evidence before national_chain when the user-provided name is empty.
+Examples:
+- Subway Cafe (https://subwaycafe.com) -> plausible_unverified, score 13, minimal_html
+- McDonald's Pub (https://mcdonaldspub.com) -> plausible_unverified, score 0, timeout_or_network_error
+- Waffle House Pub (https://wafflehousepub.com) -> plausible_unverified, score 0, timeout_or_network_error
+
+11. Network-inaccessible real restaurant domains
+Volume/Risk: high/medium
+Current examples still not verified: 4/4
+Estimated impact: Highest; 54/100 baseline failures and 215/345 failure-hunt rows were inaccessible.
+Fix: Add alternate scheme/host retries, shorter HEAD preflight, DNS classification, and optional external evidence lookup before giving up.
+Examples:
+- Ole Bay Cafe (https://olebaycafe.com) -> plausible_unverified, score 0, timeout_or_network_error
+- Ocean Restaurant (https://www.oceanrestaurant.net) -> plausible_unverified, score 0, timeout_or_network_error
+- Bottega (https://bottegafrombirmingham.com) -> plausible_unverified, score 0, timeout_or_network_error
+- Marx Bros Cafe (https://www.marxbroscafe.com) -> plausible_unverified, score 0, timeout_or_network_error
+
+12. Stale, moved, or 404 restaurant domains
+Volume/Risk: medium/medium
+Current examples still not verified: 3/3
+Estimated impact: Medium; 8 invalid rows in failure-hunt and 3 in the 100-failure sample.
+Fix: For 404 on restaurant-looking domains, offer plausible_unverified/manual review and optionally try search-discovered canonical domains.
+Examples:
+- Tracy's King Crab Shack (https://tracyskingcrab.com) -> invalid_website, score 0, invalid_or_stale_url
+- Hai Hai (https://linktr.ee/haihaipdx) -> invalid_website, score 0, invalid_or_stale_url
+- Bohemian (https://www.playearth.jp/bohemian) -> invalid_website, score 0, invalid_or_stale_url
+
+13. Bot-protected pages with no useful metadata
+Volume/Risk: medium/medium
+Current examples still not verified: 3/3
+Estimated impact: Medium; 7/100 baseline failures and 17/345 failure-hunt rows were bot/cloudflare related.
+Fix: Add richer protected-site heuristics: favicon/domain history, known restaurant terms in brand domain, and optional external SERP/title fallback.
+Examples:
+- The Ravenous Pig (https://www.theravenouspig.com) -> plausible_unverified, score 0, cloudflare_blocked
+- Saint Anejo (https://www.saintanejo.com) -> plausible_unverified, score 0, cloudflare_blocked
+- Auberge du Soleil Dining (https://aubergeresorts.com/aubergedusoleil/dine/) -> plausible_unverified, score 0, cloudflare_blocked
+
+14. Generic schema.org only
+Volume/Risk: high/low
+Current examples still not verified: 2/3
+Estimated impact: High among reachable low_signal_score pages.
+Fix: Infer restaurant intent from generic schema combined with menu/hours/address/phone and parse nested @graph names/descriptions for food terms.
+Examples:
+- State Bird Provisions (https://statebirdsf.com) -> plausible_unverified, score 53, low_signal_score
+- Alinea (https://alinearestaurant.com) -> plausible_unverified, score 55, low_signal_score
+- Pizzeria Bianco (https://pizzeriabianco.com) -> verified_restaurant, score 82, currently_verified
+
+15. OpenGraph/meta-only restaurant pages
+Volume/Risk: medium/low
+Current examples still not verified: 3/3
+Estimated impact: Medium; failure-hunt found meta_description in 72 rows and og_image in 65 rows.
+Fix: Add a metadata bundle rule: restaurant-like title/meta plus phone/og image/address should reach verified or protected context threshold.
+Examples:
+- The Cellar (https://www.thecellarcda.com) -> plausible_unverified, score 0, timeout_or_network_error
+- The Dogfish Cafe (https://www.thedogfish.com) -> plausible_unverified, score 0, cloudflare_blocked
+- Elway's (https://www.elways.com) -> plausible_unverified, score 15, minimal_html
+
+16. PDF-only menus and direct PDF URLs
+Volume/Risk: medium/medium
+Current examples still not verified: 3/3
+Estimated impact: Medium for small-town, food-truck, and catering operators.
+Fix: Detect application/pdf, mark as plausible foodservice when URL/path/title has menu or restaurant terms, and optionally extract first-page text with a lightweight PDF parser.
+Examples:
+- Pho Auntie 7 Menu PDF (https://phoauntie7.square.site/uploads/b/4827ad00-ab91-11eb-82fa-2b0aaa385d39/PHO%20AUNTIE%207%20MENU.pdf) -> invalid_website, score 0, invalid_or_stale_url
+- Jessie Lou's Menu PDF (https://jessielou757.square.site/uploads/b/bc9c8030-6a4a-11ea-951f-299fd17be793/Menu_summer2020.pdf) -> invalid_website, score 0, invalid_or_stale_url
+- Sprout Sandwich Shop Catering PDF (https://sprout-sandwich-shop.square.site/uploads/b/de15b3a0-db12-11e9-a4b6-a320b8c3151e/74abce80-32fc-11f1-a33c-c9326a2c4e57.pdf) -> plausible_unverified, score 0, low_signal_score
+
+17. Huge HTML where restaurant cues are past the 5KB body cutoff
+Volume/Risk: medium/low
+Current examples still not verified: 3/3
+Estimated impact: Medium; failure-hunt rows include very large HTML with score 0 and only meta/schema hints.
+Fix: Score full extracted text for keyword presence or keep targeted windows around menu/hours/address terms before truncating for downstream prompts.
+Examples:
+- Craigie on Main (https://www.craigieonmain.com) -> plausible_unverified, score 0, low_signal_score
+- DeLorenzo's Tomato Pies (https://www.delorenzospizza.com) -> plausible_unverified, score 0, low_signal_score
+- Girl & the Goat (https://girlandthegoat.com) -> plausible_unverified, score 27, minimal_html
+
+18. Hospitality group and hotel restaurant dilution
+Volume/Risk: medium/medium
+Current examples still not verified: 2/3
+Estimated impact: Medium for fine dining and hotel restaurants.
+Fix: Score restaurant-indicating paths under hotel/group domains and avoid penalizing low name-domain match when URL path contains dine/menu/restaurant.
+Examples:
+- The Capital Hotel Bar (https://thecappuccinohotel.com) -> plausible_unverified, score 0, timeout_or_network_error
+- HoDo Restaurant (https://www.hoteldonaldson.com) -> verified_restaurant, score 66, currently_verified
+- Auberge du Soleil Dining (https://aubergeresorts.com/aubergedusoleil/dine/) -> plausible_unverified, score 0, cloudflare_blocked
+
+19. Hijacked or unrelated reused domains
+Volume/Risk: low/low
+Current examples still not verified: 3/3
+Estimated impact: Low for product conversion, meaningful for benchmark accuracy.
+Fix: Add stale/hijacked domain failure category using title/meta mismatch and strong non-food topic detection, so benchmarks do not treat them as fixable restaurant false negatives.
+Examples:
+- Domaine Hudson (https://www.domainehudson.com) -> plausible_unverified, score 0, low_signal_score
+- Milktooth (https://milktoothindy.com) -> plausible_unverified, score 21, low_signal_score
+- John's Restaurant (https://www.johnsrestaurant.com) -> plausible_unverified, score 0, timeout_or_network_error
+
+20. Threshold cliff just below verified
+Volume/Risk: medium/low
+Current examples still not verified: 4/4
+Estimated impact: Medium; this directly targets reachable false negatives with strong but sub-threshold evidence.
+Fix: Add a confidence bundle rule for 50-59 scores when three independent restaurant signals are present and negativeSignalScore is low.
+Examples:
+- Union League Cafe (https://www.unionleaguecafe.com) -> plausible_unverified, score 57, low_signal_score
+- The Optimist (https://www.theoptimistrestaurant.com) -> plausible_unverified, score 23, low_signal_score
+- Boise Fry Company (https://www.boisefrycompany.com) -> plausible_unverified, score 49, low_signal_score
+- Alinea (https://alinearestaurant.com) -> plausible_unverified, score 55, low_signal_score
+
+Highest Volume Scenario: Network-inaccessible real restaurant domains
+Easiest Fix: Single-page websites with no navigation
+Highest Impact Single Change: Add alternate-host/network fallback plus platform-specific parsing for hosted ordering/menu pages.

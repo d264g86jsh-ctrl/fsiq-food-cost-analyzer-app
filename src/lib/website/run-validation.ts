@@ -53,6 +53,34 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
 
   const normalizedUrl = normalized.normalizedUrl;
 
+  // ── Step 1b: Trusted restaurant merchant platforms ───────────────────────
+  const platformMatch = detectTrustedMerchantPlatform(normalizedUrl);
+  if (platformMatch?.verified) {
+    const eligibility = computeCountryEligibility();
+    return buildResult({
+      finalDecision: 'verified_restaurant',
+      normalizedUrl,
+      finalUrl: normalizedUrl,
+      httpStatus: 200,
+      websiteReachabilityStatus: 'reachable',
+      restaurantSignalScore: 60,
+      negativeSignalScore: 0,
+      nationalChainScore: 0,
+      websiteRelationshipScore: 0,
+      googlePlacesScore: 0,
+      ...eligibility,
+      headlessBrowserUsed: false,
+      googlePlacesQueried: false,
+      claudeAiUsed: false,
+      websiteLogoHints: [],
+      logoUrl: null,
+      internalFlags: [...internalFlags, platformMatch.flag],
+      reasons: ['trusted_restaurant_platform'],
+      userFacingMessage: null,
+      manualReviewRequired: false,
+    });
+  }
+
   // ── Step 2: Chain detection — name-only pass ──────────────────────────────
   const nameChainCheck = detectNationalChain({ restaurantName, domain: normalizedUrl });
   if (nameChainCheck.score >= 85) {
@@ -118,7 +146,9 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   const needsHeadless =
     fetchResult.reachability.status === 'blocked' ||
     fetchResult.reachability.status === 'thin' ||
-    (signals?.hasBotProtection ?? false);
+    (signals?.hasBotProtection ?? false) ||
+    fetchResult.html.length < 500 ||
+    hasJsFrameworkShell(fetchResult.html);
 
   if (needsHeadless) {
     const headlessResult = await headlessFetch(normalizedUrl);
@@ -208,10 +238,9 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   }
 
   const contextualScore = computeProtectedRestaurantContextScore({
-    restaurantName,
     domain,
+    finalUrl,
     reachabilityStatus: fetchResult.reachability.status,
-    relationshipScore: relationship.websiteRelationshipScore,
     scores,
     signals,
     nationalChainScore,
@@ -342,7 +371,7 @@ function applyDecisionRules(options: {
   if (negativeSignalScore >= 70 && restaurantSignalScore < 30 && googlePlacesScore < 30) {
     return { decision: 'clear_non_fit', reason: 'high_negative_score' };
   }
-  if (restaurantSignalScore >= 60 && negativeSignalScore < 40 && nationalChainScore < 50) {
+  if (restaurantSignalScore >= 60 && negativeSignalScore < 40 && nationalChainScore < 85) {
     return { decision: 'verified_restaurant', reason: 'high_restaurant_score' };
   }
   if (googlePlacesScore >= 80 && nationalChainScore < 50 && negativeSignalScore < 60) {
@@ -352,19 +381,17 @@ function applyDecisionRules(options: {
 }
 
 function computeProtectedRestaurantContextScore(options: {
-  restaurantName: string;
   domain: string;
+  finalUrl: string;
   reachabilityStatus: string;
-  relationshipScore: number;
   scores: { restaurantSignalScore: number; negativeSignalScore: number };
   signals: ExtractSignalsResult | null;
   nationalChainScore: number;
 }): { restaurantSignalScore: number; flag: string } | null {
   const {
-    restaurantName,
     domain,
+    finalUrl,
     reachabilityStatus,
-    relationshipScore,
     scores,
     signals,
     nationalChainScore,
@@ -377,18 +404,38 @@ function computeProtectedRestaurantContextScore(options: {
 
   if (!isProtectedOrThin) return null;
   if (scores.negativeSignalScore >= 40 || nationalChainScore >= 50) return null;
-  if (relationshipScore < 50) return null;
 
-  const context = `${restaurantName} ${domain}`.toLowerCase();
+  const domainWords = splitDomainWords(domain);
+  const pathSegments = splitUrlPathSegments(finalUrl);
+  const pageContext = [
+    signals?.pageTitle,
+    signals?.metaDescription,
+    signals?.ogTitle,
+    signals?.ogDescription,
+    signals?.ogSiteName,
+    signals?.ogType,
+    ...(signals?.schemaOrgTypes ?? []),
+    ...(signals?.schemaOrgNames ?? []),
+    ...(signals?.schemaOrgDescriptions ?? []),
+    ...(signals?.navLinkTexts ?? []),
+    ...(signals?.headingTexts ?? []),
+    ...(signals?.buttonTexts ?? []),
+    ...pathSegments,
+  ].filter(Boolean).join(' ').toLowerCase();
+  const context = `${domainWords.join(' ')} ${pageContext}`.toLowerCase();
   if (NON_RESTAURANT_CONTEXT_TERMS.some((term) => context.includes(term))) return null;
 
-  const hasRestaurantContext = RESTAURANT_CONTEXT_TERMS.some((term) => context.includes(term));
-  const hasPageRestaurantHint =
-    signals?.hasRestaurantSchema ||
-    signals?.hasAgeGate ||
-    signals?.navLinkTexts.some((text) => RESTAURANT_NAV_HINTS.some((hint) => text.includes(hint)));
+  const domainScore = domainWords.reduce((total, word) => total + scoreRestaurantDomainWord(word), 0);
+  const metadataScore = scoreRestaurantText(pageContext);
+  const pathScore = pathSegments.reduce((total, segment) => total + scoreRestaurantPathSegment(segment), 0);
+  const pageHintScore =
+    (signals?.hasRestaurantSchema ? 30 : 0) +
+    (signals?.hasAgeGate ? 20 : 0) +
+    ([...(signals?.navLinkTexts ?? []), ...(signals?.headingTexts ?? []), ...(signals?.buttonTexts ?? [])]
+      .some((text) => RESTAURANT_NAV_HINTS.some((hint) => text.includes(hint))) ? 15 : 0);
 
-  if (!hasRestaurantContext && !hasPageRestaurantHint) return null;
+  const contextScore = domainScore + metadataScore + pathScore + pageHintScore;
+  if (contextScore < 30) return null;
 
   return {
     restaurantSignalScore: 60,
@@ -402,6 +449,7 @@ const RESTAURANT_CONTEXT_TERMS = [
   'grill', 'bbq', 'barbecue', 'pizza', 'pizzeria', 'taco', 'taqueria',
   'sushi', 'ramen', 'seafood', 'steakhouse', 'smokehouse', 'catering',
   'cuisine', 'cantina', 'brasserie', 'trattoria', 'chophouse', 'brewery',
+  'gastropub', 'bodega', 'spirits',
 ];
 
 const RESTAURANT_NAV_HINTS = ['menu', 'order', 'reservation', 'catering', 'private dining'];
@@ -412,6 +460,126 @@ const NON_RESTAURANT_CONTEXT_TERMS = [
   'consulting', 'logistics', 'manufacturer', 'packaging', 'remodeling',
   'catering company',
 ];
+
+function scoreRestaurantDomainWord(word: string): number {
+  if (['restaurant', 'bistro', 'brasserie', 'trattoria', 'taqueria', 'pizzeria', 'steakhouse', 'smokehouse', 'chophouse', 'gastropub'].includes(word)) return 30;
+  if (['grill', 'kitchen', 'cafe', 'eatery', 'diner', 'cantina', 'tavern', 'brewery', 'seafood', 'bbq', 'bakery', 'pub', 'bar', 'bodega'].includes(word)) return 20;
+  if (word === 'spirits') return 30;
+  if (['pizza', 'sushi', 'ramen', 'taco', 'cuisine', 'food', 'foods', 'dining'].includes(word)) return 15;
+  if (word === 'catering') return 8;
+  return 0;
+}
+
+function scoreRestaurantText(text: string): number {
+  let score = 0;
+  for (const term of RESTAURANT_CONTEXT_TERMS) {
+    if (text.includes(term)) score += 6;
+  }
+  if (text.includes('og:type restaurant') || text.includes('schema.org/restaurant')) score += 20;
+  if (text.includes('book a table') || text.includes('private dining')) score += 12;
+  return Math.min(score, 30);
+}
+
+function scoreRestaurantPathSegment(segment: string): number {
+  if (['menu', 'menus', 'reservations', 'reserve', 'book-a-table'].includes(segment)) return 20;
+  if (['order', 'order-online', 'hours'].includes(segment)) return 10;
+  if (['our-story', 'about-us', 'about', 'catering'].includes(segment)) return 5;
+  return 0;
+}
+
+function splitUrlPathSegments(url: string): string[] {
+  try {
+    return new URL(url).pathname
+      .split('/')
+      .map((segment) => segment.trim().toLowerCase())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function splitDomainWords(domain: string): string[] {
+  const root = domain
+    .replace(/^www\./, '')
+    .replace(/\.(com|net|org|io|co|us|biz|info|restaurant)$/i, '');
+
+  const explicitWords = root
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/[^a-z0-9]+/gi, ' ')
+    .toLowerCase()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  const words = new Set(explicitWords);
+  for (const word of explicitWords) {
+    for (const term of [...RESTAURANT_CONTEXT_TERMS, ...NON_RESTAURANT_CONTEXT_TERMS]) {
+      if (word.includes(term)) words.add(term);
+    }
+  }
+
+  return [...words];
+}
+
+function detectTrustedMerchantPlatform(url: string): { verified: boolean; flag: string } | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+
+  const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+  const pathSegments = parsed.pathname.split('/').filter(Boolean);
+  const hasMerchantPath = pathSegments.some((segment) => /[a-z0-9]{3,}/i.test(segment)) &&
+    !pathSegments.some((segment) => ['corporate', 'careers', 'pricing', 'demo', 'partners', 'developers'].includes(segment.toLowerCase()));
+
+  if (host === 'toasttab.com' || host === 'squareup.com') return null;
+
+  if (host === 'order.toasttab.com' && hasMerchantPath) {
+    return { verified: true, flag: 'trusted_platform_toasttab_merchant' };
+  }
+
+  if (host.endsWith('.square.site') && host !== 'square.site') {
+    return { verified: true, flag: 'trusted_platform_square_merchant' };
+  }
+
+  const wildcardPlatforms = ['popmenu.com', 'bentobox.com', 'chownow.com', 'owner.com', 'bopomenu.com'];
+  for (const platform of wildcardPlatforms) {
+    if (host.endsWith(`.${platform}`) && host !== platform) {
+      return { verified: true, flag: `trusted_platform_${platform.replace(/\.com$/, '')}_merchant` };
+    }
+  }
+
+  return null;
+}
+
+function hasJsFrameworkShell(html: string): boolean {
+  if (!html) return false;
+  const lower = html.toLowerCase();
+  const scriptSignals = [
+    'wixstatic.com',
+    'wix-code',
+    'static.parastorage.com',
+    'squarespace.com',
+    'static1.squarespace.com',
+    'webflow.js',
+    'data-wf-page',
+    '__next',
+    'react-dom',
+    'vue.runtime',
+    'angular.js',
+    'ng-app',
+  ];
+  if (scriptSignals.some((signal) => lower.includes(signal))) return true;
+
+  const bodyText = lower
+    .replace(/<style[\s\S]*?<\/style>/g, '')
+    .replace(/<script[\s\S]*?<\/script>/g, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return bodyText.length < 500 && /<script[^>]+src=/i.test(html);
+}
 
 function shouldFlagManualReview(
   reachabilityStatus: string,

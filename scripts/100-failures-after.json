@@ -1,0 +1,2100 @@
+{
+  "summary": {
+    "generatedAt": "2026-05-18T17:05:33.014Z",
+    "total": 100,
+    "fixed": 16,
+    "stillFailing": 84,
+    "beforeAccuracy": 0,
+    "afterAccuracy": 0.16,
+    "stillFailingByCategory": {
+      "timeout": 54,
+      "minimal_html": 11,
+      "low_signal_score": 11,
+      "cloudflare_blocked": 6,
+      "js_rendered": 2
+    },
+    "fixedByCategory": {
+      "low_signal_score": 13,
+      "minimal_html": 2,
+      "cloudflare_blocked": 1
+    },
+    "stillFailingByDecision": {
+      "plausible_unverified": 81,
+      "invalid_website": 3
+    }
+  },
+  "rows": [
+    {
+      "url": "https://sawsbbq.com",
+      "name": "Saw's BBQ",
+      "city": "Birmingham, AL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 56,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 88,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://bigbobgibson.com",
+      "name": "Big Bob Gibson BBQ",
+      "city": "Decatur, AL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 57,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 75,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://olebaycafe.com",
+      "name": "Ole Bay Cafe",
+      "city": "Mobile, AL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.johnsrestaurant.com",
+      "name": "John's Restaurant",
+      "city": "Birmingham, AL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.rodneyscottsbbq.com",
+      "name": "Rodney Scott's BBQ",
+      "city": "Birmingham, AL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 8,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 8,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.oceanrestaurant.net",
+      "name": "Ocean Restaurant",
+      "city": "Birmingham, AL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://bottegafrombirmingham.com",
+      "name": "Bottega",
+      "city": "Birmingham, AL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.marxbroscafe.com",
+      "name": "Marx Bros Cafe",
+      "city": "Anchorage, AK",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.kinleyrestaurant.com",
+      "name": "Kinley",
+      "city": "Anchorage, AK",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.orsalaska.com",
+      "name": "Orso",
+      "city": "Anchorage, AK",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.beartoothmovies.net",
+      "name": "Bear Tooth Theatrepub",
+      "city": "Anchorage, AK",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.pangalaska.com",
+      "name": "Pangea Restaurant",
+      "city": "Juneau, AK",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://tracyskingcrab.com",
+      "name": "Tracy's King Crab Shack",
+      "city": "Juneau, AK",
+      "beforeDecision": "invalid_website",
+      "beforeScore": 0,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "invalid_website",
+      "afterHttpStatus": 404,
+      "afterScore": 0,
+      "afterReachability": "invalid",
+      "fixed": false,
+      "reasons": [
+        "http_404"
+      ],
+      "internalFlags": [
+        "http_404"
+      ]
+    },
+    {
+      "url": "https://pizzeriabianco.com",
+      "name": "Pizzeria Bianco",
+      "city": "Phoenix, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 37,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 82,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://barriocafe.com",
+      "name": "Barrio Cafe",
+      "city": "Phoenix, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 16,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 60,
+      "afterReachability": "thin",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "protected_or_thin_restaurant_context",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.cafemonarch.com",
+      "name": "Cafe Monarch",
+      "city": "Scottsdale, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 8,
+      "beforeCategory": "cloudflare_blocked",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 403,
+      "afterScore": 8,
+      "afterReachability": "blocked",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "http_403",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.tocamadera.com",
+      "name": "Toca Madera",
+      "city": "Scottsdale, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 46,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 62,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.lonsdalefour.com",
+      "name": "LON's at The Hermosa",
+      "city": "Paradise Valley, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.quelintaqueria.com",
+      "name": "Quelin Taqueria",
+      "city": "Tucson, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.cafeportagul.com",
+      "name": "Cafe Poca Cosa",
+      "city": "Tucson, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.elcharro.com",
+      "name": "El Charro Cafe",
+      "city": "Tucson, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.binkscafe.com",
+      "name": "Bink's Midtown",
+      "city": "Phoenix, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.tarbell.com",
+      "name": "Tarbell's",
+      "city": "Phoenix, AZ",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 0,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://doeseatplace.com",
+      "name": "Doe's Eat Place",
+      "city": "Little Rock, AR",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 51,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 75,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.pressroombentonville.com",
+      "name": "Pressroom",
+      "city": "Bentonville, AR",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.catfishhole.com",
+      "name": "The Catfish Hole",
+      "city": "Fayetteville, AR",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 0,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.mocojackson.com",
+      "name": "Mojo on Center",
+      "city": "Little Rock, AR",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://thecappuccinohotel.com",
+      "name": "The Capital Hotel Bar",
+      "city": "Little Rock, AR",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.brunoscafeandgrill.com",
+      "name": "Bruno's Little Italy",
+      "city": "Little Rock, AR",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.tusklounge.com",
+      "name": "Tusk Lounge",
+      "city": "Bentonville, AR",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.herbershq.com",
+      "name": "Herbers HQ",
+      "city": "Rogers, AR",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.tartinebakery.com",
+      "name": "Tartine Bakery",
+      "city": "San Francisco, CA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 8,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 8,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://statebirdsf.com",
+      "name": "State Bird Provisions",
+      "city": "San Francisco, CA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 36,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 53,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://animalrestaurant.com",
+      "name": "Animal",
+      "city": "Los Angeles, CA",
+      "beforeDecision": "invalid_website",
+      "beforeScore": 0,
+      "beforeCategory": "js_rendered",
+      "afterDecision": "invalid_website",
+      "afterHttpStatus": 404,
+      "afterScore": 0,
+      "afterReachability": "invalid",
+      "fixed": false,
+      "reasons": [
+        "http_404"
+      ],
+      "internalFlags": [
+        "http_404"
+      ]
+    },
+    {
+      "url": "https://www.cassiala.com",
+      "name": "Cassia",
+      "city": "Los Angeles, CA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 44,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 61,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.tartinemanufactory.com",
+      "name": "Tartine Manufactory",
+      "city": "San Francisco, CA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 8,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 8,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.saftarestaurant.com",
+      "name": "Safta",
+      "city": "Denver, CO",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 60,
+      "afterReachability": "thin",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "protected_or_thin_restaurant_context",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.guardandgrace.com",
+      "name": "Guard and Grace",
+      "city": "Denver, CO",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 34,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 70,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.denveracorn.com",
+      "name": "Acorn",
+      "city": "Denver, CO",
+      "beforeDecision": "invalid_website",
+      "beforeScore": 0,
+      "beforeCategory": "js_rendered",
+      "afterDecision": "invalid_website",
+      "afterHttpStatus": 404,
+      "afterScore": 0,
+      "afterReachability": "invalid",
+      "fixed": false,
+      "reasons": [
+        "http_404"
+      ],
+      "internalFlags": [
+        "http_404"
+      ]
+    },
+    {
+      "url": "https://www.riojadenvcer.com",
+      "name": "Rioja",
+      "city": "Denver, CO",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.elways.com",
+      "name": "Elway's",
+      "city": "Denver, CO",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 5,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 15,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.mizuna-denver.com",
+      "name": "Mizuna",
+      "city": "Denver, CO",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://pepespizzeria.com",
+      "name": "Frank Pepe's",
+      "city": "New Haven, CT",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 40,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 63,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.unionleaguecafe.com",
+      "name": "Union League Cafe",
+      "city": "New Haven, CT",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 45,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 57,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.oysterclubnorwalk.com",
+      "name": "Oyster Club",
+      "city": "Norwalk, CT",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.thomashenkelmancatering.com",
+      "name": "Thomas Henkelmann",
+      "city": "Greenwich, CT",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.grandbycorner.com",
+      "name": "Millwright's",
+      "city": "Simsbury, CT",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.burgerbar-hartford.com",
+      "name": "Plan B Burger Bar",
+      "city": "Hartford, CT",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.ondaskitchen.com",
+      "name": "Ondas Kitchen",
+      "city": "Bridgeport, CT",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.domainehudson.com",
+      "name": "Domaine Hudson",
+      "city": "Wilmington, DE",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 6,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 6,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.henlopen-city-oyster-house.com",
+      "name": "Henlopen City Oyster House",
+      "city": "Rehoboth Beach, DE",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.bancroft-on-the-green.com",
+      "name": "Bancroft on the Green",
+      "city": "Wilmington, DE",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.jessopstavern.com",
+      "name": "Jessop's Tavern",
+      "city": "New Castle, DE",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.pizzabythesea.com",
+      "name": "Pizza by the Sea",
+      "city": "Rehoboth Beach, DE",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "cloudflare_blocked",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 403,
+      "afterScore": 8,
+      "afterReachability": "blocked",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "http_403",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.lupositaliankit.com",
+      "name": "Lupo Italian Kitchen",
+      "city": "Georgetown, DE",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.harrysseafood.com",
+      "name": "Harry's Seafood",
+      "city": "Wilmington, DE",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.boiaderestaurant.com",
+      "name": "Boia De",
+      "city": "Miami, FL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 58,
+      "beforeCategory": "cloudflare_blocked",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 75,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "protected_or_thin_restaurant_context",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://bernssteakhouse.com",
+      "name": "Bern's Steak House",
+      "city": "Tampa, FL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 54,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 99,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.theravenouspig.com",
+      "name": "The Ravenous Pig",
+      "city": "Winter Park, FL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "cloudflare_blocked",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 403,
+      "afterScore": 0,
+      "afterReachability": "blocked",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "http_403",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.mignonetteuptown.com",
+      "name": "Mignonette",
+      "city": "Miami, FL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://foxbrosbbq.com",
+      "name": "Fox Bros BBQ",
+      "city": "Atlanta, GA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 8,
+      "beforeCategory": "cloudflare_blocked",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 403,
+      "afterScore": 8,
+      "afterReachability": "blocked",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "http_403",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.theoptimistrestaurant.com",
+      "name": "The Optimist",
+      "city": "Atlanta, GA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 6,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 23,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://staplehouse.com",
+      "name": "Staplehouse",
+      "city": "Atlanta, GA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 36,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 42,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.empirestatesouthrestaurant.com",
+      "name": "Empire State South",
+      "city": "Atlanta, GA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.canoeatlanta.com",
+      "name": "Canoe",
+      "city": "Atlanta, GA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.bacchanalia.com",
+      "name": "Bacchanalia",
+      "city": "Atlanta, GA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 0,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.mamasfishhouse.com",
+      "name": "Mama's Fish House",
+      "city": "Paia, HI",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 30,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 64,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://tinroofmaui.com",
+      "name": "Tin Roof",
+      "city": "Kahului, HI",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 50,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 61,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.rainbowdrivein.com",
+      "name": "Rainbow Drive-In",
+      "city": "Honolulu, HI",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 27,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 44,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.mw-restaurant.com",
+      "name": "MW Restaurant",
+      "city": "Honolulu, HI",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.onoseafood.com",
+      "name": "Ono Seafood",
+      "city": "Honolulu, HI",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.highwayin-haleiwa.com",
+      "name": "Haleiwa Joe's",
+      "city": "Haleiwa, HI",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.giovannisshrimptruck.com",
+      "name": "Giovanni's Shrimp Truck",
+      "city": "Kahuku, HI",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 50,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 67,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.boisefrycompany.com",
+      "name": "Boise Fry Company",
+      "city": "Boise, ID",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 37,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 49,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://forkboise.com",
+      "name": "Fork",
+      "city": "Boise, ID",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.barbacoa.com",
+      "name": "Barbacoa",
+      "city": "Boise, ID",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 8,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 13,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.richardsdining.com",
+      "name": "Richard's",
+      "city": "Boise, ID",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.juniperboise.com",
+      "name": "Juniper",
+      "city": "Boise, ID",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.goldy-s.com",
+      "name": "Goldy's",
+      "city": "Boise, ID",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.thecellarcda.com",
+      "name": "The Cellar",
+      "city": "Coeur d'Alene, ID",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "cloudflare_blocked",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 0,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.boisedeli.com",
+      "name": "Guru Donuts",
+      "city": "Boise, ID",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.kbsboise.com",
+      "name": "KIN",
+      "city": "Boise, ID",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://alinearestaurant.com",
+      "name": "Alinea",
+      "city": "Chicago, IL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 38,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 55,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://girlandthegoat.com",
+      "name": "Girl & the Goat",
+      "city": "Chicago, IL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 16,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 27,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://monteverdechicago.com",
+      "name": "Monteverde",
+      "city": "Chicago, IL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 55,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "verified_restaurant",
+      "afterHttpStatus": 200,
+      "afterScore": 66,
+      "afterReachability": "reachable",
+      "fixed": true,
+      "reasons": [
+        "high_restaurant_score"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://avecchicago.com",
+      "name": "Avec",
+      "city": "Chicago, IL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://smythandtheloyal.com",
+      "name": "Smyth",
+      "city": "Chicago, IL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.fronteragrill.net",
+      "name": "Frontera Grill",
+      "city": "Chicago, IL",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 8,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 8,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://milktoothindy.com",
+      "name": "Milktooth",
+      "city": "Indianapolis, IN",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 21,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 21,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.liveryindy.com",
+      "name": "Livery",
+      "city": "Indianapolis, IN",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.tinkerstreet.com",
+      "name": "Tinker Street",
+      "city": "Indianapolis, IN",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.blackmarketindy.com",
+      "name": "Black Market",
+      "city": "Indianapolis, IN",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.theeagle-indy.com",
+      "name": "The Eagle",
+      "city": "Indianapolis, IN",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.oceanprimeindy.com",
+      "name": "Late Harvest Kitchen",
+      "city": "Indianapolis, IN",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.louvoguepistro.com",
+      "name": "Bru Burger",
+      "city": "Indianapolis, IN",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.albastpizza.com",
+      "name": "Eatery A",
+      "city": "Des Moines, IA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "network_error",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.zombieburgerdm.com",
+      "name": "Zombie Burger",
+      "city": "Des Moines, IA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 32,
+      "beforeCategory": "low_signal_score",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 32,
+      "afterReachability": "reachable",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.pullmandining.com",
+      "name": "Pullman Bar & Diner",
+      "city": "Iowa City, IA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "timeout",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 0,
+      "afterScore": 0,
+      "afterReachability": "inaccessible",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "request_timeout",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.aposto.us",
+      "name": "Aposto",
+      "city": "Des Moines, IA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "minimal_html",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 200,
+      "afterScore": 0,
+      "afterReachability": "thin",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "thin_content",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    },
+    {
+      "url": "https://www.saintanejo.com",
+      "name": "Saint Anejo",
+      "city": "Des Moines, IA",
+      "beforeDecision": "plausible_unverified",
+      "beforeScore": 0,
+      "beforeCategory": "cloudflare_blocked",
+      "afterDecision": "plausible_unverified",
+      "afterHttpStatus": 403,
+      "afterScore": 0,
+      "afterReachability": "blocked",
+      "fixed": false,
+      "reasons": [
+        "claude_tiebreaker"
+      ],
+      "internalFlags": [
+        "http_403",
+        "low_name_domain_match",
+        "us_state_selected"
+      ]
+    }
+  ]
+}

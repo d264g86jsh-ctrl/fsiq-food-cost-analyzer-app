@@ -1,0 +1,11 @@
+100 Failure Validation Summary
+==============================
+Total baseline failures: 100
+Fixed after changes: 16
+Still failing: 84
+Before accuracy on this dataset: 0.00%
+After accuracy on this dataset: 16.00%
+
+Fixed by baseline category: {"low_signal_score":13,"minimal_html":2,"cloudflare_blocked":1}
+Still failing by baseline category: {"timeout":54,"minimal_html":11,"low_signal_score":11,"cloudflare_blocked":6,"js_rendered":2}
+Still failing by current decision: {"plausible_unverified":81,"invalid_website":3}

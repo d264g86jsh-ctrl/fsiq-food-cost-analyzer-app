@@ -24,6 +24,8 @@ vi.mock('../website/headless-fetch', () => ({
 
 import { runValidation } from '../website/run-validation';
 import { classifyWithClaude, isAmbiguous } from '../relevance/claude-classifier';
+import { computeRestaurantScores } from '../relevance/classify-restaurant';
+import { extractSignals } from '../website/extract-signals';
 
 const mockClassifyWithClaude = vi.mocked(classifyWithClaude);
 
@@ -168,6 +170,21 @@ describe('runValidation — plausible_unverified cases', () => {
     expect(r.manualReviewRequired).toBe(true);
   });
 
+  it('timeout retry succeeds → validates retry response', async () => {
+    const err = Object.assign(new Error('AbortError'), { name: 'AbortError' });
+    mockFetch
+      .mockRejectedValueOnce(err)
+      .mockResolvedValueOnce(makeHtmlResponse(RESTAURANT_HTML, 200, 'https://casaroberto.com/'));
+
+    const r = await runValidation({ ...baseInput, website: 'https://casaroberto.com' });
+
+    expect(mockFetch).toHaveBeenCalledTimes(4);
+    expect(mockFetch.mock.calls[0]?.[0]).toBe('https://casaroberto.com/');
+    expect(mockFetch.mock.calls[1]?.[0]).toBe('https://casaroberto.com/');
+    expect(r.finalDecision).toBe('verified_restaurant');
+    expect(r.httpStatus).toBe(200);
+  });
+
   it('toasttab ordering page → plausible_unverified', async () => {
     mockFetch.mockResolvedValue(makeHtmlResponse('<html><body>Order online</body></html>', 200, 'https://order.toasttab.com/casaroberto'));
     const r = await runValidation({ ...baseInput, website: 'https://order.toasttab.com/casaroberto' });
@@ -200,7 +217,7 @@ describe('runValidation — verified_restaurant', () => {
   it('Cloudflare-protected matching restaurant site → verified_restaurant', async () => {
     mockFetch.mockResolvedValue(makeHtmlResponse(CLOUDFLARE_CHALLENGE_HTML, 403, 'https://spiritscenla.com/'));
     const r = await runValidation({
-      restaurantName: 'Spirits Food & Friends',
+      restaurantName: '',
       website: 'https://spiritscenla.com/',
       state: 'LA',
     });
@@ -216,7 +233,7 @@ describe('runValidation — verified_restaurant', () => {
   it('minimal matching restaurant HTML → verified_restaurant', async () => {
     mockFetch.mockResolvedValue(makeHtmlResponse('<html><head><title>Spirits Food & Friends</title></head><body><nav><a>Menu</a></nav></body></html>', 200, 'https://spiritscenla.com/'));
     const r = await runValidation({
-      restaurantName: 'Spirits Food & Friends',
+      restaurantName: '',
       website: 'https://spiritscenla.com/',
       state: 'LA',
     });
@@ -224,6 +241,64 @@ describe('runValidation — verified_restaurant', () => {
     expect(r.finalDecision).toBe('verified_restaurant');
     expect(r.websiteReachabilityStatus).toBe('thin');
     expect(r.restaurantSignalScore).toBe(60);
+  });
+});
+
+describe('restaurant signal extraction — audited evidence', () => {
+  it('scores embedded reservation widgets', () => {
+    const signals = extractSignals(
+      '<html><head><title>Welcome</title><script src="https://widgets.resy.io/embed.js"></script></head><body><p>Welcome.</p></body></html>',
+      'https://example.com/',
+    );
+    const scores = computeRestaurantScores(signals, 'example.com');
+
+    expect(signals.hasReservationWidget).toBe(true);
+    expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(12);
+  });
+
+  it('scores embedded online ordering widgets', () => {
+    const signals = extractSignals(
+      '<html><head><title>Welcome</title><script src="https://www.toasttab.com/widget.js"></script></head><body><p>Welcome.</p></body></html>',
+      'https://example.com/',
+    );
+    const scores = computeRestaurantScores(signals, 'example.com');
+
+    expect(signals.hasOrderingWidget).toBe(true);
+    expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(10);
+  });
+
+  it('scores pages that expose both a US address and phone number', () => {
+    const signals = extractSignals(
+      '<html><body><p>101 Main St, Austin, TX 78701</p><p>(512) 555-0123</p></body></html>',
+      'https://example.com/',
+    );
+    const scores = computeRestaurantScores(signals, 'example.com');
+
+    expect(signals.hasAddressPhoneBlock).toBe(true);
+    expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(14);
+  });
+
+  it('scores food-related image alt text as weak supporting evidence', () => {
+    const signals = extractSignals(
+      '<html><body><img src="/hero.jpg" alt="plate of handmade pasta"></body></html>',
+      'https://example.com/',
+    );
+    const scores = computeRestaurantScores(signals, 'example.com');
+
+    expect(signals.hasFoodImageAltText).toBe(true);
+    expect(scores.restaurantSignalScore).toBeGreaterThanOrEqual(4);
+  });
+
+  it('does not treat generic menu links as a new audited signal', () => {
+    const signals = extractSignals(
+      '<html><body><nav><a href="/menu">Menu</a></nav><p>Marketing services and consulting firm.</p></body></html>',
+      'https://example.com/',
+    );
+
+    expect(signals.hasReservationWidget).toBe(false);
+    expect(signals.hasOrderingWidget).toBe(false);
+    expect(signals.hasAddressPhoneBlock).toBe(false);
+    expect(signals.hasFoodImageAltText).toBe(false);
   });
 });
 
@@ -252,6 +327,25 @@ describe('runValidation — clear_non_fit (vendor/SaaS)', () => {
 
     expect(r.finalDecision).not.toBe('verified_restaurant');
     expect(r.restaurantSignalScore).toBe(0);
+    expect(r.internalFlags).not.toContain('protected_or_thin_restaurant_context');
+  });
+
+  it.each([
+    ['Spirits Wholesale Liquor & Distribution', 'https://spiritswholesale.com/'],
+    ['Blue Mesa Catering Company', 'https://bluemesacatering.com/'],
+    ['The Kitchen Remodeling Co', 'https://kitchenremodeling.com/'],
+    ['Menu Marketing Agency', 'https://menumarketing.com/'],
+    ['Reservation Software Inc', 'https://reservationsoftware.com/'],
+  ])('blocked non-restaurant context does not boost: %s', async (restaurantName, website) => {
+    mockFetch.mockResolvedValue(makeHtmlResponse(CLOUDFLARE_CHALLENGE_HTML, 403, website));
+    const r = await runValidation({
+      restaurantName,
+      website,
+      state: 'TX',
+    });
+
+    expect(r.finalDecision).not.toBe('verified_restaurant');
+    expect(r.restaurantSignalScore).toBeLessThan(60);
     expect(r.internalFlags).not.toContain('protected_or_thin_restaurant_context');
   });
 });
