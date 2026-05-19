@@ -7,18 +7,24 @@
 
 import type { PdfPayload, GeneratePdfInput, GeneratePdfResult } from './pdf-types';
 import { buildPdfPayload } from './build-pdf-payload';
+import { patchPdfMonkeyTemplateHtml } from './pdfmonkey-template';
 
 const PDFMONKEY_API_URL = 'https://api.pdfmonkey.io/api/v1/documents';
+const PDFMONKEY_TEMPLATE_API_URL = 'https://api.pdfmonkey.io/api/v1/document_templates';
 const LOGO_VALIDATE_TIMEOUT_MS = 5_000;
 
 // Private IP patterns that PDFMonkey's network can't reach
 const PRIVATE_IP_PATTERNS = ['127.0.0.1', 'localhost', '192.168.', '10.0.', '172.16.'];
 
+const patchedTemplateIds = new Set<string>();
+
 // ── Logo validation ───────────────────────────────────────────────────────────
 
 /**
  * Validates a logo URL before passing it to PDFMonkey.
- * Returns the URL if valid, null otherwise.
+ * Returns a data URI if valid, null otherwise. Embedding the image avoids a
+ * second network fetch from PDFMonkey during render, which is where broken
+ * image boxes can appear even after app-side URL validation succeeds.
  * Conservative PDFs never show a restaurant logo — always return null.
  */
 async function validateLogoForPdf(url: string | null, isConservative: boolean): Promise<string | null> {
@@ -79,12 +85,50 @@ async function validateLogoForPdf(url: string | null, isConservative: boolean): 
       return null;
     }
 
+    const imageDataUri = await fetchLogoAsDataUri(url, ct);
+    if (!imageDataUri) return null;
+
     // Rule 7: Paper trail
     const timestamp = new Date().toISOString();
-    console.log(`[FSIQ PDF LOGO] validated at ${timestamp}: ${url}`);
-    return url;
+    console.log(`[FSIQ PDF LOGO] validated and embedded at ${timestamp}: ${url}`);
+    return imageDataUri;
   } catch {
     console.warn(`[FSIQ PDF LOGO] HEAD request failed → hasLogo=false: ${url}`);
+    return null;
+  }
+}
+
+async function fetchLogoAsDataUri(url: string, expectedContentType: string): Promise<string | null> {
+  try {
+    const res = await fetch(url, {
+      method: 'GET',
+      signal: AbortSignal.timeout(LOGO_VALIDATE_TIMEOUT_MS),
+    });
+
+    if (!res.ok) {
+      console.warn(`[FSIQ PDF LOGO] GET ${res.status} → hasLogo=false: ${url}`);
+      return null;
+    }
+
+    const ct = res.headers.get('content-type') ?? expectedContentType;
+    if (!ct.startsWith('image/')) {
+      console.warn(`[FSIQ PDF LOGO] GET content-type "${ct}" is not image/ → hasLogo=false: ${url}`);
+      return null;
+    }
+    if (ct === 'image/x-icon' || ct === 'image/vnd.microsoft.icon') {
+      console.warn(`[FSIQ PDF LOGO] GET ICO content-type → hasLogo=false: ${url}`);
+      return null;
+    }
+
+    const buffer = Buffer.from(await res.arrayBuffer());
+    if (buffer.length < 500) {
+      console.warn(`[FSIQ PDF LOGO] downloaded image ${buffer.length} bytes < 500 → hasLogo=false: ${url}`);
+      return null;
+    }
+
+    return `data:${ct};base64,${buffer.toString('base64')}`;
+  } catch {
+    console.warn(`[FSIQ PDF LOGO] GET request failed → hasLogo=false: ${url}`);
     return null;
   }
 }
@@ -120,6 +164,19 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
   const payload = buildPdfPayload(validatedInput);
 
   try {
+    const templatePatch = await ensureTemplateSafe(apiKey, templateId);
+    if (!templatePatch.ok) {
+      return {
+        pdfStatus: 'error',
+        pdfMode: input.mode,
+        pdfMonkeyDocumentId: null,
+        pdfDownloadUrl: null,
+        pdfError: templatePatch.error,
+        pdfRetryCount: 0,
+        pdfUrlType: null,
+      };
+    }
+
     const response = await fetch(PDFMONKEY_API_URL, {
       method: 'POST',
       headers: {
@@ -203,6 +260,82 @@ interface PdfMonkeyResponse {
     preview_url?: string | null;  // web viewer URL — preferred for storage and GHL
     status?: string;
   };
+}
+
+interface PdfMonkeyTemplateResponse {
+  document_template?: {
+    body?: string | null;
+    body_draft?: string | null;
+  };
+}
+
+// ── Template safety helper ────────────────────────────────────────────────────
+// Keeps the remote PDFMonkey Code Template aligned with app-owned invariants:
+// no empty restaurant-logo container and no hardcoded stale Calendly links.
+
+async function ensureTemplateSafe(
+  apiKey: string,
+  templateId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (patchedTemplateIds.has(templateId)) return { ok: true };
+
+  const templateUrl = `${PDFMONKEY_TEMPLATE_API_URL}/${templateId}`;
+
+  const getRes = await fetch(templateUrl, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+
+  if (!getRes.ok) {
+    const errorText = await getRes.text().catch(() => `HTTP ${getRes.status}`);
+    return {
+      ok: false,
+      error: `PDFMonkey template safety check failed ${getRes.status}: ${errorText.slice(0, 300)}`,
+    };
+  }
+
+  const data = (await getRes.json()) as PdfMonkeyTemplateResponse;
+  const template = data.document_template;
+  if (!template) {
+    return { ok: false, error: 'PDFMonkey template safety check failed: response missing document_template' };
+  }
+
+  const update: { body?: string; body_draft?: string } = {};
+
+  if (typeof template.body === 'string') {
+    const patched = patchPdfMonkeyTemplateHtml(template.body);
+    if (patched.changed) update.body = patched.html;
+  }
+
+  if (typeof template.body_draft === 'string') {
+    const patched = patchPdfMonkeyTemplateHtml(template.body_draft);
+    if (patched.changed) update.body_draft = patched.html;
+  }
+
+  if (Object.keys(update).length === 0) {
+    patchedTemplateIds.add(templateId);
+    return { ok: true };
+  }
+
+  const putRes = await fetch(templateUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ document_template: update }),
+  });
+
+  if (!putRes.ok) {
+    const errorText = await putRes.text().catch(() => `HTTP ${putRes.status}`);
+    return {
+      ok: false,
+      error: `PDFMonkey template safety update failed ${putRes.status}: ${errorText.slice(0, 300)}`,
+    };
+  }
+
+  console.log(`[FSIQ PDF TEMPLATE] safety patch applied: ${templateId}`);
+  patchedTemplateIds.add(templateId);
+  return { ok: true };
 }
 
 // ── Polling helper — waits for PDFMonkey to finish generating the document ────
