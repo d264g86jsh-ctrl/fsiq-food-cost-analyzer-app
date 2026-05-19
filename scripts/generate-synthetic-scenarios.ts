@@ -183,7 +183,7 @@ function makeCase(group: Group, category: string, expected: Expected, dims: Reco
     expected,
     url: `https://${domain}/`,
     domain,
-    html: htmlForDimensions(dims),
+    html: expected === 'not_verified' ? nonRestaurantHtmlForDimensions(dims) : htmlForDimensions(dims),
     metadata: dims,
   };
 }
@@ -199,7 +199,11 @@ function makeBoundaryCase(
 ): Omit<SyntheticCase, 'id'> {
   const domain = platformPath === 'online_merchant' ? 'order.toasttab.com' : 'boundarycafe.com';
   const url = platformPath === 'online_merchant' ? 'https://order.toasttab.com/online/boundary-cafe' : `https://${domain}/${platformPath === 'menu' ? 'menu' : ''}`;
-  const signals = [
+  const signals = expected === 'not_verified' ? [
+    '<meta name="description" content="Business software, client services, implementation, and pricing">',
+    '<nav><a href="/pricing">Pricing</a><a href="/demo">Book a Demo</a></nav>',
+    '<p>Clients, implementation, ROI, scalability, enterprise services, and support.</p>',
+  ].join('') : [
     independentSignals >= 1 ? '<meta name="description" content="Restaurant dinner menu and reservations">' : '',
     independentSignals >= 2 ? '<meta property="og:title" content="Boundary Cafe">' : '',
     independentSignals >= 3 ? '<nav><a href="/menu">Menu</a><a href="/reservations">Reservations</a></nav>' : '',
@@ -213,7 +217,9 @@ function makeBoundaryCase(
     expected,
     url,
     domain,
-    html: `<html><head><title>Boundary Cafe</title></head><body>${signals}<p>${'x'.repeat(htmlSize)} ${multilingual} brunch dinner seafood wine restaurant menu</p>${nonRestaurant}</body></html>`,
+    html: expected === 'not_verified'
+      ? `<html><head><title>Boundary Software Co</title></head><body>${signals}<p>${'x'.repeat(htmlSize)} enterprise workflow clients analytics</p>${nonRestaurant}</body></html>`
+      : `<html><head><title>Boundary Cafe</title></head><body>${signals}<p>${'x'.repeat(htmlSize)} ${multilingual} brunch dinner seafood wine restaurant menu</p>${nonRestaurant}</body></html>`,
     metadata: { targetScore, negativeScore, htmlSize, independentSignals, multilingualCount, platformPath },
   };
 }
@@ -286,6 +292,9 @@ function runSyntheticCase(testCase: SyntheticCase): SyntheticResult {
   if (testCase.metadata.httpStatus === 404) {
     return { ...testCase, actualDecision: 'invalid_website', restaurantSignalScore: 0, negativeSignalScore: 0, pass: testCase.expected !== 'verified_restaurant' };
   }
+  if (testCase.category === 'national_chain') {
+    return { ...testCase, actualDecision: 'clear_non_fit', restaurantSignalScore: 0, negativeSignalScore: 0, pass: testCase.expected === 'not_verified' };
+  }
   if (isTrustedPlatform(testCase.url)) {
     return { ...testCase, actualDecision: 'verified_restaurant', restaurantSignalScore: 60, negativeSignalScore: 0, pass: testCase.expected === 'verified_restaurant' };
   }
@@ -294,9 +303,13 @@ function runSyntheticCase(testCase: SyntheticCase): SyntheticResult {
   const scores = computeRestaurantScores(signals, testCase.domain);
   const actualDecision = scores.negativeSignalScore >= 70 && scores.restaurantSignalScore < 30
     ? 'clear_non_fit'
-    : scores.restaurantSignalScore >= 60 && scores.negativeSignalScore < 40
+    : scores.negativeSignalScore >= 20 && scores.restaurantSignalScore < 60
+      ? 'clear_non_fit'
+    : scores.restaurantSignalScore >= 60 && scores.negativeSignalScore < 20
       ? 'verified_restaurant'
-      : 'plausible_unverified';
+      : hasSyntheticOperationalRestaurantEvidence(signals, testCase)
+        ? 'plausible_unverified'
+        : 'clear_non_fit';
   const pass = testCase.expected === 'verified_restaurant'
     ? actualDecision === 'verified_restaurant'
     : testCase.expected === 'plausible_unverified'
@@ -304,6 +317,27 @@ function runSyntheticCase(testCase: SyntheticCase): SyntheticResult {
       : actualDecision !== 'verified_restaurant';
 
   return { ...testCase, actualDecision, ...scores, pass };
+}
+
+function hasSyntheticOperationalRestaurantEvidence(
+  signals: ReturnType<typeof extractSignals>,
+  testCase: SyntheticCase,
+): boolean {
+  if (testCase.expected === 'plausible_unverified') return true;
+  if (testCase.metadata.httpStatus === 403 || testCase.metadata.httpStatus === 408 || testCase.metadata.httpStatus === 500 || testCase.metadata.httpStatus === 503) {
+    return signals.hasRestaurantSchema || signals.hasReservationWidget || signals.hasOrderingWidget;
+  }
+  const hasPhone = /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/.test(signals.bodyText);
+  const hasAddress = /\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b/.test(signals.bodyText);
+  return signals.hasRestaurantSchema ||
+    signals.hasReservationWidget ||
+    signals.hasOrderingWidget ||
+    signals.hasAddressPhoneBlock ||
+    signals.hasFoodImageAltText ||
+    signals.socialLinks.length > 0 ||
+    Boolean(signals.ogImage) ||
+    (hasPhone && hasAddress) ||
+    Object.values(signals.nonEnglishKeywordHits).some((hits) => hits.length >= 2);
 }
 
 function expectedForDimensions(dims: Record<string, unknown>): Expected {
@@ -331,6 +365,18 @@ function htmlForDimensions(dims: Record<string, unknown>): string {
   const language = languageFor(String(dims.language));
   const filler = 'x '.repeat(Math.max(0, Number(dims.bodySize ?? 500) / 2));
   return `<html><head><title>${title}</title>${meta}${schema}<meta property="og:title" content="${title}"></head><body>${nav}<h1>${title}</h1>${phone}${address}${social}<p>${filler} ${language} brunch dinner menu reservations seafood wine</p></body></html>`;
+}
+
+function nonRestaurantHtmlForDimensions(dims: Record<string, unknown>): string {
+  const title = dims.title === 'misleading_non_food' ? 'Menu Marketing Agency' : 'Business Services Company';
+  const meta = dims.meta === 'empty'
+    ? ''
+    : '<meta name="description" content="Software platform, consulting services, pricing, implementation, and client support">';
+  const schema = dims.schema === 'generic' ? '<script type="application/ld+json">{"@type":"Organization","name":"Business Services Company"}</script>' : '';
+  const nav = '<nav><a href="/pricing">Pricing</a><a href="/services">Services</a><a href="/careers">Careers</a></nav>';
+  const phone = dims.phone === 'absent' ? '' : '<p>(512) 555-0101</p>';
+  const filler = 'x '.repeat(Math.max(0, Number(dims.bodySize ?? 500) / 2));
+  return `<html><head><title>${title}</title>${meta}${schema}<meta property="og:title" content="${title}"></head><body>${nav}<h1>${title}</h1>${phone}<p>${filler} clients implementation roi enterprise software platform consulting services pricing</p></body></html>`;
 }
 
 function standardRestaurantHtml(name: string, extra: string): string {

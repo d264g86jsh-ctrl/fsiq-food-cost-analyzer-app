@@ -1,39 +1,39 @@
 Synthetic Website Validation Stress Test
 ========================================
 Total cases: 10000
-Overall pass rate: 79.57%
+Overall pass rate: 75.49%
 
 Pass Rate by Group
 ------------------
-equivalence: 82.15%
-boundary: 66.4%
-frequency_weighted: 77%
-mutation: 90%
+equivalence: 96.8%
+boundary: 51.3%
+frequency_weighted: 70%
+mutation: 80%
 
 Pass Rate by Scenario Category
 ------------------------------
-equivalence:none:none:none: 53.85%
-equivalence:restaurant:none:none: 80%
-equivalence:restaurant:menu_only:none: 90.91%
-equivalence:local_business:menu_only:none: 100%
-equivalence:generic:menu_only:none: 100%
-equivalence:generic:reservations_only:none: 84.62%
+equivalence:none:none:none: 100%
+equivalence:restaurant:none:none: 100%
+equivalence:restaurant:menu_only:none: 100%
+equivalence:local_business:menu_only:none: 93.33%
+equivalence:generic:menu_only:none: 90.91%
+equivalence:generic:reservations_only:none: 100%
 equivalence:graph:reservations_only:none: 100%
-equivalence:malformed:both:none: 100%
-equivalence:none:both:none: 92.31%
-equivalence:none:broken_links_only:none: 91.67%
+equivalence:malformed:both:none: 93.33%
+equivalence:none:both:none: 100%
+equivalence:none:broken_links_only:none: 100%
 equivalence:restaurant:broken_links_only:none: 100%
 equivalence:restaurant:broken_links_only:toast_merchant: 100%
 equivalence:local_business:broken_links_only:toast_merchant: 100%
 equivalence:local_business:none:toast_merchant: 100%
-equivalence:generic:none:toast_merchant: 90.91%
+equivalence:generic:none:toast_merchant: 100%
 equivalence:graph:menu_only:toast_merchant: 100%
-equivalence:malformed:menu_only:toast_merchant: 66.67%
-equivalence:malformed:reservations_only:toast_merchant: 91.67%
-equivalence:none:reservations_only:toast_merchant: 87.5%
+equivalence:malformed:menu_only:toast_merchant: 100%
+equivalence:malformed:reservations_only:toast_merchant: 100%
+equivalence:none:reservations_only:toast_merchant: 100%
 equivalence:restaurant:reservations_only:toast_merchant: 100%
-equivalence:restaurant:both:toast_merchant: 78.57%
-equivalence:local_business:both:toast_merchant: 92.86%
+equivalence:restaurant:both:toast_merchant: 100%
+equivalence:local_business:both:toast_merchant: 100%
 equivalence:generic:broken_links_only:toast_merchant: 100%
 equivalence:generic:broken_links_only:square_merchant: 63.64%
 equivalence:graph:broken_links_only:square_merchant: 83.33%
@@ -46,14 +46,14 @@ equivalence:local_business:reservations_only:square_merchant: 87.5%
 equivalence:generic:reservations_only:square_merchant: 83.33%
 equivalence:generic:both:square_merchant: 100%
 equivalence:graph:both:square_merchant: 100%
-equivalence:malformed:both:popmenu: 90.91%
+equivalence:malformed:both:popmenu: 100%
 equivalence:malformed:broken_links_only:popmenu: 100%
-equivalence:none:broken_links_only:popmenu: 90.91%
-equivalence:restaurant:none:popmenu: 91.67%
+equivalence:none:broken_links_only:popmenu: 100%
+equivalence:restaurant:none:popmenu: 100%
 equivalence:local_business:none:popmenu: 100%
-equivalence:local_business:menu_only:popmenu: 90%
+equivalence:local_business:menu_only:popmenu: 100%
 
-95% confidence interval for synthetic true positive rate: 81.45% - 83.16%
-Cliff edges identified: {"status_403":200}
+95% confidence interval for synthetic true positive rate: 67.65% - 69.73%
+Cliff edges identified: {"status_403":200,"add_two_non_restaurant_signals":200}
 Coverage of theoretical equivalence signal space: 0.0018% (10000/544320000)
 Remaining gaps: real network timing, live bot mitigation behavior, real browser rendering, external Places/Yelp evidence, and adversarial domain reuse are not fully represented by synthetic HTML-only cases.

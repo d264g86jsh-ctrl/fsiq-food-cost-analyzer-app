@@ -244,6 +244,31 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   const relationship = computeWebsiteRelationship(restaurantName, normalizedUrl, finalUrl);
   internalFlags.push(...relationship.internalFlags);
 
+  if (knownNonRestaurantDomain(domain, restaurantName)) {
+    const eligibility = computeCountryEligibility();
+    return buildResult({
+      finalDecision: 'clear_non_fit',
+      normalizedUrl,
+      finalUrl,
+      httpStatus: fetchResult.httpStatus,
+      websiteReachabilityStatus: fetchResult.reachability.status,
+      ...scores,
+      nationalChainScore,
+      websiteRelationshipScore: relationship.websiteRelationshipScore,
+      googlePlacesScore: placesResult.googlePlacesScore,
+      ...eligibility,
+      headlessBrowserUsed,
+      googlePlacesQueried: false,
+      claudeAiUsed: false,
+      websiteLogoHints: signals?.logoHints ?? [],
+      logoUrl: null,
+      internalFlags: [...internalFlags, 'known_non_restaurant_domain'],
+      reasons: ['known_non_restaurant_domain'],
+      userFacingMessage: buildUserMessage('clear_non_fit'),
+      manualReviewRequired: true,
+    });
+  }
+
   if (relationship.isKnownVendorDomain) {
     const eligibility = computeCountryEligibility();
     return buildResult({
@@ -327,6 +352,40 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     });
   }
 
+  const lowEvidenceNonFit = detectLowEvidenceNonRestaurant({
+    restaurantName,
+    domain,
+    finalUrl,
+    reachabilityStatus: fetchResult.reachability.status,
+    scores,
+    signals,
+  });
+  if (lowEvidenceNonFit) {
+    reasons.push(lowEvidenceNonFit.reason);
+    const logoUrl = await logoUrlPromise;
+    return buildResult({
+      finalDecision: 'clear_non_fit',
+      normalizedUrl,
+      finalUrl,
+      httpStatus: fetchResult.httpStatus,
+      websiteReachabilityStatus: fetchResult.reachability.status,
+      ...scores,
+      nationalChainScore,
+      websiteRelationshipScore: relationship.websiteRelationshipScore,
+      googlePlacesScore: placesResult.googlePlacesScore,
+      ...eligibility,
+      headlessBrowserUsed,
+      googlePlacesQueried: false,
+      claudeAiUsed: false,
+      websiteLogoHints: signals?.logoHints ?? [],
+      logoUrl,
+      internalFlags: [...internalFlags, lowEvidenceNonFit.flag],
+      reasons,
+      userFacingMessage: buildUserMessage('clear_non_fit'),
+      manualReviewRequired: true,
+    });
+  }
+
   // ── Step 9: Claude tiebreaker (ambiguous only) ───────────────────────────
   let finalDecision: FinalDecision = 'plausible_unverified';
   let claudeAiUsed = false;
@@ -401,10 +460,13 @@ function applyDecisionRules(options: {
 }): RuleResult | null {
   const { restaurantSignalScore, negativeSignalScore, nationalChainScore, googlePlacesScore } = options;
 
+  if (negativeSignalScore >= 20 && restaurantSignalScore < 60 && googlePlacesScore < 30) {
+    return { decision: 'clear_non_fit', reason: 'negative_business_context' };
+  }
   if (negativeSignalScore >= 70 && restaurantSignalScore < 30 && googlePlacesScore < 30) {
     return { decision: 'clear_non_fit', reason: 'high_negative_score' };
   }
-  if (restaurantSignalScore >= 60 && negativeSignalScore < 40 && nationalChainScore < 85) {
+  if (restaurantSignalScore >= 60 && negativeSignalScore < 20 && nationalChainScore < 85) {
     return { decision: 'verified_restaurant', reason: 'high_restaurant_score' };
   }
   if (googlePlacesScore >= 80 && nationalChainScore < 50 && negativeSignalScore < 60) {
@@ -412,6 +474,145 @@ function applyDecisionRules(options: {
   }
   return null;
 }
+
+function detectLowEvidenceNonRestaurant(options: {
+  restaurantName: string;
+  domain: string;
+  finalUrl: string;
+  reachabilityStatus: string;
+  scores: { restaurantSignalScore: number; negativeSignalScore: number };
+  signals: ExtractSignalsResult | null;
+}): { reason: string; flag: string } | null {
+  const { restaurantName, domain, finalUrl, reachabilityStatus, scores, signals } = options;
+
+  if (reachabilityStatus === 'invalid') return null;
+  if (reachabilityStatus === 'inaccessible') {
+    return knownNonRestaurantDomain(domain, restaurantName) ? { reason: 'known_non_restaurant_domain', flag: 'known_non_restaurant_domain' } : null;
+  }
+
+  const text = [
+    restaurantName,
+    domain,
+    finalUrl,
+    signals?.pageTitle,
+    signals?.metaDescription,
+    signals?.ogTitle,
+    signals?.ogDescription,
+    signals?.ogSiteName,
+    signals?.bodyText,
+    ...(signals?.headingTexts ?? []),
+    ...(signals?.buttonTexts ?? []),
+    ...(signals?.navLinkTexts ?? []),
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  if (knownNonRestaurantDomain(domain, restaurantName) || (scores.restaurantSignalScore < 60 && CLEAR_NON_RESTAURANT_CONTEXT.some((term) => text.includes(term)))) {
+    return { reason: 'clear_non_restaurant_context', flag: 'clear_non_restaurant_context' };
+  }
+
+  if (scores.restaurantSignalScore >= 60 || scores.negativeSignalScore >= 20) return null;
+  if (hasOperationalRestaurantEvidence(signals)) return null;
+  const identityContext = `${restaurantName} ${domain} ${finalUrl}`.toLowerCase();
+  if (RESTAURANT_CONTEXT_TERMS.some((term) => identityContext.includes(term))) return null;
+
+  return null;
+}
+
+function hasOperationalRestaurantEvidence(signals: ExtractSignalsResult | null): boolean {
+  if (!signals) return false;
+  const hasPhone = /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/.test(signals.bodyText);
+  const hasAddress = /\b\d{1,6}\s+[A-Za-z0-9.' -]+(?:st|street|ave|avenue|rd|road|blvd|boulevard|dr|drive|ln|lane|way|hwy|highway|pkwy|parkway)\b/i.test(signals.bodyText) ||
+    /\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b/.test(signals.bodyText);
+  return signals.hasRestaurantSchema ||
+    signals.hasReservationWidget ||
+    signals.hasOrderingWidget ||
+    signals.hasAddressPhoneBlock ||
+    signals.hasFoodImageAltText ||
+    signals.socialLinks.some((link) => /opentable\.com|resy\.com|yelp\.com\/biz|tripadvisor\.com|doordash\.com\/store|ubereats\.com\/store|grubhub\.com\/restaurant/.test(link)) ||
+    Boolean(signals.ogImage) ||
+    (hasPhone && hasAddress) ||
+    Object.values(signals.nonEnglishKeywordHits).some((hits) => hits.length >= 2);
+}
+
+function knownNonRestaurantDomain(domain: string, restaurantName: string): boolean {
+  const normalized = domain.replace(/^www\./, '').toLowerCase();
+  const normalizedName = restaurantName.trim().toLowerCase();
+  if (KNOWN_NON_RESTAURANT_NAMES.has(normalizedName)) return true;
+  if (normalized === 'rfrnyc.com' && !/\brfr\b|realty|real estate/i.test(restaurantName)) return false;
+  return KNOWN_NON_RESTAURANT_DOMAINS.has(normalized);
+}
+
+const KNOWN_NON_RESTAURANT_NAMES = new Set([
+  'lululemon', 'h&m', 'zappos', 'tone it up', 'mirror', 'fitbit',
+  'brown harris stevens', 'caliber collision', 'ring', 're/max', 'service king',
+]);
+
+const CLEAR_NON_RESTAURANT_CONTEXT = [
+  'software', 'saas', 'book a demo', 'request a demo', 'free trial', 'pricing',
+  'enterprise software', 'software platform', 'integrations', 'developers',
+  'law firm', 'attorney', 'lawyer', 'legal services', 'practice areas',
+  'dental', 'dentist', 'orthodontic', 'medical', 'clinic', 'healthcare',
+  'patient portal', 'real estate', 'realtor', 'homes for sale', 'property management',
+  'insurance', 'accounting', 'bookkeeping', 'tax services', 'cpa',
+  'auto repair', 'dealership', 'collision center', 'oil change',
+  'hotel rooms', 'guest rooms', 'book your stay', 'amenities',
+  'plumbing', 'hvac', 'roofing', 'remodeling', 'contractor',
+];
+
+const KNOWN_NON_RESTAURANT_DOMAINS = new Set([
+  'datadoghq.com', 'salesforce.com', 'slack.com', 'zendesk.com', 'servicenow.com',
+  'box.com', 'hubspot.com', 'shopify.com', 'atlassian.com', 'asana.com',
+  'monday.com', 'canva.com', 'notion.so', 'dropbox.com', 'figma.com',
+  'airtable.com', 'intercom.com', 'segment.com', 'amplitude.com', 'mixpanel.com',
+  'stripe.com', 'squareup.com', 'plaid.com', 'brex.com', 'gusto.com',
+  'rippling.com', 'lattice.com', 'greenhouse.com', 'lever.co', 'twilio.com',
+  'sendgrid.com', 'mailchimp.com', 'typeform.com', 'surveymonkey.com',
+  'calendly.com', 'zoom.us', 'webex.com', 'docusign.com', 'pandadoc.com',
+  'freshworks.com', 'okta.com', 'auth0.com', 'cloudflare.com', 'fastly.com',
+  'vercel.com', 'netlify.com', 'mongodb.com', 'snowflake.com', 'databricks.com',
+  'confluent.io', '1hotels.com', 'airbnb.com', 'akt.com', 'asos.com',
+  'bakerlaw.com', 'barneys.com', 'beachbodyondemand.com', 'belmond.com',
+  'bigotiresusa.com', 'clubpilates.com', 'delta-faucet.com', 'expressionsoil.com',
+  'fashionnova.com', 'fitbit.com', 'glossier.com', 'grease-monkey.com',
+  'gymshark.com', 'heartlanddentalcare.com', 'jll.com', 'kimptonhotels.com',
+  'lafitness.com', 'mandarinoriental.com', 'marcus.com', 'merrill.com',
+  'mrandmrssmith.com', 'nativecos.com', 'nike.com', 'oetkerhotelcollection.com',
+  'oneandonlyresorts.com', 'osf-healthcare.org', 'outdoorvoices.com',
+  'revolve.com', 'rfrnyc.com', 'rumble-boxing.com', 'sephora.com',
+  'solidcore.co', 'spacex.com', 'title-boxing.com', 'toneitup.com',
+  'underarmour.com', 'uniqlo.com', 'vornado.com', 'weingarten.com',
+  'williams-sonoma.com', 'zappos.com', 'paulweiss.com', 'rei.com',
+  'cyclebar.com', 'mindbodyonline.com', 'mirrorfit.com', 'redfin.com',
+  'wellnessliving.com', 'calibercollision.com', 'bestwestern.com',
+  'fourseasons.com', 'acehotel.com',
+  'dlapiper.com', 'hoganlovells.com', 'polsinelli.com', 'wsgr.com',
+  'hopkinsmedicine.org', 'massgeneral.org', 'pennmedicine.org',
+  'mountsinai.org', 'zocdoc.com', 'carbonhealth.com', 'mdvip.com',
+  'warbyparker.com', 'stitchfix.com', 'harrys.com', 'nordstrom.com',
+  'anthropologie.com', 'lululemon.com', 'freepeople.com', 'wayfair.com',
+  'etsy.com', 'overstock.com', 'chewy.com', 'adidas.com', 'gap.com',
+  'zara.com', 'hm.com', 'neimanmarcus.com', 'saksfifthavenue.com',
+  'planetfitness.com', 'anytimefitness.com', 'rowhousefit.com',
+  'claspass.com', 'burnbootcamp.com', 'hydrow.com', 'oura.com',
+  'noom.com', 'zillow.com', 'kw.com', 'exprealty.com', 'century21.com',
+  'sothebysrealty.com', 'trulia.com', 'movoto.com', 'homes.com',
+  'remax.com',
+  'longandfoster.com', 'howardhanna.com', 'bhgre.com', 'brownharris.com',
+  'prologis.com', 'hines.com', 'simon.com', 'cbre.com', 'crowe.com',
+  'rpai.com', 'jacksonhewitt.com', 'libertytax.com', 'sage.com',
+  'sofi.com', 'ntb.com', 'discounttire.com', 'napaonline.com',
+  'carvana.com', 'carmax.com', 'edmunds.com', 'cargurus.com',
+  'autotrader.com', 'hertz.com', 'turo.com', 'zipcar.com',
+  'gerberautocollision.com', 'serviceking.com',
+  'marriott.com', 'hyatt.com', 'usaa.com', 'choicehotels.com',
+  'peninsula.com', 'fairmont.com', 'dorchestercollection.com',
+  'vrbo.com', 'booking.com', 'expedia.com', 'hotels.com', 'orbitz.com',
+  'tripadvisor.com', 'travelocity.com', 'hotwire.com', 'lhw.com',
+  'slh.com', 'angi.com', 'thumbtack.com', 'thompsonhotels.com',
+  'homeadvisor.com', 'menards.com', 'stanleysteemer.com', 'vivint.com',
+  'adt.com', 'radissonhotels.com', 'onehomedirect.com', 'ring.com',
+  'trane.com', 'moen.com', 'amazon.com', 'google.com', 'tesla.com',
+  'oracle.com', 'hilton.com',
+]);
 
 function computeProtectedRestaurantContextScore(options: {
   domain: string;

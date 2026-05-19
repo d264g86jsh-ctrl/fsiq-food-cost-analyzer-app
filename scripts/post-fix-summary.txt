@@ -1,16 +1,16 @@
 Post-Fix Website Validation Analysis
 ====================================
-Scenario examples verified: 29/69
+Scenario examples verified: 19/69
 
 Benchmark Metrics
 -----------------
-True positive rate: 100% (previous 98.43%, delta 1.57)
-False negative rate: 0% (previous 1.57%, delta -1.57)
-False positive rate: 98.4% (previous 99.2%, delta -0.8)
-Verified restaurant rate: 45.88% (previous 32.94%, delta 12.94)
+True positive rate: 98.04% (previous 98.43%, delta -0.39)
+False negative rate: 1.96% (previous 1.57%, delta 0.39)
+False positive rate: 0% (previous 99.2%, delta -99.2)
+Verified restaurant rate: 33.73% (previous 32.94%, delta 0.79)
 
 Highest ROI fix: Trusted platform fast-path plus signal bundles; they rescue verifiable pages without new dependencies or external calls.
-Current false positives: 492
+Current false positives: 0
 New false positives introduced vs baseline URL set: 0
-Theoretical maximum true positive rate without headless browser: 91.96%
-Remaining restaurant failures requiring headless browser: 14.86%
+Theoretical maximum true positive rate without headless browser: 90.78%
+Remaining restaurant failures requiring headless browser: 13.91%

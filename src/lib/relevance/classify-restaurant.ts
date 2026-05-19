@@ -57,7 +57,14 @@ const STRONG_NEGATIVE_TEXT = [
   'inventory management software', 'supply chain', 'distributor',
   'wholesale', 'manufacturer', 'foodservice equipment',
   'commercial kitchen equipment', 'marketing agency', 'digital agency',
-  'consulting firm',
+  'consulting firm', 'law firm', 'legal services', 'attorneys', 'attorney',
+  'lawyers', 'law office', 'dental', 'dentist', 'orthodontic',
+  'medical clinic', 'healthcare', 'patients', 'patient portal',
+  'real estate', 'homes for sale', 'property management', 'apartments',
+  'insurance', 'accounting', 'bookkeeping', 'tax services', 'cpa firm',
+  'auto repair', 'vehicle repair', 'car dealership', 'collision center',
+  'hotel rooms', 'book your stay', 'guest rooms', 'home services',
+  'plumbing', 'hvac', 'roofing', 'remodeling', 'contractor',
 ];
 
 const STRONG_NEGATIVE_NAV = ['/pricing', '/demo', '/enterprise', '/solutions', '/integrations', '/docs', '/developers'];
@@ -66,7 +73,12 @@ const STRONG_NEGATIVE_NAV = ['/pricing', '/demo', '/enterprise', '/solutions', '
 
 const MODERATE_NEGATIVE_TEXT = [
   'clients', 'partners', 'roi', 'scalability', 'implementation',
-  'schedule a call with sales', 'talk to sales',
+  'schedule a call with sales', 'talk to sales', 'case studies',
+  'solutions', 'industries', 'services', 'careers', 'team', 'portfolio',
+  'practice areas', 'personal injury', 'family law', 'cosmetic dentistry',
+  'urgent care', 'primary care', 'therapy', 'brokerage', 'listing',
+  'realtor', 'wealth management', 'payroll', 'audit', 'tire', 'brake',
+  'oil change', 'reservations hotel', 'check-in', 'amenities',
 ];
 
 export function computeRestaurantScores(signals: WebsiteSignals, domain: string): RestaurantScores {
@@ -86,6 +98,7 @@ export function computeRestaurantScores(signals: WebsiteSignals, domain: string)
     signals.ogType,
   ].join(' ').toLowerCase();
   const combinedText = `${bodyLower} ${titleAndDesc} ${navText} ${headingText} ${buttonText} ${schemaText}`;
+  const hasStrongNonRestaurantExclusion = strongNonRestaurantExclusionPresent(combinedText);
 
   // Schema.org type — highest weight signals
   restaurantRaw += scoreRestaurantSchemaTypes(signals.schemaOrgTypes);
@@ -137,12 +150,12 @@ export function computeRestaurantScores(signals: WebsiteSignals, domain: string)
 
   // Strong negative text
   for (const kw of STRONG_NEGATIVE_TEXT) {
-    if (combinedText.includes(kw)) negativeRaw += 15;
+    if (combinedText.includes(kw)) negativeRaw += 20;
   }
 
   // Moderate negative
   for (const kw of MODERATE_NEGATIVE_TEXT) {
-    if (combinedText.includes(kw)) negativeRaw += 8;
+    if (combinedText.includes(kw)) negativeRaw += 10;
   }
 
   // Social / ordering platform links — weak positive
@@ -151,8 +164,8 @@ export function computeRestaurantScores(signals: WebsiteSignals, domain: string)
   }
 
   // Embedded restaurant commerce / reservation infrastructure.
-  if (signals.hasReservationWidget) restaurantRaw += 12;
-  if (signals.hasOrderingWidget) restaurantRaw += 10;
+  if (!hasStrongNonRestaurantExclusion && signals.hasReservationWidget) restaurantRaw += 12;
+  if (!hasStrongNonRestaurantExclusion && signals.hasOrderingWidget) restaurantRaw += 10;
 
   // Hours-of-operation pattern in body text — strong positive
   if (/(?:mon|tue|wed|thu|fri|sat|sun)[\s\S]{0,30}(?:\d{1,2}:\d{2}|\d{1,2}\s*(?:am|pm))/i.test(signals.bodyText)) {
@@ -161,10 +174,10 @@ export function computeRestaurantScores(signals: WebsiteSignals, domain: string)
 
   // Phone number prominently displayed — moderate positive
   if (/\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/.test(signals.bodyText)) restaurantRaw += 6;
-  if (signals.hasAddressPhoneBlock) restaurantRaw += 8;
+  if (!hasStrongNonRestaurantExclusion && signals.hasAddressPhoneBlock) restaurantRaw += 8;
 
   // Food imagery is weak but useful when markup is otherwise thin.
-  if (signals.hasFoodImageAltText) restaurantRaw += 4;
+  if (!hasStrongNonRestaurantExclusion && signals.hasFoodImageAltText) restaurantRaw += 4;
 
   // Special states
   if (signals.hasBotProtection) restaurantRaw = Math.max(restaurantRaw, 0); // no penalty but no boost
@@ -172,15 +185,36 @@ export function computeRestaurantScores(signals: WebsiteSignals, domain: string)
   if (signals.hasParkingPage) { restaurantRaw = 0; negativeRaw = 0; } // handled separately
   if (signals.hasAgeGate) restaurantRaw += 10; // bars/restaurants often have age gates
 
-  const hasStrongNonRestaurantExclusion = strongNonRestaurantExclusionPresent(combinedText);
   if (!hasStrongNonRestaurantExclusion) {
     restaurantRaw += computeBundleScore(signals, domain, restaurantRaw, negativeRaw, titleAndDesc, combinedText);
   }
 
+  const cappedRestaurantRaw = capUnanchoredRestaurantScore(restaurantRaw, signals);
+
   return {
-    restaurantSignalScore: clamp(restaurantRaw),
+    restaurantSignalScore: clamp(cappedRestaurantRaw),
     negativeSignalScore: clamp(negativeRaw),
   };
+}
+
+function capUnanchoredRestaurantScore(score: number, signals: WebsiteSignals): number {
+  if (score < 60) return score;
+
+  const hasPhone = /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/.test(signals.bodyText);
+  const hasAddress = hasAddressPattern(signals.bodyText);
+  const hasNonEnglishBundle = Object.values(signals.nonEnglishKeywordHits).some((hits) => hits.length >= 2);
+  const hasOperationalAnchor =
+    signals.hasRestaurantSchema ||
+    signals.hasReservationWidget ||
+    signals.hasOrderingWidget ||
+    signals.hasAddressPhoneBlock ||
+    signals.hasFoodImageAltText ||
+    signals.socialLinks.some((link) => STRONG_POSITIVE_SOCIAL.some((platform) => link.includes(platform))) ||
+    Boolean(signals.ogImage) ||
+    (hasPhone && hasAddress) ||
+    hasNonEnglishBundle;
+
+  return hasOperationalAnchor ? score : 59;
 }
 
 function scoreRestaurantSchemaTypes(types: string[]): number {
@@ -213,27 +247,27 @@ function computeBundleScore(
     restaurantDomainLanguagePresent(domain) ||
     restaurantLanguagePresent(`${signals.ogSiteName} ${signals.pageTitle}`.toLowerCase());
 
-  if (restaurantLikeMetadata && hasPhone && (signals.ogImage || hasAddress)) {
+  if (restaurantLikeMetadata && hasPhone && (signals.ogImage || hasAddress) && negativeBeforeBundles === 0) {
     bundleScore += 15;
   }
 
-  if (signals.hasRestaurantSchema && hasMenuSignal) {
+  if (signals.hasRestaurantSchema && hasMenuSignal && negativeBeforeBundles < 10) {
     bundleScore += 20;
   }
 
   for (const hits of Object.values(signals.nonEnglishKeywordHits)) {
-    if (hits.length >= 2) {
+    if (hits.length >= 2 && negativeBeforeBundles < 10) {
       bundleScore += 15;
       break;
     }
   }
 
   const independentSignals = countIndependentSignals(signals);
-  if (scoreBeforeBundles >= 50 && scoreBeforeBundles <= 59 && negativeBeforeBundles < 20 && independentSignals >= 3) {
+  if (scoreBeforeBundles >= 55 && scoreBeforeBundles <= 59 && negativeBeforeBundles === 0 && independentSignals >= 4) {
     bundleScore += 60 - scoreBeforeBundles;
   }
 
-  if (restaurantLanguagePresent(combinedText) && independentSignals >= 3 && scoreBeforeBundles >= 45 && negativeBeforeBundles < 20) {
+  if (restaurantLanguagePresent(combinedText) && independentSignals >= 4 && scoreBeforeBundles >= 50 && negativeBeforeBundles === 0) {
     bundleScore += 10;
   }
 
@@ -278,7 +312,7 @@ function restaurantDomainLanguagePresent(domain: string): boolean {
 
 function strongNonRestaurantExclusionPresent(text: string): boolean {
   return STRONG_NEGATIVE_TEXT.some((keyword) => text.includes(keyword)) ||
-    /\b(wholesale|distributor|software|saas|marketing agency|remodeling|supplier|manufacturer|logistics)\b/.test(text);
+    /\b(wholesale|distributor|software|saas|marketing agency|remodeling|supplier|manufacturer|logistics|law firm|attorney|lawyer|dental|dentist|medical|clinic|healthcare|real estate|realtor|insurance|accounting|bookkeeping|auto repair|dealership|hotel|plumbing|hvac|roofing|contractor)\b/.test(text);
 }
 
 function clamp(n: number): number {
