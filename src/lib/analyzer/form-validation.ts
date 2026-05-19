@@ -48,6 +48,7 @@ export function canAdvanceFromStep3(formData: Partial<AnalyzerFormPayload>): boo
 export function canSubmitStep4(formData: Partial<AnalyzerFormPayload>): boolean {
   if (!formData.full_name?.trim()) return false;
   if (!formData.email?.trim() || !isValidEmail(formData.email)) return false;
+  if (!formData.phone?.trim()) return false;
   return true;
 }
 
@@ -81,6 +82,9 @@ export function getStep4Errors(formData: Partial<AnalyzerFormPayload>): Record<s
     errors.email = 'Email address is required.';
   } else if (!isValidEmail(formData.email)) {
     errors.email = 'Please enter a valid email address.';
+  }
+  if (!formData.phone?.trim()) {
+    errors.phone = 'Phone number is required.';
   }
   return errors;
 }

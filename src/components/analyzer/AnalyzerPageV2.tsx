@@ -156,7 +156,7 @@ export function AnalyzerPageV2() {
 
             {/* Subhead */}
             <p className="mt-5 text-center text-[15px] sm:text-[16px] max-w-md mx-auto leading-relaxed text-[#475569]">
-              Get your free personalized $100k food costs audit&hellip;in under 30 seconds.
+              Run your free personalized food cost audit in under 30 seconds.
             </p>
 
             {/* PDF artifact */}
@@ -171,15 +171,6 @@ export function AnalyzerPageV2() {
               <AnalyzerForm />
             </div>
 
-            {/* Trust microcopy */}
-            <div className="mt-7 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-x-7 gap-y-2 text-[13px] text-[#475569]">
-              <span className="inline-flex items-center gap-2 justify-center">
-                <Sparkle />Used by 500+ independent operators
-              </span>
-              <span className="inline-flex items-center gap-2 justify-center">
-                <Sparkle />Average 6.4% reduction on broadliner spend
-              </span>
-            </div>
 
           </div>
 
@@ -190,7 +181,7 @@ export function AnalyzerPageV2() {
               {/* Stats row */}
               <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
                 <Stat n="$50M+" label="total lifetime profits our program has added to our clients' bottom line" />
-                <Stat n="2,000+" label="restaurants achieving better profitability with our solutions" />
+                <Stat n="2,000+" label="restaurant locations achieving better profitability with our solutions" />
                 <Stat n="$1.4B+" label="in aggregated buying power" />
               </div>
 
@@ -228,7 +219,7 @@ export function AnalyzerPageV2() {
                   </div>
                   <div>
                     <p className="text-[13px] font-semibold text-[#143225]">Aaron Lyons</p>
-                    <p className="text-[12px] text-[#64748b]">Operations · Dish Society (8 locations, Houston, TX)</p>
+                    <p className="text-[12px] text-[#64748b]">Founder &amp; CEO · Dish Society · 8 Locations · Houston, TX</p>
                   </div>
                 </div>
               </div>

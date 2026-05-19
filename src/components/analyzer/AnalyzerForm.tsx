@@ -44,8 +44,8 @@ const TOTAL_STEPS = 4;
 
 const STEP_TITLES: Record<number, string> = {
   1: 'Tell us about your restaurant.',
-  2: 'A bit about your setup.',
-  3: 'Where your dollars go.',
+  2: 'Tell us how you operate.',
+  3: 'Tell us how you buy food.',
   4: 'Where do we send your report?',
 };
 
@@ -466,14 +466,14 @@ export function AnalyzerForm() {
               />
             </FormField>
 
-            <FormField label="Phone number" hint="Optional">
+            <FormField label="Phone number" error={fieldErrors.phone} required>
               <input
                 type="tel"
                 value={formData.phone ?? ''}
                 onChange={(e) => update('phone', e.target.value)}
                 placeholder="(555) 123-4567"
                 autoComplete="tel"
-                className={inputCls(false)}
+                className={inputCls(!!fieldErrors.phone)}
               />
             </FormField>
 
@@ -537,7 +537,7 @@ export function AnalyzerForm() {
               <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M4 7V5a4 4 0 118 0v2m-9 0h10v7H3V7z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Encrypted · never sold
+              Encrypted
             </span>
           </div>
         </div>

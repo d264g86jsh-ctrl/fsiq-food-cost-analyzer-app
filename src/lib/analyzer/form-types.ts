@@ -20,7 +20,7 @@ export interface AnalyzerFormPayload {
   // Step 4 — Contact info
   full_name: string;
   email: string;
-  phone?: string;
+  phone: string;
 
   // Hidden tracking fields — captured client-side, optional, never block submission
   utm_source?: string;
