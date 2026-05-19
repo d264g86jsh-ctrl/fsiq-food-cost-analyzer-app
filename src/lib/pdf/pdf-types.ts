@@ -1,8 +1,10 @@
 // Phase 6 — PDF generation types.
 // Source of truth: docs/build-phases.md §Phase 6, docs/FSIQ_SOP_v3.3.md §19.
 //
-// The 26 SOP variables plus one approved presentation variable (reportDate = 27 total).
-// reportDate is a PDF/report presentation field, not business logic — intentionally separate.
+// The 26 SOP variables plus three approved presentation/app-control variables (29 total):
+//   reportDate     — self-dates the report
+//   calendlyUrl    — Calendly booking link, app-controlled with UTM params
+//   fsiqIqLogoUrl  — FSIQ IQ chip mark fallback logo, app-controlled
 // See docs/architecture.md §PDF for routing rules.
 
 // ── Mode decision ─────────────────────────────────────────────────────────────
@@ -16,7 +18,7 @@ export interface PdfModeDecision {
 
 // ── Payload ───────────────────────────────────────────────────────────────────
 
-// 27 variables sent to PDFMonkey (26 from SOP §19 + approved reportDate).
+// 29 variables sent to PDFMonkey (26 from SOP §19 + reportDate + calendlyUrl + fsiqIqLogoUrl).
 export interface PdfPayload {
   // Contact / identity
   restaurantName: string;
@@ -62,6 +64,10 @@ export interface PdfPayload {
 
   // Presentation metadata (approved 27th variable — self-dates the report)
   reportDate: string; // e.g. "May 2026"
+
+  // App-controlled CTA and branding (28th and 29th variables)
+  calendlyUrl: string;    // Calendly booking link for CTAs — app-controlled, not template variable
+  fsiqIqLogoUrl: string;  // FSIQ IQ chip mark fallback logo — app-controlled
 }
 
 // ── Input ─────────────────────────────────────────────────────────────────────

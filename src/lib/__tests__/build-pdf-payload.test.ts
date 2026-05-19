@@ -233,12 +233,12 @@ describe('buildPdfPayload — reportDate', () => {
   });
 });
 
-// ── Payload shape — 27 variables ─────────────────────────────────────────────
+// ── Payload shape — 29 variables ─────────────────────────────────────────────
 
 describe('buildPdfPayload — payload shape', () => {
-  it('result has exactly 27 keys', () => {
+  it('result has exactly 29 keys', () => {
     const p = buildPdfPayload(baseInput);
-    expect(Object.keys(p)).toHaveLength(27);
+    expect(Object.keys(p)).toHaveLength(29);
   });
 
   it('does not include raw savings ints (year1–year5 only as display strings)', () => {
@@ -253,5 +253,44 @@ describe('buildPdfPayload — payload shape', () => {
     const p = buildPdfPayload(baseInput);
     expect(p).not.toHaveProperty('finalPct');
     expect(p).not.toHaveProperty('dollarEstimate');
+  });
+});
+
+// ── calendlyUrl ───────────────────────────────────────────────────────────────
+
+describe('buildPdfPayload — calendlyUrl', () => {
+  it('calendlyUrl is a non-empty string', () => {
+    const p = buildPdfPayload(baseInput);
+    expect(typeof p.calendlyUrl).toBe('string');
+    expect(p.calendlyUrl.length).toBeGreaterThan(0);
+  });
+
+  it('calendlyUrl contains calendly.com', () => {
+    const p = buildPdfPayload(baseInput);
+    expect(p.calendlyUrl).toContain('calendly.com');
+  });
+
+  it('calendlyUrl contains utm_source=fsiq_pdf', () => {
+    const p = buildPdfPayload(baseInput);
+    expect(p.calendlyUrl).toContain('utm_source=fsiq_pdf');
+  });
+
+  it('calendlyUrl contains utm_medium=pdf', () => {
+    const p = buildPdfPayload(baseInput);
+    expect(p.calendlyUrl).toContain('utm_medium=pdf');
+  });
+
+  it('calendlyUrl contains utm_campaign=food_cost_analyzer', () => {
+    const p = buildPdfPayload(baseInput);
+    expect(p.calendlyUrl).toContain('utm_campaign=food_cost_analyzer');
+  });
+});
+
+// ── fsiqIqLogoUrl ─────────────────────────────────────────────────────────────
+
+describe('buildPdfPayload — fsiqIqLogoUrl', () => {
+  it('fsiqIqLogoUrl is a string (may be empty if env not set)', () => {
+    const p = buildPdfPayload(baseInput);
+    expect(typeof p.fsiqIqLogoUrl).toBe('string');
   });
 });

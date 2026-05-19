@@ -9,12 +9,96 @@ import type { PdfPayload, GeneratePdfInput, GeneratePdfResult } from './pdf-type
 import { buildPdfPayload } from './build-pdf-payload';
 
 const PDFMONKEY_API_URL = 'https://api.pdfmonkey.io/api/v1/documents';
+const LOGO_VALIDATE_TIMEOUT_MS = 5_000;
+
+// Private IP patterns that PDFMonkey's network can't reach
+const PRIVATE_IP_PATTERNS = ['127.0.0.1', 'localhost', '192.168.', '10.0.', '172.16.'];
+
+// ── Logo validation ───────────────────────────────────────────────────────────
+
+/**
+ * Validates a logo URL before passing it to PDFMonkey.
+ * Returns the URL if valid, null otherwise.
+ * Conservative PDFs never show a restaurant logo — always return null.
+ */
+async function validateLogoForPdf(url: string | null, isConservative: boolean): Promise<string | null> {
+  // Rule 1: Conservative PDF never shows restaurant logo
+  if (isConservative) return null;
+
+  // Rule 2: Null or non-http URL
+  if (!url || !url.startsWith('http')) {
+    if (url) console.warn(`[FSIQ PDF LOGO] non-http URL → hasLogo=false: ${url}`);
+    return null;
+  }
+
+  // Rule 6: Private/local IP guard (PDFMonkey can't reach these)
+  for (const pattern of PRIVATE_IP_PATTERNS) {
+    if (url.includes(pattern)) {
+      console.error(`[FSIQ PDF LOGO] private IP in URL → hasLogo=false: ${url}`);
+      return null;
+    }
+  }
+
+  try {
+    const res = await fetch(url, {
+      method: 'HEAD',
+      signal: AbortSignal.timeout(LOGO_VALIDATE_TIMEOUT_MS),
+    });
+
+    // Rule 3a: Non-OK status
+    if (!res.ok) {
+      console.log(`[FSIQ PDF LOGO] HEAD ${res.status} → hasLogo=false: ${url}`);
+      return null;
+    }
+
+    const ct = res.headers.get('content-type') ?? '';
+    const cl = res.headers.get('content-length');
+    const clInt = cl !== null ? parseInt(cl, 10) : null;
+
+    // Rule 3b: Not an image
+    if (!ct.startsWith('image/')) {
+      console.warn(`[FSIQ PDF LOGO] content-type "${ct}" is not image/ → hasLogo=false: ${url}`);
+      return null;
+    }
+
+    // Rule 3c: ICO files — poor quality for PDF
+    if (ct === 'image/x-icon' || ct === 'image/vnd.microsoft.icon') {
+      console.warn(`[FSIQ PDF LOGO] ICO content-type → hasLogo=false: ${url}`);
+      return null;
+    }
+
+    // Rule 4: CDN returns 200 for any URL — zero-byte content
+    if (clInt !== null && clInt === 0) {
+      console.warn(`[FSIQ PDF LOGO] Content-Length=0 → hasLogo=false: ${url}`);
+      return null;
+    }
+
+    // Rule 5: Tracking pixel / blank image
+    if (clInt !== null && clInt < 500) {
+      console.warn(`[FSIQ PDF LOGO] Content-Length=${clInt} < 500 → hasLogo=false: ${url}`);
+      return null;
+    }
+
+    // Rule 7: Paper trail
+    const timestamp = new Date().toISOString();
+    console.log(`[FSIQ PDF LOGO] validated at ${timestamp}: ${url}`);
+    return url;
+  } catch {
+    console.warn(`[FSIQ PDF LOGO] HEAD request failed → hasLogo=false: ${url}`);
+    return null;
+  }
+}
 
 // ── Exported API client ───────────────────────────────────────────────────────
 
 export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfResult> {
   const apiKey    = process.env.PDFMONKEY_API_KEY;
   const templateId = process.env.PDFMONKEY_TEMPLATE_ID;
+
+  // Warn if FSIQ_IQ_LOGO_URL fallback is not configured
+  if (!process.env.FSIQ_IQ_LOGO_URL) {
+    console.warn('[FSIQ PDF] FSIQ_IQ_LOGO_URL is not set — PDF fallback logo will be empty');
+  }
 
   // Graceful no-op when credentials are missing (dev / misconfigured environments)
   if (!apiKey || !templateId) {
@@ -29,7 +113,11 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
     };
   }
 
-  const payload = buildPdfPayload(input);
+  // Validate logo URL before building payload
+  const validatedLogoUrl = await validateLogoForPdf(input.logoUrl, input.mode === 'conservative');
+  const validatedInput = { ...input, logoUrl: validatedLogoUrl };
+
+  const payload = buildPdfPayload(validatedInput);
 
   try {
     const response = await fetch(PDFMONKEY_API_URL, {

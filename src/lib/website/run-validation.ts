@@ -6,6 +6,7 @@ import { normalizeUrl, extractDomain } from '@/lib/website/normalize-url';
 import { checkWebsite } from '@/lib/website/check-website';
 import { headlessFetch } from '@/lib/website/headless-fetch';
 import { extractLogoUrl } from '@/lib/website/logo-extractor';
+import { extractSignals } from '@/lib/website/extract-signals';
 import { detectNationalChain } from '@/lib/qualification/national-chains';
 import { computeRestaurantScores } from '@/lib/relevance/classify-restaurant';
 import { computeWebsiteRelationship } from '@/lib/relevance/website-relationship';
@@ -190,6 +191,15 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
       finalUrl = headlessResult.finalUrl;
       headlessBrowserUsed = true;
       internalFlags.push('headless_attempted');
+    }
+  }
+
+  // ── Step 4b: Same-domain intent pages (menu/reservations/order/hours/contact) ──
+  if (signals && shouldExpandWithIntentPages(fetchResult.reachability.status, signals)) {
+    const expanded = await fetchIntentSubpageSignals(finalUrl, signals);
+    if (expanded) {
+      signals = expanded;
+      internalFlags.push('intent_pages_merged');
     }
   }
 
@@ -962,6 +972,152 @@ function buildNegativeSignalList(
   if (signals?.hasVendorSchema) list.push('Vendor/SaaS schema.org type detected');
   if (scores.negativeSignalScore > 40) list.push(`Negative signal score: ${scores.negativeSignalScore}/100`);
   return list;
+}
+
+function shouldExpandWithIntentPages(reachabilityStatus: string, signals: ExtractSignalsResult): boolean {
+  if (reachabilityStatus === 'invalid' || reachabilityStatus === 'inaccessible') return false;
+  if (signals.hasRestaurantSchema || signals.hasReservationWidget || signals.hasOrderingWidget || signals.hasAddressPhoneBlock) return false;
+  return true;
+}
+
+async function fetchIntentSubpageSignals(
+  baseUrl: string,
+  primarySignals: ExtractSignalsResult,
+): Promise<ExtractSignalsResult | null> {
+  const candidates = buildIntentPageCandidates(baseUrl, primarySignals.bodyText);
+  if (candidates.length === 0) return null;
+
+  const collected: ExtractSignalsResult[] = [];
+  const maxPages = Math.min(3, candidates.length);
+
+  for (let i = 0; i < maxPages; i += 1) {
+    const signals = await fetchSubpageSignals(candidates[i]);
+    if (signals && isOperationalRestaurantSubpage(signals)) collected.push(signals);
+  }
+
+  if (collected.length === 0) return null;
+  return mergeSignals(primarySignals, collected);
+}
+
+function buildIntentPageCandidates(baseUrl: string, htmlText: string): string[] {
+  let parsed: URL;
+  try {
+    parsed = new URL(baseUrl);
+  } catch {
+    return [];
+  }
+
+  const pathHints = [
+    '/menu',
+    '/menus',
+    '/reservations',
+    '/reserve',
+    '/book',
+    '/order',
+    '/order-online',
+    '/hours',
+    '/contact',
+  ];
+
+  const urls: string[] = [];
+  for (const hint of pathHints) {
+    urls.push(new URL(hint, parsed.origin).toString());
+  }
+
+  // Extract first-party hrefs from the raw page body text window if any URL-like paths leaked in.
+  const hrefMatches = htmlText.match(/\b\/(?:menu|menus|reservations?|reserve|book|order(?:-online)?|hours|contact)[a-z0-9\-\/]*\b/gi) ?? [];
+  for (const href of hrefMatches) {
+    urls.push(new URL(href, parsed.origin).toString());
+  }
+
+  return [...new Set(urls)];
+}
+
+async function fetchSubpageSignals(url: string): Promise<ExtractSignalsResult | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 7000);
+  try {
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Cache-Control': 'no-cache',
+      },
+      redirect: 'follow',
+      signal: controller.signal,
+    });
+    const contentType = (res.headers.get('content-type') ?? '').toLowerCase();
+    if (!contentType.includes('text/html')) return null;
+    const html = await res.text();
+    if (!html || html.length < 200) return null;
+    return extractSignals(html, res.url || url);
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function mergeSignals(primary: ExtractSignalsResult, extras: ExtractSignalsResult[]): ExtractSignalsResult {
+  const merged = { ...primary };
+  for (const extra of extras) {
+    merged.pageTitle = merged.pageTitle || extra.pageTitle;
+    merged.metaDescription = merged.metaDescription || extra.metaDescription;
+    merged.ogTitle = merged.ogTitle || extra.ogTitle;
+    merged.ogType = merged.ogType || extra.ogType;
+    merged.ogDescription = merged.ogDescription || extra.ogDescription;
+    merged.ogSiteName = merged.ogSiteName || extra.ogSiteName;
+    merged.ogImage = merged.ogImage || extra.ogImage;
+    merged.schemaOrgTypes = [...new Set([...merged.schemaOrgTypes, ...extra.schemaOrgTypes])];
+    merged.schemaOrgNames = [...new Set([...merged.schemaOrgNames, ...extra.schemaOrgNames])].slice(0, 40);
+    merged.schemaOrgDescriptions = [...new Set([...merged.schemaOrgDescriptions, ...extra.schemaOrgDescriptions])].slice(0, 40);
+    merged.navLinkTexts = [...new Set([...merged.navLinkTexts, ...extra.navLinkTexts])].slice(0, 120);
+    merged.headingTexts = [...new Set([...merged.headingTexts, ...extra.headingTexts])].slice(0, 120);
+    merged.buttonTexts = [...new Set([...merged.buttonTexts, ...extra.buttonTexts])].slice(0, 120);
+    merged.urlPathSegments = [...new Set([...merged.urlPathSegments, ...extra.urlPathSegments])].slice(0, 40);
+    merged.bodyText = `${merged.bodyText} ${extra.bodyText}`.slice(0, 120000);
+    merged.logoHints = [...new Set([...merged.logoHints, ...extra.logoHints])].slice(0, 60);
+    merged.socialLinks = [...new Set([...merged.socialLinks, ...extra.socialLinks])].slice(0, 120);
+    merged.imageAltTexts = [...new Set([...merged.imageAltTexts, ...extra.imageAltTexts])].slice(0, 120);
+    merged.hasReservationWidget = merged.hasReservationWidget || extra.hasReservationWidget;
+    merged.hasOrderingWidget = merged.hasOrderingWidget || extra.hasOrderingWidget;
+    merged.hasAddressPhoneBlock = merged.hasAddressPhoneBlock || extra.hasAddressPhoneBlock;
+    merged.hasFoodImageAltText = merged.hasFoodImageAltText || extra.hasFoodImageAltText;
+    merged.hasRestaurantSchema = merged.hasRestaurantSchema || extra.hasRestaurantSchema;
+    merged.hasVendorSchema = merged.hasVendorSchema || extra.hasVendorSchema;
+    merged.hasBotProtection = merged.hasBotProtection || extra.hasBotProtection;
+    merged.hasComingSoon = merged.hasComingSoon || extra.hasComingSoon;
+    merged.hasParkingPage = merged.hasParkingPage || extra.hasParkingPage;
+    merged.hasLinkInBio = merged.hasLinkInBio || extra.hasLinkInBio;
+    merged.hasAgeGate = merged.hasAgeGate || extra.hasAgeGate;
+    merged.hasCookieGate = merged.hasCookieGate || extra.hasCookieGate;
+    for (const [lang, hits] of Object.entries(extra.nonEnglishKeywordHits)) {
+      const existing = merged.nonEnglishKeywordHits[lang] ?? [];
+      merged.nonEnglishKeywordHits[lang] = [...new Set([...existing, ...hits])].slice(0, 40);
+    }
+  }
+  return merged;
+}
+
+function isOperationalRestaurantSubpage(signals: ExtractSignalsResult): boolean {
+  const combinedText = `${signals.pageTitle} ${signals.metaDescription} ${signals.ogTitle} ${signals.ogDescription} ${signals.bodyText} ${signals.navLinkTexts.join(' ')} ${signals.headingTexts.join(' ')}`.toLowerCase();
+  const hasPhone = /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/.test(signals.bodyText);
+  const hasAddress = /\b\d{1,6}\s+[A-Za-z0-9.' -]+(?:st|street|ave|avenue|rd|road|blvd|boulevard|dr|drive|ln|lane|way|hwy|highway|pkwy|parkway)\b/i.test(signals.bodyText) ||
+    /\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b/.test(signals.bodyText);
+  const hasHours = /(?:mon|tue|wed|thu|fri|sat|sun)[\s\S]{0,30}(?:\d{1,2}:\d{2}|\d{1,2}\s*(?:am|pm))/i.test(signals.bodyText);
+  const hasMenuLanguage = /menu|menus|menú|菜单|thực đơn|메뉴|private dining|reservation|reservations|order online|book a table/.test(combinedText);
+
+  const hardAnchor =
+    signals.hasRestaurantSchema ||
+    signals.hasReservationWidget ||
+    signals.hasOrderingWidget ||
+    signals.hasAddressPhoneBlock ||
+    signals.hasFoodImageAltText ||
+    signals.socialLinks.some((link) => /opentable\.com|resy\.com|doordash\.com\/store|ubereats\.com\/store|grubhub\.com\/restaurant|tripadvisor\.com|yelp\.com\/biz/.test(link));
+
+  if (hardAnchor) return true;
+  return hasMenuLanguage && ((hasPhone && hasAddress) || hasHours);
 }
 
 function buildResult(input: ValidationResult): ValidationResult {

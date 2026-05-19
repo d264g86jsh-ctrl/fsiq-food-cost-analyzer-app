@@ -1,11 +1,12 @@
-// Phase 6 — Assemble the 27-variable PDFMonkey payload.
-// 26 variables from SOP §19 + approved reportDate (self-dates the report).
+// Phase 6 — Assemble the 29-variable PDFMonkey payload.
+// 26 variables from SOP §19 + reportDate + calendlyUrl + fsiqIqLogoUrl.
 // Source of truth: docs/FSIQ_SOP_v3.3.md §19, docs/build-phases.md §Phase 6.
 //
 // conceptBenchmark en-dashes are intentional for PDF display.
 // The no-em/en-dash rule applies to AI narrative copy, not these fixed benchmark strings.
 
 import type { PdfPayload, GeneratePdfInput } from './pdf-types';
+import { CALENDLY_URL } from '@/lib/constants';
 
 // ── Concept benchmark lookup (SOP §18 benchmarks table) ──────────────────────
 // Default to "28%–32%" for unknown/unlisted concept types.
@@ -97,5 +98,22 @@ export function buildPdfPayload(input: GeneratePdfInput): PdfPayload {
 
     // Presentation metadata (approved 27th variable)
     reportDate: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+
+    // App-controlled CTA and branding (28th and 29th variables)
+    calendlyUrl:   buildCalendlyUrl(process.env.CALENDLY_URL || CALENDLY_URL),
+    fsiqIqLogoUrl: process.env.FSIQ_IQ_LOGO_URL ?? '',
   };
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/**
+ * Appends UTM parameters to a Calendly URL so click-through is trackable.
+ */
+function buildCalendlyUrl(base: string): string {
+  const url = new URL(base);
+  url.searchParams.set('utm_source', 'fsiq_pdf');
+  url.searchParams.set('utm_medium', 'pdf');
+  url.searchParams.set('utm_campaign', 'food_cost_analyzer');
+  return url.toString();
 }

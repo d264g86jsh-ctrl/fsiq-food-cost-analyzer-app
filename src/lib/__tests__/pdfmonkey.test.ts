@@ -226,12 +226,19 @@ describe('generatePdf — conservative mode', () => {
 });
 
 describe('generatePdf — fetch call shape', () => {
+  // NOTE: calls[0] is now the logo HEAD validation request.
+  // We use findCall() to locate the PDFMonkey POST by URL.
+
   it('calls PDFMonkey API with Authorization header', async () => {
     const mockFetchFn = mockFetch(200, successBody);
     vi.stubGlobal('fetch', mockFetchFn);
     const { generatePdf } = await import('../pdf/pdfmonkey');
     await runWithTimers(() => generatePdf(baseInput));
-    const [, options] = mockFetchFn.mock.calls[0] as [string, RequestInit];
+    const pdfCall = mockFetchFn.mock.calls.find(
+      (c: unknown[]) => typeof c[0] === 'string' && (c[0] as string).includes('pdfmonkey.io'),
+    );
+    expect(pdfCall).toBeDefined();
+    const options = pdfCall![1] as RequestInit;
     const headers = options.headers as Record<string, string>;
     expect(headers['Authorization']).toBe('Bearer test-api-key');
   });
@@ -241,8 +248,11 @@ describe('generatePdf — fetch call shape', () => {
     vi.stubGlobal('fetch', mockFetchFn);
     const { generatePdf } = await import('../pdf/pdfmonkey');
     await runWithTimers(() => generatePdf(baseInput));
-    const [url] = mockFetchFn.mock.calls[0] as [string];
-    expect(url).toContain('pdfmonkey.io');
+    const pdfCall = mockFetchFn.mock.calls.find(
+      (c: unknown[]) => typeof c[0] === 'string' && (c[0] as string).includes('pdfmonkey.io'),
+    );
+    expect(pdfCall).toBeDefined();
+    expect(pdfCall![0] as string).toContain('pdfmonkey.io');
   });
 
   it('sends document_template_id in body', async () => {
@@ -250,8 +260,11 @@ describe('generatePdf — fetch call shape', () => {
     vi.stubGlobal('fetch', mockFetchFn);
     const { generatePdf } = await import('../pdf/pdfmonkey');
     await runWithTimers(() => generatePdf(baseInput));
-    const [, options] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    const body = JSON.parse(options.body as string);
+    const pdfCall = mockFetchFn.mock.calls.find(
+      (c: unknown[]) => typeof c[0] === 'string' && (c[0] as string).includes('pdfmonkey.io'),
+    );
+    expect(pdfCall).toBeDefined();
+    const body = JSON.parse((pdfCall![1] as RequestInit).body as string);
     expect(body.document.document_template_id).toBe('tmpl_test123');
   });
 
@@ -260,10 +273,159 @@ describe('generatePdf — fetch call shape', () => {
     vi.stubGlobal('fetch', mockFetchFn);
     const { generatePdf } = await import('../pdf/pdfmonkey');
     await runWithTimers(() => generatePdf(baseInput));
-    const [, options] = mockFetchFn.mock.calls[0] as [string, RequestInit];
-    const body = JSON.parse(options.body as string);
+    const pdfCall = mockFetchFn.mock.calls.find(
+      (c: unknown[]) => typeof c[0] === 'string' && (c[0] as string).includes('pdfmonkey.io'),
+    );
+    expect(pdfCall).toBeDefined();
+    const body = JSON.parse((pdfCall![1] as RequestInit).body as string);
     const payload = JSON.parse(body.document.payload);
     expect(payload).toHaveProperty('restaurantName');
     expect(payload).toHaveProperty('reportDate');
+  });
+});
+
+// ── Logo validation ───────────────────────────────────────────────────────────
+//
+// Mock strategy: HEAD requests to casaroberto.com = logo validation
+//                POST/GET requests to pdfmonkey.io = PDFMonkey API
+//
+// We use mockFetchByUrl to route responses by URL pattern.
+
+function headResponse(status: number, contentType: string, contentLength?: number) {
+  const headers: Record<string, string> = { 'content-type': contentType };
+  if (contentLength !== undefined) headers['content-length'] = String(contentLength);
+  return Promise.resolve({
+    ok: status >= 200 && status < 300,
+    status,
+    headers: { get: (key: string) => headers[key.toLowerCase()] ?? null },
+    json: () => Promise.resolve(successBody),
+    text: () => Promise.resolve(JSON.stringify(successBody)),
+  });
+}
+
+function mockFetchByUrl(
+  logoResponse: { status: number; contentType: string; contentLength?: number },
+) {
+  return vi.fn().mockImplementation((input: unknown) => {
+    const url = typeof input === 'string' ? input : (input as Request).url;
+    if (url.includes('casaroberto.com')) {
+      return headResponse(logoResponse.status, logoResponse.contentType, logoResponse.contentLength);
+    }
+    // PDFMonkey API calls — return success
+    return Promise.resolve({
+      ok: true,
+      status: 200,
+      headers: { get: () => null },
+      json: () => Promise.resolve(successBody),
+      text: () => Promise.resolve(JSON.stringify(successBody)),
+    });
+  });
+}
+
+/** Find the first fetch call whose URL includes the given pattern */
+function findCall(
+  calls: unknown[][],
+  pattern: string,
+): [string, RequestInit] | undefined {
+  const match = calls.find((c) => typeof c[0] === 'string' && (c[0] as string).includes(pattern));
+  return match as [string, RequestInit] | undefined;
+}
+
+describe('generatePdf — logo validation', () => {
+  it('passes null logoUrl through without error → hasLogo=false in payload', async () => {
+    const mockFetchFn = mockFetchByUrl({ status: 404, contentType: 'text/html' });
+    vi.stubGlobal('fetch', mockFetchFn);
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await runWithTimers(() => generatePdf({ ...baseInput, logoUrl: null }));
+    // Should complete successfully — null logo is fine
+    expect(r.pdfStatus).toBe('complete');
+    // Verify hasLogo=false in the payload sent
+    const pdfCallArgs = findCall(mockFetchFn.mock.calls, 'pdfmonkey.io');
+    expect(pdfCallArgs).toBeDefined();
+    const body = JSON.parse(pdfCallArgs![1].body as string);
+    const payload = JSON.parse(body.document.payload);
+    expect(payload.hasLogo).toBe(false);
+  });
+
+  it('validates logoUrl with HEAD request before sending to PDFMonkey', async () => {
+    const mockFetchFn = mockFetchByUrl({ status: 200, contentType: 'image/png', contentLength: 5000 });
+    vi.stubGlobal('fetch', mockFetchFn);
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    await runWithTimers(() => generatePdf(baseInput));
+    // HEAD call to logo URL should have been made
+    const headCall = findCall(mockFetchFn.mock.calls, 'casaroberto.com');
+    expect(headCall).toBeDefined();
+  });
+
+  it('sets logoUrl=null (hasLogo=false) when HEAD returns 404', async () => {
+    const mockFetchFn = mockFetchByUrl({ status: 404, contentType: 'text/html' });
+    vi.stubGlobal('fetch', mockFetchFn);
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await runWithTimers(() => generatePdf(baseInput));
+    expect(r.pdfStatus).toBe('complete');
+    const pdfCallArgs = findCall(mockFetchFn.mock.calls, 'pdfmonkey.io');
+    const body = JSON.parse(pdfCallArgs![1].body as string);
+    const payload = JSON.parse(body.document.payload);
+    expect(payload.hasLogo).toBe(false);
+    expect(payload.logoUrl).toBe('');
+  });
+
+  it('sets logoUrl=null when content-type is not image/', async () => {
+    const mockFetchFn = mockFetchByUrl({ status: 200, contentType: 'text/html' });
+    vi.stubGlobal('fetch', mockFetchFn);
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await runWithTimers(() => generatePdf(baseInput));
+    expect(r.pdfStatus).toBe('complete');
+    const pdfCallArgs = findCall(mockFetchFn.mock.calls, 'pdfmonkey.io');
+    const body = JSON.parse(pdfCallArgs![1].body as string);
+    const payload = JSON.parse(body.document.payload);
+    expect(payload.hasLogo).toBe(false);
+  });
+
+  it('sets logoUrl=null for ICO files', async () => {
+    const mockFetchFn = mockFetchByUrl({ status: 200, contentType: 'image/x-icon' });
+    vi.stubGlobal('fetch', mockFetchFn);
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await runWithTimers(() => generatePdf(baseInput));
+    expect(r.pdfStatus).toBe('complete');
+    const pdfCallArgs = findCall(mockFetchFn.mock.calls, 'pdfmonkey.io');
+    const body = JSON.parse(pdfCallArgs![1].body as string);
+    const payload = JSON.parse(body.document.payload);
+    expect(payload.hasLogo).toBe(false);
+  });
+
+  it('sets logoUrl=null when Content-Length < 500', async () => {
+    const mockFetchFn = mockFetchByUrl({ status: 200, contentType: 'image/png', contentLength: 100 });
+    vi.stubGlobal('fetch', mockFetchFn);
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await runWithTimers(() => generatePdf(baseInput));
+    expect(r.pdfStatus).toBe('complete');
+    const pdfCallArgs = findCall(mockFetchFn.mock.calls, 'pdfmonkey.io');
+    const body = JSON.parse(pdfCallArgs![1].body as string);
+    const payload = JSON.parse(body.document.payload);
+    expect(payload.hasLogo).toBe(false);
+  });
+
+  it('accepts valid logo URL and passes it to payload (hasLogo=true)', async () => {
+    const mockFetchFn = mockFetchByUrl({ status: 200, contentType: 'image/png', contentLength: 5000 });
+    vi.stubGlobal('fetch', mockFetchFn);
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    const r = await runWithTimers(() => generatePdf(baseInput));
+    expect(r.pdfStatus).toBe('complete');
+    const pdfCallArgs = findCall(mockFetchFn.mock.calls, 'pdfmonkey.io');
+    const body = JSON.parse(pdfCallArgs![1].body as string);
+    const payload = JSON.parse(body.document.payload);
+    expect(payload.hasLogo).toBe(true);
+    expect(payload.logoUrl).toBe('https://casaroberto.com/logo.png');
+  });
+
+  it('conservative mode skips logo validation — hasLogo always false', async () => {
+    const mockFetchFn = mockFetchByUrl({ status: 200, contentType: 'image/png', contentLength: 5000 });
+    vi.stubGlobal('fetch', mockFetchFn);
+    const { generatePdf } = await import('../pdf/pdfmonkey');
+    await runWithTimers(() => generatePdf({ ...baseInput, mode: 'conservative' }));
+    // No HEAD request to logo URL should have been made
+    const headCall = findCall(mockFetchFn.mock.calls, 'casaroberto.com');
+    expect(headCall).toBeUndefined();
   });
 });
