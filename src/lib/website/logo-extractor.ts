@@ -3,27 +3,34 @@
 //
 // Note: Clearbit (logo.clearbit.com) was removed — the free API is DNS-dead as of 2025.
 //
-// HTML sources (1–5, 7–8) require page HTML.
+// HTML sources (1–4, 5–6, 8) require page HTML.
 // If rawHtml is not provided, the extractor fetches it internally with browser-like
 // headers, a 12 s timeout, 403-body reading (Cloudflare challenge pages still contain
 // og:image), and one retry on timeout.
 //
+// Sources 1–4 and 7 are icon-format or explicitly labelled — zero photo false-positives.
+// Sources 5–6 are social-sharing tags filtered by URL keyword (logo/brand/favicon/icon)
+// and a 150 KB content-length cap to prevent hero photos from reaching the PDF.
+//
 // Source 1: Schema.org JSON-LD logo (structured data — actual brand logo URL)
-// Source 2: og:image                (social sharing image — HEAD validated)
-// Source 3: twitter:image           (fallback to og:image)
-// Source 4: apple-touch-icon        (iOS home screen icon — high quality PNG)
-// Source 5: link[rel=icon][png]     (PNG favicon)
-// Source 6: Google Favicon HD       (free, no key — last resort external API)
-// Source 7: Largest img in header/nav
-// Source 8: img with alt="logo"
+// Source 2: apple-touch-icon        (iOS home screen icon — always logo format)
+// Source 3: link[rel=icon][png]     (PNG favicon — always logo format)
+// Source 4: img with alt="logo"     (explicit semantic label)
+// Source 5: og:image                (social sharing — logo-URL-filtered + 150 KB cap)
+// Source 6: twitter:image           (social sharing — logo-URL-filtered)
+// Source 7: Google Favicon HD       (free, no key — icon format, reliable)
+// Source 8: Largest img in header/nav (logo-URL-filtered)
 
 import { extractDomain } from '@/lib/website/normalize-url';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const SOURCE_TIMEOUT_MS  = 3_000;
-const HTML_TIMEOUT_MS    = 12_000;
-const HTML_RETRY_MS      = 6_000;
+const SOURCE_TIMEOUT_MS    = 3_000;
+const HTML_TIMEOUT_MS      = 12_000;
+const HTML_RETRY_MS        = 6_000;
+// Social-sharing images (og:image, twitter:image) over this size are almost
+// certainly hero/food photos, not logos.
+const SOCIAL_IMAGE_MAX_BYTES = 150_000;
 
 // Realistic browser User-Agents — rotated per request to reduce bot-blocking
 const USER_AGENTS = [
@@ -34,6 +41,35 @@ const USER_AGENTS = [
 
 function randomUA(): string {
   return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
+
+// ── Logo URL keyword gates ────────────────────────────────────────────────────
+//
+// Applied to og:image, twitter:image, and nav-img — sources that can return
+// arbitrary images. We require at least one positive logo signal and zero
+// negative photo/hero signals before spending a HEAD request.
+
+const LOGO_URL_POSITIVE = [
+  'logo', 'brand', 'favicon', 'icon', 'logotype', 'wordmark',
+  'emblem', 'badge', 'android-chrome', 'apple-touch', 'site-icon',
+] as const;
+
+const LOGO_URL_NEGATIVE = [
+  'hero', 'banner', 'og-image', 'og_image', 'social',
+  'share', 'featured', 'marquee', 'carousel', 'gallery',
+  'wallpaper', 'background', 'interior', 'exterior',
+  'atmosphere', '1200x630', '1200x628', 'x630', 'x628',
+] as const;
+
+/**
+ * Returns true only when a URL path has at least one positive logo keyword
+ * and zero negative photo/hero keywords. Used to gate social-sharing image
+ * sources so they never return hero photos.
+ */
+export function isLogoLikeUrl(url: string): boolean {
+  const path = (url.split('?')[0] ?? '').toLowerCase();
+  if (LOGO_URL_NEGATIVE.some((t) => path.includes(t))) return false;
+  return LOGO_URL_POSITIVE.some((t) => path.includes(t));
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -64,27 +100,7 @@ export async function extractLogoUrl(
       }
     }
 
-    // Source 2: og:image (HEAD validated)
-    const ogImage = extractOgImage(html);
-    if (ogImage && isValidImageUrlStructure(ogImage)) {
-      const resolved = resolveUrl(ogImage, websiteUrl);
-      if (resolved && await isValidImageUrl(resolved)) {
-        console.log('[FSIQ LOGO] source: og-image');
-        return resolved;
-      }
-    }
-
-    // Source 3: twitter:image
-    const twitterImage = extractTwitterImage(html);
-    if (twitterImage) {
-      const resolved = resolveUrl(twitterImage, websiteUrl);
-      if (resolved && await isValidImageUrl(resolved)) {
-        console.log('[FSIQ LOGO] source: twitter-image');
-        return resolved;
-      }
-    }
-
-    // Source 4: apple-touch-icon
+    // Source 2: apple-touch-icon (icon format — zero false-positive risk)
     const appleTouchIcon = extractAppleTouchIcon(html);
     if (appleTouchIcon) {
       const resolved = resolveUrl(appleTouchIcon, websiteUrl);
@@ -94,7 +110,7 @@ export async function extractLogoUrl(
       }
     }
 
-    // Source 5: link[rel=icon][type=image/png]
+    // Source 3: link[rel=icon][type=image/png] (favicon format — zero false-positive risk)
     const pngIcon = extractPngIcon(html);
     if (pngIcon) {
       const resolved = resolveUrl(pngIcon, websiteUrl);
@@ -103,9 +119,49 @@ export async function extractLogoUrl(
         return resolved;
       }
     }
+
+    // Source 4: img with alt containing "logo" (explicit semantic label)
+    const altLogoImage = extractAltLogoImage(html);
+    if (altLogoImage) {
+      const resolved = resolveUrl(altLogoImage, websiteUrl);
+      if (resolved && await isValidImageUrl(resolved)) {
+        console.log('[FSIQ LOGO] source: alt-img');
+        return resolved;
+      }
+    }
+
+    // Source 5: og:image — only when URL carries an explicit logo keyword
+    // and the image is small enough not to be a hero photo (≤ 150 KB).
+    const ogImage = extractOgImage(html);
+    if (ogImage) {
+      const resolved = resolveUrl(ogImage, websiteUrl);
+      if (
+        resolved &&
+        isLogoLikeUrl(resolved) &&
+        isValidImageUrlStructure(resolved) &&
+        await isValidImageUrl(resolved, SOCIAL_IMAGE_MAX_BYTES)
+      ) {
+        console.log('[FSIQ LOGO] source: og-image');
+        return resolved;
+      }
+    }
+
+    // Source 6: twitter:image — same logo-URL gate as og:image
+    const twitterImage = extractTwitterImage(html);
+    if (twitterImage) {
+      const resolved = resolveUrl(twitterImage, websiteUrl);
+      if (
+        resolved &&
+        isLogoLikeUrl(resolved) &&
+        await isValidImageUrl(resolved, SOCIAL_IMAGE_MAX_BYTES)
+      ) {
+        console.log('[FSIQ LOGO] source: twitter-image');
+        return resolved;
+      }
+    }
   }
 
-  // Source 6: Google Favicon HD (external API — last resort before image extraction)
+  // Source 7: Google Favicon HD (always icon-format, no false-positive risk)
   const googleUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
   if (await isValidImageUrl(googleUrl)) {
     console.log('[FSIQ LOGO] source: google');
@@ -113,22 +169,12 @@ export async function extractLogoUrl(
   }
 
   if (html) {
-    // Source 7: Largest img in header/nav
+    // Source 8: img in header/nav — only when the src URL carries a logo keyword
     const navImage = extractNavImage(html);
     if (navImage) {
       const resolved = resolveUrl(navImage, websiteUrl);
-      if (resolved && await isValidImageUrl(resolved)) {
+      if (resolved && isLogoLikeUrl(resolved) && await isValidImageUrl(resolved)) {
         console.log('[FSIQ LOGO] source: nav-img');
-        return resolved;
-      }
-    }
-
-    // Source 8: img with alt containing "logo"
-    const altLogoImage = extractAltLogoImage(html);
-    if (altLogoImage) {
-      const resolved = resolveUrl(altLogoImage, websiteUrl);
-      if (resolved && await isValidImageUrl(resolved)) {
-        console.log('[FSIQ LOGO] source: alt-img');
         return resolved;
       }
     }
@@ -211,7 +257,12 @@ function isValidImageUrlStructure(url: string): boolean {
   return true;
 }
 
-async function isValidImageUrl(url: string): Promise<boolean> {
+/**
+ * HEAD-validates an image URL.
+ * @param maxContentLengthBytes  Optional upper bound on Content-Length. Pass
+ *   SOCIAL_IMAGE_MAX_BYTES for og:image/twitter:image to reject hero photos.
+ */
+async function isValidImageUrl(url: string, maxContentLengthBytes?: number): Promise<boolean> {
   // Structure checks before spending network time
   if (!isValidImageUrlStructure(url)) return false;
 
@@ -230,9 +281,12 @@ async function isValidImageUrl(url: string): Promise<boolean> {
     if (!ct.startsWith('image/')) return false;
     // Reject ICO files — poor quality for PDF logos
     if (ct === 'image/x-icon' || ct === 'image/vnd.microsoft.icon') return false;
-    // Reject tracking pixels / blank images (Content-Length < 200 bytes)
     const contentLength = res.headers.get('content-length');
-    if (contentLength !== null && parseInt(contentLength, 10) < 200) return false;
+    const bytes = contentLength !== null ? parseInt(contentLength, 10) : null;
+    // Reject tracking pixels / blank images (< 200 bytes)
+    if (bytes !== null && bytes < 200) return false;
+    // Reject oversized images for social-sharing sources (likely hero photos)
+    if (maxContentLengthBytes !== undefined && bytes !== null && bytes > maxContentLengthBytes) return false;
     return true;
   } catch {
     return false;
