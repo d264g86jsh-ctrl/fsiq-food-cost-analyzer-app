@@ -8,6 +8,7 @@ export interface PdfMonkeyTemplatePatchResult {
 }
 
 const OLD_CALENDLY_URL = 'https://calendly.com/neil-foodserviceiq/15-minute-meeting-clone-1';
+const SAFETY_STYLE_MARKER = 'fsiq-app-logo-safety';
 
 const SAFE_COVER_LOGO_BLOCK = `<div class="cover-logos">
       {% if hasLogo and logoUrl != blank %}
@@ -25,6 +26,7 @@ const SAFE_COVER_LOGO_BLOCK = `<div class="cover-logos">
 export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatchResult {
   let next = html;
 
+  next = injectLogoSafetyStyle(next);
   next = next.replaceAll(`href="${OLD_CALENDLY_URL}"`, 'href="{{ calendlyUrl }}"');
 
   next = next.replace(
@@ -36,4 +38,36 @@ export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatch
     html: next,
     changed: next !== html,
   };
+}
+
+function injectLogoSafetyStyle(html: string): string {
+  if (html.includes(SAFETY_STYLE_MARKER)) return html;
+
+  const safetyStyle = `
+{% unless hasLogo and logoUrl != blank %}
+<style id="${SAFETY_STYLE_MARKER}">
+  .cover-operator-logo {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    overflow: hidden !important;
+  }
+  .cover-operator-logo img {
+    display: none !important;
+  }
+</style>
+{% endunless %}
+`;
+
+  if (html.includes('</head>')) {
+    return html.replace('</head>', `${safetyStyle}</head>`);
+  }
+
+  return `${safetyStyle}${html}`;
 }

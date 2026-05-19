@@ -324,6 +324,20 @@ describe('generatePdf — fetch call shape', () => {
 });
 
 describe('PDFMonkey template safety patch', () => {
+  it('injects an idempotent no-logo safety style into template HTML', async () => {
+    const { patchPdfMonkeyTemplateHtml } = await import('../pdf/pdfmonkey-template');
+    const first = patchPdfMonkeyTemplateHtml('<html><head></head><body><div class="cover-operator-logo"><img src="{{ logoUrl }}"></div></body></html>');
+    const second = patchPdfMonkeyTemplateHtml(first.html);
+
+    expect(first.changed).toBe(true);
+    expect(first.html).toContain('{% unless hasLogo and logoUrl != blank %}');
+    expect(first.html).toContain('id="fsiq-app-logo-safety"');
+    expect(first.html).toContain('.cover-operator-logo {');
+    expect(first.html).toContain('display: none !important;');
+    expect(second.changed).toBe(false);
+    expect(second.html.match(/fsiq-app-logo-safety/g)).toHaveLength(1);
+  });
+
   it('patches the remote template before creating a document', async () => {
     const mockFetchFn = vi.fn().mockImplementation((input: unknown, init?: RequestInit) => {
       const url = typeof input === 'string' ? input : (input as Request).url;
@@ -381,6 +395,9 @@ describe('PDFMonkey template safety patch', () => {
     const body = JSON.parse((putCall![1] as RequestInit).body as string);
     const patchedHtml = body.document_template.body;
     expect(patchedHtml).toContain('{% if hasLogo and logoUrl != blank %}');
+    expect(patchedHtml).toContain('{% unless hasLogo and logoUrl != blank %}');
+    expect(patchedHtml).toContain('id="fsiq-app-logo-safety"');
+    expect(patchedHtml).toContain('.cover-operator-logo {');
     expect(patchedHtml).not.toContain('cover-operator-logo">\n      {% if hasLogo %}');
     expect(patchedHtml).not.toContain('15-minute-meeting-clone-1');
     expect(patchedHtml).toContain('href="{{ calendlyUrl }}"');
