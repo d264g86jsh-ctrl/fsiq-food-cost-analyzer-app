@@ -21,7 +21,6 @@ import {
   STATE_OPTIONS,
   CONCEPT_TYPE_OPTIONS,
   LOCATIONS_OPTIONS,
-  ANNUAL_FOOD_SPEND_OPTIONS,
   DISTRIBUTOR_TYPE_OPTIONS,
   PROCUREMENT_STRATEGY_OPTIONS,
 } from '@/lib/analyzer/form-types';
@@ -45,10 +44,44 @@ const TOTAL_STEPS = 4;
 
 const STEP_TITLES: Record<number, string> = {
   1: 'Tell us about your restaurant.',
-  2: 'A bit about your setup.',
-  3: 'Where your dollars go.',
+  2: 'Tell us how you operate.',
+  3: 'Tell us how you buy food.',
   4: 'Where do we send your report?',
 };
+
+// ── Radio card group ──────────────────────────────────────────────────────────
+
+function RadioCardGroup({
+  name,
+  options,
+  value,
+  onChange,
+}: {
+  name: string;
+  options: { value: string; label: string }[];
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="radio-card-grid">
+      {options.map((opt) => (
+        <label key={opt.value} className="radio-card">
+          <input
+            type="radio"
+            name={name}
+            value={opt.value}
+            checked={value === opt.value}
+            onChange={() => onChange(opt.value)}
+          />
+          <span className="radio-card-inner">
+            <span className="radio-card-dot" aria-hidden="true" />
+            {opt.label}
+          </span>
+        </label>
+      ))}
+    </div>
+  );
+}
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -355,16 +388,14 @@ export function AnalyzerForm() {
             </FormField>
 
             <FormField label="Estimated annual food spend" required>
-              <select
+              <input
+                type="text"
+                placeholder="e.g. $1.5M, $800K, or $800,000"
+                className="field-underline"
                 value={formData.annual_food_spend ?? ''}
                 onChange={(e) => update('annual_food_spend', e.target.value)}
-                className={selectCls(false)}
-              >
-                <option value="">Select annual food spend</option>
-                {ANNUAL_FOOD_SPEND_OPTIONS.map((o) => (
-                  <option key={o} value={o}>{o}</option>
-                ))}
-              </select>
+              />
+              <p className="text-[11px] text-[#64748b] mt-1">Enter your total annual food &amp; beverage spend</p>
             </FormField>
           </div>
         )}
@@ -380,7 +411,7 @@ export function AnalyzerForm() {
               >
                 <option value="">Select distributor type</option>
                 {DISTRIBUTOR_TYPE_OPTIONS.map((o) => (
-                  <option key={o} value={o}>{o}</option>
+                  <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
             </FormField>
@@ -393,7 +424,7 @@ export function AnalyzerForm() {
               >
                 <option value="">Select procurement strategy</option>
                 {PROCUREMENT_STRATEGY_OPTIONS.map((o) => (
-                  <option key={o} value={o}>{o}</option>
+                  <option key={o.value} value={o.value}>{o.label}</option>
                 ))}
               </select>
             </FormField>
@@ -435,14 +466,14 @@ export function AnalyzerForm() {
               />
             </FormField>
 
-            <FormField label="Phone number" hint="Optional">
+            <FormField label="Phone number" error={fieldErrors.phone} required>
               <input
                 type="tel"
                 value={formData.phone ?? ''}
                 onChange={(e) => update('phone', e.target.value)}
                 placeholder="(555) 123-4567"
                 autoComplete="tel"
-                className={inputCls(false)}
+                className={inputCls(!!fieldErrors.phone)}
               />
             </FormField>
 
@@ -506,7 +537,7 @@ export function AnalyzerForm() {
               <svg width="11" height="11" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path d="M4 7V5a4 4 0 118 0v2m-9 0h10v7H3V7z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-              Encrypted · never sold
+              Encrypted
             </span>
           </div>
         </div>

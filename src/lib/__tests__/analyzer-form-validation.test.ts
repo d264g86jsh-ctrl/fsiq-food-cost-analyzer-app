@@ -157,12 +157,16 @@ describe('canAdvanceFromStep3', () => {
 // ── canSubmitStep4 ────────────────────────────────────────────────────────────
 
 describe('canSubmitStep4', () => {
-  it('full_name + valid email → can submit', () => {
-    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com' })).toBe(true);
+  it('full_name + valid email + phone → can submit', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '5125550100' })).toBe(true);
   });
 
-  it('phone is optional — absent does not block', () => {
-    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com' })).toBe(true);
+  it('phone is required — absent blocks submit', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com' })).toBe(false);
+  });
+
+  it('phone present — does not block', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '5125550100' })).toBe(true);
   });
 
   it('missing full_name → blocks', () => {
@@ -205,9 +209,14 @@ describe('getStep1Errors', () => {
 // ── getStep4Errors ────────────────────────────────────────────────────────────
 
 describe('getStep4Errors', () => {
-  it('valid full_name + email → no errors', () => {
-    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com' });
+  it('valid full_name + email + phone → no errors', () => {
+    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '5125550100' });
     expect(Object.keys(errors)).toHaveLength(0);
+  });
+
+  it('missing phone → error', () => {
+    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com' });
+    expect(errors.phone).toBeTruthy();
   });
 
   it('invalid email → error', () => {
@@ -298,6 +307,7 @@ describe('lead payload is never erased by eligibility decisions', () => {
     top_skus: 'chicken and beef',
     full_name: 'Maria Garcia',
     email: 'maria@restaurant.com',
+    phone: '5125550100',
   };
 
   const eligibilityStates: ValidationUIState[] = [

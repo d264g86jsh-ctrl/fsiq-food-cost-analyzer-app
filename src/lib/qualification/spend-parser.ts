@@ -88,6 +88,23 @@ function parseSingleToken(s: string, notes: string[]): number | null {
     return 500_000;
   }
 
+  // "N hundred thousand" — must come before the word-number loop so "five hundred thousand"
+  // is not misread as "five × thousand" (= $5,000 instead of $500,000).
+  const hundredThousandMatch = s.match(/^(.+?)\s+hundred\s+thousand$/);
+  if (hundredThousandMatch) {
+    const part = hundredThousandMatch[1].trim();
+    const wordNum = WORD_NUMBERS[part];
+    if (wordNum !== undefined) {
+      notes.push('word_hundred_thousand');
+      return Math.round(wordNum * 100_000);
+    }
+    const n = parseFloat(part);
+    if (!isNaN(n)) {
+      notes.push('n_hundred_thousand');
+      return Math.round(n * 100_000);
+    }
+  }
+
   // Check word numbers — try each in descending length order to avoid partial matches
   for (const [word, num] of Object.entries(WORD_NUMBERS).sort((a, b) => b[0].length - a[0].length)) {
     const wordRegex = new RegExp(`(?:^|\\s)${escapeRegex(word)}(?:\\s|$)`);
@@ -117,6 +134,16 @@ function parseSingleToken(s: string, notes: string[]): number | null {
     if (!isNaN(n)) {
       notes.push('n_million');
       return Math.round(n * 1_000_000);
+    }
+  }
+
+  // "500 thousand", "2.5 thousand"
+  const thousandWordMatch = s.match(/^([\d.]+)\s*thousand$/);
+  if (thousandWordMatch) {
+    const n = parseFloat(thousandWordMatch[1]);
+    if (!isNaN(n)) {
+      notes.push('n_thousand');
+      return Math.round(n * 1_000);
     }
   }
 
@@ -150,7 +177,7 @@ function parseSingleToken(s: string, notes: string[]): number | null {
 }
 
 function applyBareHeuristic(n: number, notes: string[]): number {
-  if (n >= 1 && n <= 99) {
+  if (n > 0 && n < 100) {
     notes.push('bare_heuristic:millions');
     return Math.round(n * 1_000_000);
   }

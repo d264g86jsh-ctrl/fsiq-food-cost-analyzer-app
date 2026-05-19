@@ -20,7 +20,7 @@ export interface AnalyzerFormPayload {
   // Step 4 — Contact info
   full_name: string;
   email: string;
-  phone?: string;
+  phone: string;
 
   // Hidden tracking fields — captured client-side, optional, never block submission
   utm_source?: string;
@@ -125,16 +125,16 @@ export const ANNUAL_FOOD_SPEND_OPTIONS = [
   '$7M+',
 ] as const;
 
-export const DISTRIBUTOR_TYPE_OPTIONS = [
-  'National broadliners (Sysco, US Foods)',
-  'Regional distributor',
-  'Local/specialty only',
-  'Combination',
-] as const;
+export const DISTRIBUTOR_TYPE_OPTIONS: { value: string; label: string }[] = [
+  { value: 'national_broadliners', label: 'I purchase primarily through broadline distributors (Sysco, US Foods, Performance Food Group, etc.)' },
+  { value: 'combination',          label: 'I use a mix of broadline and specialty/local distributors' },
+  { value: 'regional',             label: 'I purchase primarily through regional distributors' },
+  { value: 'local_specialty',      label: 'I purchase through local or specialty distributors only' },
+];
 
-export const PROCUREMENT_STRATEGY_OPTIONS = [
-  'Market price, single distributor',
-  'Market price, multiple distributors',
-  'GPO or Group Purchasing Organization',
-  'Negotiated cost-plus agreement',
-] as const;
+export const PROCUREMENT_STRATEGY_OPTIONS: { value: string; label: string }[] = [
+  { value: 'market_price_single',   label: 'I buy at market price through one distributor' },
+  { value: 'market_price_multiple', label: 'I buy at market price across multiple distributors' },
+  { value: 'gpo',                   label: 'I use a GPO or Group Purchasing Organization' },
+  { value: 'negotiated_cost_plus',  label: 'I have a negotiated cost-plus agreement' },
+];
