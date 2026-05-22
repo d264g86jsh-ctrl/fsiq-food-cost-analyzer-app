@@ -132,7 +132,7 @@ All fields prefixed `fsiq_` to avoid collisions with other GHL integrations.
 |---|---|
 | `fsiq_restaurant_name` | Form `restaurantName` |
 | `fsiq_website` | Form `website` |
-| `fsiq_zip_code` | Form `zipCode` |
+| `fsiq_us_business_confirmed` | Form `usBusinessConfirmed` — boolean |
 | `fsiq_concept_type` | Form `conceptType` |
 | `fsiq_locations` | Form `locations` |
 | `fsiq_annual_food_spend` | Form `annualFoodSpend` (raw dropdown value) |

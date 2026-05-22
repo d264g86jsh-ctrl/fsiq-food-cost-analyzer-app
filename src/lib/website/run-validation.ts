@@ -20,7 +20,7 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
   const reasons: string[] = [];
   let headlessBrowserUsed = false;
 
-  // Hardcoded no-op Places result — Google Places removed; state dropdown guarantees US.
+  // Hardcoded no-op Places result — Google Places removed; user attestation guarantees US.
   const placesResult = { googlePlacesScore: 0, placesCountry: null, googlePlacesQueried: false, internalFlags: [] as string[] };
 
   // ── Step 1: URL normalization ─────────────────────────────────────────────────
@@ -468,11 +468,13 @@ function applyDecisionRules(options: {
   reachabilityStatus: string;
   signals: ExtractSignalsResult | null;
 }): RuleResult | null {
-  const { restaurantSignalScore, negativeSignalScore, nationalChainScore, googlePlacesScore } = options;
+  const { restaurantSignalScore, negativeSignalScore, nationalChainScore, googlePlacesScore, signals } = options;
 
-  if (negativeSignalScore >= 20 && restaurantSignalScore < 60 && googlePlacesScore < 30) {
-    return { decision: 'clear_non_fit', reason: 'negative_business_context' };
+  // First clear_non_fit rule (raised from 20 to 40 — single pricing/demo keyword no longer triggers)
+  if (negativeSignalScore >= 40 && restaurantSignalScore < 20 && googlePlacesScore < 30) {
+    return { decision: 'clear_non_fit', reason: 'high_negative_score' };
   }
+  // High-confidence clear_non_fit (unchanged)
   if (negativeSignalScore >= 70 && restaurantSignalScore < 30 && googlePlacesScore < 30) {
     return { decision: 'clear_non_fit', reason: 'high_negative_score' };
   }
@@ -482,6 +484,29 @@ function applyDecisionRules(options: {
   if (googlePlacesScore >= 80 && nationalChainScore < 50 && negativeSignalScore < 60) {
     return { decision: 'verified_restaurant', reason: 'google_places_confirmed' };
   }
+
+  // Confidence bundle: 50–59 restaurant score with multiple corroborating independent signals
+  if (
+    restaurantSignalScore >= 50 &&
+    restaurantSignalScore < 60 &&
+    negativeSignalScore === 0 &&
+    nationalChainScore < 50
+  ) {
+    const independentCount = [
+      signals?.hasRestaurantSchema,
+      signals?.navLinkTexts?.some(t => ['menu', 'reservation', 'reserve', 'order'].some(k => t.includes(k))),
+      signals?.hasReservationWidget,
+      signals?.hasOrderingWidget,
+      signals?.hasAddressPhoneBlock,
+      /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/.test(signals?.bodyText ?? ''),
+      signals?.ogTitle && signals?.metaDescription,
+    ].filter(Boolean).length;
+
+    if (independentCount >= 3) {
+      return { decision: 'verified_restaurant', reason: 'confidence_bundle_50_59' };
+    }
+  }
+
   return null;
 }
 

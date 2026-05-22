@@ -32,6 +32,9 @@ export interface WebsiteSignals {
   hasLinkInBio: boolean;
   hasAgeGate: boolean;
   hasCookieGate: boolean;
+  hasReservationWidget: boolean;
+  hasOrderingWidget: boolean;
+  hasAddressPhoneBlock: boolean;
 }
 
 const RESTAURANT_SCHEMA_TYPES = [
@@ -170,6 +173,9 @@ export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
     hasLinkInBio,
     hasAgeGate,
     hasCookieGate,
+    hasReservationWidget: false,
+    hasOrderingWidget: false,
+    hasAddressPhoneBlock: false,
   };
 }
 

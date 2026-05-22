@@ -220,7 +220,7 @@ Field definitions and dropdown values: `docs/FSIQ_SOP_v3.3.md` §5.
 |---|---|---|
 | `restaurant_name` | Yes | Text |
 | `website` | Yes | Text + real-time validation |
-| `zip_code` | Yes | Text (U.S. ZIP/ZIP+4 only) |
+| `us_business_confirmed` | Yes | Checkbox — "I confirm this is a U.S.-based restaurant or foodservice operation" |
 | `concept_type` | Yes | Dropdown |
 | `locations` | Yes | Dropdown |
 | `annual_food_spend` | Yes | Dropdown |

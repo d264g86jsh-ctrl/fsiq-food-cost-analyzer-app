@@ -1,6 +1,5 @@
 import { describe, it, expect } from 'vitest';
 import {
-  isValidUsState,
   isValidEmail,
   canAdvanceFromStep1,
   canAdvanceFromStep2,
@@ -15,16 +14,6 @@ import {
 } from '../../components/analyzer/WebsiteValidationStatus';
 import type { ValidationUIState } from '../../components/analyzer/WebsiteValidationStatus';
 import type { AnalyzerFormPayload } from '../analyzer/form-types';
-
-// ── isValidUsState ────────────────────────────────────────────────────────────
-
-describe('isValidUsState', () => {
-  it('valid state abbreviation → true', () => expect(isValidUsState('TX')).toBe(true));
-  it('lowercase accepted (normalized) → true', () => expect(isValidUsState('tx')).toBe(true));
-  it('DC accepted → true', () => expect(isValidUsState('DC')).toBe(true));
-  it('invalid abbreviation → false', () => expect(isValidUsState('XX')).toBe(false));
-  it('empty string → false', () => expect(isValidUsState('')).toBe(false));
-});
 
 // ── isValidEmail ──────────────────────────────────────────────────────────────
 
@@ -42,7 +31,7 @@ describe('isValidEmail', () => {
 const baseStep1: Partial<AnalyzerFormPayload> = {
   restaurant_name: 'Casa Roberto',
   website: 'casaroberto.com',
-  state: 'TX',
+  us_business_confirmed: true,
 };
 
 describe('canAdvanceFromStep1', () => {
@@ -90,8 +79,8 @@ describe('canAdvanceFromStep1', () => {
     expect(canAdvanceFromStep1({ ...baseStep1, website: '' }, 'idle')).toBe(false);
   });
 
-  it('missing state → blocks', () => {
-    expect(canAdvanceFromStep1({ ...baseStep1, state: '' }, 'idle')).toBe(false);
+  it('us_business_confirmed false → blocks', () => {
+    expect(canAdvanceFromStep1({ ...baseStep1, us_business_confirmed: false }, 'idle')).toBe(false);
   });
 });
 
@@ -195,9 +184,9 @@ describe('getStep1Errors', () => {
     expect(errors.restaurant_name).toBeTruthy();
   });
 
-  it('missing state → error', () => {
-    const errors = getStep1Errors({ ...baseStep1, state: '' }, 'idle');
-    expect(errors.state).toBeTruthy();
+  it('us_business_confirmed false → error', () => {
+    const errors = getStep1Errors({ ...baseStep1, us_business_confirmed: false }, 'idle');
+    expect(errors.us_business_confirmed).toBeTruthy();
   });
 
   it('invalid_website state → website error', () => {

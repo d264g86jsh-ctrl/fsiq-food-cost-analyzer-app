@@ -10,7 +10,6 @@ function makeSubmission(overrides: Partial<Submission> = {}): Submission {
     id: 'sub_test_001',
     restaurantName: "MaryAnn's Diner",
     website: 'https://maryannsdiner.com',
-    state: 'MA',
     conceptType: 'Casual dining',
     locations: '2 – 4 locations',
     annualFoodSpend: '$1M–$3M',
@@ -93,7 +92,6 @@ describe('buildGhlPayload — identity fields', () => {
     expect(p.fsiq_phone).toBe('6175550100');
     expect(p.fsiq_restaurant_name).toBe("MaryAnn's Diner");
     expect(p.fsiq_website).toBe('https://maryannsdiner.com');
-    expect(p.fsiq_state).toBe('MA');
   });
 });
 

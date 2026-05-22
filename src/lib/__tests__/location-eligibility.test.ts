@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { computeCountryEligibility } from '../relevance/location-eligibility';
 
 describe('computeCountryEligibility always returns us_verified', () => {
-  it('returns us_verified with state_selection_us_confirmed reason', () => {
+  it('returns us_verified with user_attested_us reason', () => {
     const r = computeCountryEligibility();
     expect(r.countryEligibility).toBe('us_verified');
-    expect(r.locationReasons).toContain('state_selection_us_confirmed');
+    expect(r.locationReasons).toContain('user_attested_us');
   });
 
   it('returns high confidence score', () => {
@@ -13,8 +13,8 @@ describe('computeCountryEligibility always returns us_verified', () => {
     expect(r.locationConfidenceScore).toBeGreaterThanOrEqual(90);
   });
 
-  it('includes us_state_selected internal flag', () => {
+  it('includes user_attested_us internal flag', () => {
     const r = computeCountryEligibility();
-    expect(r.internalFlags).toContain('us_state_selected');
+    expect(r.internalFlags).toContain('user_attested_us');
   });
 });

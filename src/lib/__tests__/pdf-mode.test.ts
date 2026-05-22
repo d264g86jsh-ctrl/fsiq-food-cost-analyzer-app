@@ -76,9 +76,9 @@ describe('determinePdfMode — skip: not qualified', () => {
 });
 
 describe('determinePdfMode — skip: unrecognized combinations', () => {
-  it('plausible_unverified + us_verified → skip (us_verified requires verified_restaurant)', () => {
+  it('plausible_unverified + us_verified → conservative (user-attested US allows conservative PDF)', () => {
     const r = determinePdfMode('plausible_unverified', 'us_verified', true);
-    expect(r.mode).toBe('skip');
+    expect(r.mode).toBe('conservative');
   });
 
   it('unknown finalDecision + us_verified → skip', () => {

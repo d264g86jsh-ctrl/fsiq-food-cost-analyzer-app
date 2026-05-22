@@ -15,7 +15,6 @@ Set all of these in your hosting provider (Vercel → Project Settings → Envir
 | `PDFMONKEY_TEMPLATE_ID` | PDFMonkey → your template → URL or dashboard | Must be the **published production template ID**, not a draft. |
 | `GHL_ACCESS_TOKEN` | GHL → Settings → Integrations → API Keys (or OAuth token) | Preferred over `GHL_API_KEY`. Verify it's for the correct sub-account. |
 | `GHL_LOCATION_ID` | GHL → Settings → Business Profile → Location ID | Without this, all GHL syncs fail silently. |
-| `GOOGLE_PLACES_API_KEY` | Google Cloud Console → APIs & Services → Credentials | Enable "Places API (New)" on the key. Without it, country eligibility degrades to `unknown`. |
 | `NEXT_PUBLIC_META_PIXEL_ID` | Meta Events Manager → your pixel → Pixel ID | Embedded at build time. Pixel IDs are non-secret by design. Must match `META_PIXEL_ID`. |
 | `META_PIXEL_ID` | Same pixel ID as above | Used server-side for CAPI. Set to the same value as `NEXT_PUBLIC_META_PIXEL_ID`. |
 | `META_CONVERSIONS_API_TOKEN` | Meta Events Manager → your pixel → Settings → Conversions API → Generate access token | Without this, CAPI skipped; `metaStatus = "skipped"`. |

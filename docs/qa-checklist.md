@@ -96,20 +96,11 @@ For each: confirm no Claude steps fire, no PDF generated, correct `fsiq_communic
 
 ---
 
-## ZIP / Postal Code and Country Eligibility
+## U.S. Business Confirmation Checkbox
 
-- [ ] `78704` → valid U.S. ZIP, accepted, no message
-- [ ] `78704-1234` → valid ZIP+4, accepted, no message
-- [ ] `H2X 1Y4` → non-U.S. format, friendly message shown, form submit blocked, `non_us_postal_code` flag set
-- [ ] `abc` → malformed, "Please enter a valid U.S. ZIP code (e.g. 78704).", form submit blocked
-- [ ] Empty → "ZIP code is required.", form submit blocked
-- [ ] Invalid ZIP blocks submission but does not DQ the lead on its own
-- [ ] Google Places returns U.S. address → `countryEligibility: "us_verified"`, `google_place_us_confirmed` flag
-- [ ] Google Places returns non-U.S. address → `countryEligibility: "non_us"`, `google_place_non_us` flag, `finalDecision: "clear_non_fit"`, `internalFlag: non_us_ineligible`
-- [ ] `countryEligibility: "non_us"` → no PDF generated (full or conservative); polite ineligible message sent
-- [ ] `countryEligibility: "unknown"` + plausible restaurant signals → `plausible_unverified`; conservative PDF allowed
-- [ ] `countryEligibility: "likely_us"` + `verified_restaurant` → full personalized PDF allowed
-- [ ] Non-U.S. lead receives polite message — no harsh country language used
+- [ ] `us_business_confirmed` checkbox unchecked → form submit blocked; "Please confirm this is a U.S.-based restaurant or foodservice operation." message shown
+- [ ] `us_business_confirmed` checkbox checked → form submit allowed; no blocking message
+- [ ] Checkbox is required — missing or `false` value blocks submission the same as unchecked
 
 ---
 

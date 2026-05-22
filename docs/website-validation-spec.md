@@ -402,10 +402,10 @@ Content-Type: application/json
 
 ```ts
 {
-  website: string          // Raw user input (will be normalized server-side)
-  restaurantName: string   // For name/domain relationship + Places search
-  zipCode: string          // Required — primary location signal for Google Places
-  conceptType?: string     // Optional — additional hint for Google Places Text Search
+  website: string              // Raw user input (will be normalized server-side)
+  restaurantName: string       // For name/domain relationship + Places search
+  usBusinessConfirmed: boolean // Required — user has confirmed U.S.-based business
+  conceptType?: string         // Optional — additional hint for Google Places Text Search
 }
 ```
 

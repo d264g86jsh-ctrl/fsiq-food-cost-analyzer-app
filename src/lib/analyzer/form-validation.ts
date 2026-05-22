@@ -4,15 +4,9 @@
 // Never block on eligibility decisions (national_chain, clear_non_fit, non_us, below_threshold).
 
 import type { AnalyzerFormPayload } from './form-types';
-import { STATE_OPTIONS } from './form-types';
 import type { ValidationUIState } from '@/components/analyzer/WebsiteValidationStatus';
 
 // ── Field format validators ───────────────────────────────────────────────────
-
-export function isValidUsState(state: string): boolean {
-  const upper = state.trim().toUpperCase();
-  return STATE_OPTIONS.some((option) => option.value === upper);
-}
 
 export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -26,7 +20,7 @@ export function canAdvanceFromStep1(
 ): boolean {
   if (!formData.restaurant_name?.trim()) return false;
   if (!formData.website?.trim()) return false;
-  if (!formData.state?.trim() || !isValidUsState(formData.state)) return false;
+  if (!formData.us_business_confirmed) return false;
   // Block on active check (race condition guard) and confirmed invalid website
   if (validationState === 'checking') return false;
   if (validationState === 'invalid_website') return false;
@@ -67,8 +61,8 @@ export function getStep1Errors(
   } else if (validationState === 'invalid_website') {
     errors.website = 'Please check the website URL and try again.';
   }
-  if (!formData.state?.trim() || !isValidUsState(formData.state)) {
-    errors.state = 'Please select your state.';
+  if (!formData.us_business_confirmed) {
+    errors.us_business_confirmed = 'Please confirm your business operates in the U.S. to continue.';
   }
   return errors;
 }

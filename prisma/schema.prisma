@@ -89,7 +89,6 @@ model Submission {
   // ── Form inputs (Step 1 — qualification fields) ──────────────────────────
   restaurantName      String
   website             String
-  state               String
   conceptType         String
   locations           String
   annualFoodSpend     String  // raw dropdown value, e.g. "$1M–$3M"

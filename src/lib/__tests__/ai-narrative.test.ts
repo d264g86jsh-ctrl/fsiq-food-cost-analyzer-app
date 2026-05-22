@@ -22,7 +22,6 @@ const mockGetClient = vi.mocked(getAnthropicClient);
 const baseInput: AiResearchInput = {
   restaurantName: 'Casa Roberto',
   website: 'https://casaroberto.com',
-  state: 'TX',
   conceptType: 'Casual dining',
   locations: '2 – 4 locations',
   annualFoodSpend: '$1M–$3M',

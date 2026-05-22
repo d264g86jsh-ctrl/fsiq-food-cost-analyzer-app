@@ -9,7 +9,6 @@ import type { QualifyLeadResult } from '../qualification/qualify-lead';
 const baseForm: FormContext = {
   restaurantName: 'Casa Roberto',
   website: 'https://casaroberto.com',
-  state: 'TX',
   conceptType: 'Casual dining',
   locations: '2 – 4 locations',
   annualFoodSpend: '$1M–$3M',

@@ -21,7 +21,7 @@ Contact information is collected **at the end**, after the user has completed al
 |---|---|---|
 | `restaurant_name` | Text | Used for national chain check |
 | `website` | Text + real-time validation | Triggers validation on blur (Phase 2 endpoint) |
-| `zip_code` | Text | U.S. 5-digit or ZIP+4 only; triggers validation alongside website |
+| `us_business_confirmed` | Checkbox | "I confirm this is a U.S.-based restaurant or foodservice operation" — required before submit |
 | `concept_type` | Dropdown | Dropdown values per SOP §5 |
 | `locations` | Dropdown | Single / 2–4 / 5+ |
 | `annual_food_spend` | Dropdown | Ranges per SOP §5 |

@@ -79,7 +79,6 @@ export function SubmissionDetail({ submission }: SubmissionDetailProps) {
         <Row label="Email">{submission.email}</Row>
         <Row label="Phone">{submission.phone ?? '—'}</Row>
         <Row label="Website">{submission.website}</Row>
-        <Row label="State">{submission.state}</Row>
       </Card>
 
       {/* Restaurant Profile */}

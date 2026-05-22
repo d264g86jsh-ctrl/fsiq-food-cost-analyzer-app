@@ -29,7 +29,6 @@ export function buildResearchInput(
     // Form context
     restaurantName: form.restaurantName,
     website: form.website,
-    state: form.state,
     conceptType: form.conceptType,
     locations: form.locations,
     annualFoodSpend: form.annualFoodSpend,

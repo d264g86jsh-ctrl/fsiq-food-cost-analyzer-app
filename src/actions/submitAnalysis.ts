@@ -85,7 +85,6 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       data: {
         restaurantName:      payload.restaurant_name,
         website:             payload.website,
-        state:               payload.state,
         conceptType:         payload.concept_type,
         locations:           payload.locations,
         annualFoodSpend:     payload.annual_food_spend,
@@ -127,7 +126,6 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     validationResult = await runValidation({
       website:        payload.website,
       restaurantName: payload.restaurant_name,
-      state:          payload.state,
       conceptType:    payload.concept_type,
     });
     await patch({
@@ -236,7 +234,6 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
   const formContext = {
     restaurantName:      payload.restaurant_name,
     website:             payload.website,
-    state:               payload.state,
     conceptType:         payload.concept_type,
     locations:           payload.locations,
     annualFoodSpend:     payload.annual_food_spend,

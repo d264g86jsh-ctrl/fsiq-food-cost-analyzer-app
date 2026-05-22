@@ -148,6 +148,11 @@ export function computeRestaurantScores(signals: WebsiteSignals, domain: string)
     if (['our-story', 'about-us', 'about'].includes(segment)) restaurantRaw += 4;
   }
 
+  // og:type restaurant detection (~104 sites use restaurant.restaurant)
+  if (signals.ogType === 'restaurant.restaurant' || signals.ogType.includes('restaurant')) {
+    restaurantRaw += 15;
+  }
+
   // Strong negative text
   for (const kw of STRONG_NEGATIVE_TEXT) {
     if (combinedText.includes(kw)) negativeRaw += 20;

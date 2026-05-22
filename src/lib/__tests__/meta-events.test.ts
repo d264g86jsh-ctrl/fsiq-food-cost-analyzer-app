@@ -10,7 +10,6 @@ function sha256(val: string): string {
 const baseSubmission = {
   email:    'chef@demorestaurant.com',
   phone:    '512-555-0100',
-  state:    'TX',
   qualified: true,
   dqReason: null as string | null,
   dollarEstimate: 45000,
@@ -51,11 +50,6 @@ describe('buildLeadEvent', () => {
   it('hashes phone digits in user_data', () => {
     const ev = buildLeadEvent(baseSubmission, tracking);
     expect(ev.user_data.ph).toBe(sha256('5125550100'));
-  });
-
-  it('hashes state in user_data', () => {
-    const ev = buildLeadEvent(baseSubmission, tracking);
-    expect(ev.user_data.zp).toBe(sha256('TX'));
   });
 
   it('passes fbp and fbc through unmodified', () => {

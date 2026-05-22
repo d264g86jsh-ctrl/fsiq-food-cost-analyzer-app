@@ -84,7 +84,6 @@ const CLOUDFLARE_CHALLENGE_HTML = `
 
 const baseInput = {
   restaurantName: 'Casa Roberto',
-  state: 'TX',
 };
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -182,7 +181,6 @@ describe('runValidation — national chain detection', () => {
     const r = await runValidation({
       restaurantName: "McDonald's",
       website: 'https://mycoolburger.com',
-      state: 'TX',
     });
     expect(r.finalDecision).toBe('national_chain');
     expect(r.nationalChainScore).toBeGreaterThanOrEqual(85);
@@ -194,7 +192,6 @@ describe('runValidation — national chain detection', () => {
     const r = await runValidation({
       restaurantName: 'Chipotle',
       website: 'https://chipotle.com',
-      state: 'TX',
     });
     expect(r.finalDecision).toBe('national_chain');
   });
@@ -276,7 +273,7 @@ describe('runValidation — verified_restaurant', () => {
     expect(r.restaurantSignalScore).toBeGreaterThanOrEqual(50);
   });
 
-  it('state dropdown guarantees us_verified country eligibility', async () => {
+  it('user attestation guarantees us_verified country eligibility', async () => {
     mockFetch.mockResolvedValue(makeHtmlResponse(RESTAURANT_HTML));
     const r = await runValidation({ ...baseInput, website: 'https://casaroberto.com' });
     expect(r.countryEligibility).toBe('us_verified');
@@ -287,7 +284,6 @@ describe('runValidation — verified_restaurant', () => {
     const r = await runValidation({
       restaurantName: '',
       website: 'https://spiritscenla.com/',
-      state: 'LA',
     });
 
     expect(r.finalDecision).toBe('verified_restaurant');
@@ -303,7 +299,6 @@ describe('runValidation — verified_restaurant', () => {
     const r = await runValidation({
       restaurantName: '',
       website: 'https://spiritscenla.com/',
-      state: 'LA',
     });
 
     expect(r.finalDecision).toBe('verified_restaurant');
@@ -474,7 +469,6 @@ describe('runValidation — clear_non_fit (vendor/SaaS)', () => {
     const r = await runValidation({
       restaurantName: 'Food Logistics',
       website: 'https://foodlogistics.com/',
-      state: 'TX',
     });
 
     expect(r.finalDecision).not.toBe('verified_restaurant');
@@ -499,6 +493,31 @@ describe('runValidation — clear_non_fit (vendor/SaaS)', () => {
     expect(r.finalDecision).not.toBe('verified_restaurant');
     expect(r.restaurantSignalScore).toBeLessThan(60);
     expect(r.internalFlags).not.toContain('protected_or_thin_restaurant_context');
+  });
+});
+
+describe('runValidation — confidence bundle (50–59 score)', () => {
+  it('restaurantSignalScore 50–59, negativeSignalScore 0, 3+ independent signals → verified_restaurant', async () => {
+    const confidenceBundleHtml = `
+<html>
+<head>
+  <title>Test Restaurant</title>
+  <meta name="description" content="A welcoming restaurant for all guests.">
+  <meta property="og:title" content="Test Restaurant">
+  <script type="application/ld+json">{"@type":"Restaurant","name":"Test Restaurant"}</script>
+</head>
+<body>
+  <nav><a href="/menu">Menu</a></nav>
+  <p>Dine-in available for all guests. Enjoy a relaxed experience.</p>
+</body>
+</html>
+`;
+    mockFetch.mockResolvedValue(makeHtmlResponse(confidenceBundleHtml));
+    const r = await runValidation({ ...baseInput, website: 'https://testrestaurant.com' });
+    expect(r.finalDecision).toBe('verified_restaurant');
+    expect(r.restaurantSignalScore).toBeGreaterThanOrEqual(50);
+    expect(r.restaurantSignalScore).toBeLessThan(60);
+    expect(r.negativeSignalScore).toBe(0);
   });
 });
 

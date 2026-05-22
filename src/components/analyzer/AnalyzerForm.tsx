@@ -18,7 +18,6 @@ import type { ValidationResult } from '@/lib/website/types';
 import { SuccessState } from '@/components/analyzer/SuccessState';
 import {
   type AnalyzerFormPayload,
-  STATE_OPTIONS,
   CONCEPT_TYPE_OPTIONS,
   LOCATIONS_OPTIONS,
   DISTRIBUTOR_TYPE_OPTIONS,
@@ -152,9 +151,8 @@ export function AnalyzerForm() {
   // ── Website validation ────────────────────────────────────────────────────────
 
   const triggerValidation = useCallback(
-    async (websiteOverride?: string, stateOverride?: string) => {
+    async (websiteOverride?: string) => {
       const website = websiteOverride ?? formData.website ?? '';
-      const stateValue = stateOverride ?? formData.state ?? '';
 
       if (!website.trim()) return;
 
@@ -165,7 +163,6 @@ export function AnalyzerForm() {
         const action = await validateWebsite({
           website,
           restaurantName: formData.restaurant_name ?? '',
-          state: stateValue,
         });
 
         if (!action.success || !action.result) {
@@ -197,17 +194,12 @@ export function AnalyzerForm() {
         setIsValidating(false);
       }
     },
-    [formData.website, formData.state, formData.restaurant_name, fieldErrors.website],
+    [formData.website, formData.restaurant_name, fieldErrors.website],
   );
 
   function handleWebsiteBlur() {
     const website = formData.website?.trim();
     if (website) triggerValidation(website);
-  }
-
-  function handleStateChange(selectedState: string) {
-    const website = formData.website?.trim();
-    if (website && selectedState) triggerValidation(website, selectedState);
   }
 
   // ── Step navigation ───────────────────────────────────────────────────────────
@@ -340,21 +332,32 @@ export function AnalyzerForm() {
               />
             </FormField>
 
-            <FormField label="State" error={fieldErrors.state} required>
-              <select
-                value={formData.state ?? ''}
-                onChange={(e) => {
-                  update('state', e.target.value);
-                  handleStateChange(e.target.value);
-                }}
-                className={selectCls(!!fieldErrors.state)}
-              >
-                <option value="">Select your state</option>
-                {STATE_OPTIONS.map((s) => (
-                  <option key={s.value} value={s.value}>{s.label}</option>
-                ))}
-              </select>
-            </FormField>
+            <div>
+              <label className={`flex items-start gap-3 cursor-pointer${fieldErrors.us_business_confirmed ? ' field-error-label' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={formData.us_business_confirmed ?? false}
+                  onChange={(e) => {
+                    setFormData((prev) => ({ ...prev, us_business_confirmed: e.target.checked }));
+                    if (fieldErrors.us_business_confirmed) {
+                      setFieldErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.us_business_confirmed;
+                        return next;
+                      });
+                    }
+                  }}
+                  className="mt-0.5 h-4 w-4 rounded border-[#e2e8f0] accent-[#143225] flex-shrink-0"
+                />
+                <span className="text-[13px] text-[#143225]">
+                  My business operates in the U.S.
+                  <span className="text-[#52C275] ml-0.5" aria-hidden="true">*</span>
+                </span>
+              </label>
+              {fieldErrors.us_business_confirmed && (
+                <p className="mt-2 text-[12px] text-red-600" role="alert">{fieldErrors.us_business_confirmed}</p>
+              )}
+            </div>
           </div>
         )}
 

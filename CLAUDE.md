@@ -57,7 +57,7 @@ pnpm prisma migrate dev
 ```
 
 ## Core Rules (spec: `docs/website-validation-spec.md`)
-- **U.S. restaurants only in v1.** ZIP accepts U.S. 5-digit and ZIP+4 only. Non-U.S. postal codes rejected with a friendly message.
+- **U.S. restaurants only in v1.** `us_business_confirmed` checkbox is required — user must confirm the restaurant is U.S.-based before submitting.
 - Only HTTP 404 or DNS NXDOMAIN = `invalid_website`. 403/503/0/timeout/Cloudflare = `plausible_unverified`, never auto-DQ.
 - DQ priority: `national_chain` → `invalid_website` → `below_threshold`
 - Validation decisions: `verified_restaurant` | `plausible_unverified` | `clear_non_fit` | `national_chain` | `invalid_website`
@@ -109,7 +109,6 @@ DATABASE_URL
 ANTHROPIC_API_KEY
 PDFMONKEY_API_KEY, PDFMONKEY_TEMPLATE_ID
 OUTLOOK_CLIENT_ID, OUTLOOK_CLIENT_SECRET, OUTLOOK_TENANT_ID
-GOOGLE_PLACES_API_KEY
 CALENDLY_URL
 FSIQ_LOGO_DARK_URL, FSIQ_LOGO_LIGHT_URL, FSIQ_IQ_LOGO_URL
 META_PIXEL_ID, META_CONVERSIONS_API_TOKEN

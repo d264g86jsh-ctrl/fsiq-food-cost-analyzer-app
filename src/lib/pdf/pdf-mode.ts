@@ -44,7 +44,7 @@ export function determinePdfMode(
   // Conservative profile-based PDF (no website-specific claims)
   if (
     finalDecision === 'plausible_unverified' &&
-    (countryEligibility === 'likely_us' || countryEligibility === 'unknown')
+    (countryEligibility === 'us_verified' || countryEligibility === 'likely_us' || countryEligibility === 'unknown')
   ) {
     return { mode: 'conservative', reason: 'plausible_unverified' };
   }

@@ -7,12 +7,12 @@ export interface CountryEligibilityResult {
   internalFlags: string[];
 }
 
-// State dropdown selection guarantees US eligibility — always returns us_verified.
+// User attestation of U.S. business operation guarantees eligibility — always returns us_verified.
 export function computeCountryEligibility(): CountryEligibilityResult {
   return {
     countryEligibility: 'us_verified',
-    locationConfidenceScore: 95,
-    locationReasons: ['state_selection_us_confirmed'],
-    internalFlags: ['us_state_selected'],
+    locationConfidenceScore: 99,
+    locationReasons: ['user_attested_us'],
+    internalFlags: ['user_attested_us'],
   };
 }
