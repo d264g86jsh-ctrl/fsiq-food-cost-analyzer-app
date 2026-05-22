@@ -257,7 +257,7 @@ export function AnalyzerForm() {
       if (result.success) {
         setIsSubmitted(true);
       } else {
-        setSubmitError('Something went wrong. Please try again.');
+        setSubmitError(result.error ?? 'Something went wrong. Please try again.');
       }
     } catch {
       setSubmitError('Something went wrong. Please try again.');

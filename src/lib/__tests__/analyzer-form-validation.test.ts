@@ -165,6 +165,14 @@ describe('canSubmitStep4', () => {
     expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com' })).toBe(false);
   });
 
+  it('valid formatted phone — does not block', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '(512) 555-0100' })).toBe(true);
+  });
+
+  it('short phone → blocks', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '123' })).toBe(false);
+  });
+
   it('phone present — does not block', () => {
     expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '5125550100' })).toBe(true);
   });
@@ -217,6 +225,11 @@ describe('getStep4Errors', () => {
   it('missing phone → error', () => {
     const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com' });
     expect(errors.phone).toBeTruthy();
+  });
+
+  it('short phone → error', () => {
+    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '123' });
+    expect(errors.phone).toBe('Please enter a valid phone number.');
   });
 
   it('invalid email → error', () => {

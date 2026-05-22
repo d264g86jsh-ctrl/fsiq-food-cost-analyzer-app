@@ -18,6 +18,10 @@ export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
+export function isValidPhone(phone: string): boolean {
+  return phone.replace(/\D/g, '').length >= 7;
+}
+
 // ── Step advancement gates ────────────────────────────────────────────────────
 
 export function canAdvanceFromStep1(
@@ -48,7 +52,7 @@ export function canAdvanceFromStep3(formData: Partial<AnalyzerFormPayload>): boo
 export function canSubmitStep4(formData: Partial<AnalyzerFormPayload>): boolean {
   if (!formData.full_name?.trim()) return false;
   if (!formData.email?.trim() || !isValidEmail(formData.email)) return false;
-  if (!formData.phone?.trim()) return false;
+  if (!formData.phone?.trim() || !isValidPhone(formData.phone)) return false;
   return true;
 }
 
@@ -85,6 +89,8 @@ export function getStep4Errors(formData: Partial<AnalyzerFormPayload>): Record<s
   }
   if (!formData.phone?.trim()) {
     errors.phone = 'Phone number is required.';
+  } else if (!isValidPhone(formData.phone)) {
+    errors.phone = 'Please enter a valid phone number.';
   }
   return errors;
 }
