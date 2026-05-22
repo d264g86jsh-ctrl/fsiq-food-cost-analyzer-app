@@ -32,7 +32,6 @@ export const LIST_SELECT = {
   fullName:             true,
   email:                true,
   website:              true,
-  state:                true,
   qualified:            true,
   finalDecision:        true,
   countryEligibility:   true,
