@@ -32,7 +32,6 @@ async function main(): Promise<void> {
     const result = await runValidation({
       website: failure.url,
       restaurantName: '',
-      state: extractState(failure.city) || 'CA',
     });
 
     rows.push({

@@ -50,7 +50,6 @@ async function main(): Promise<void> {
     const result = await runValidation({
       website: entry.url,
       restaurantName: '',
-      state: entry.state || 'CA',
     });
 
     if (result.finalDecision === 'verified_restaurant') {

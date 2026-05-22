@@ -138,7 +138,6 @@ async function runScenarioValidation(scenarios: ScenarioFile): Promise<Array<Rec
     const result = await runValidation({
       website: item.example.url,
       restaurantName: '',
-      state: item.example.state ?? 'CA',
     });
 
     rows.push({
@@ -177,7 +176,6 @@ async function runBenchmark(dataset: ValidationDataset): Promise<BenchmarkRow[]>
       const result = await runValidation({
         website: entry.url,
         restaurantName: entry.name,
-        state: entry.state,
       });
       rows.push(toBenchmarkRow(entry.expected, entry.name, entry.url, result));
       done += 1;

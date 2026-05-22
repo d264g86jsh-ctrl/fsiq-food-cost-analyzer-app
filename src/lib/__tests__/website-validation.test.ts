@@ -125,7 +125,6 @@ describe('runValidation — invalid website', () => {
     const r = await runValidation({
       restaurantName: 'Animal',
       website: 'https://animalrestaurant.com',
-      state: 'CA',
     });
 
     expect(r.finalDecision).toBe('plausible_unverified');
@@ -143,7 +142,6 @@ describe('runValidation — invalid website', () => {
     const r = await runValidation({
       restaurantName: 'Tinker Street',
       website: 'https://www.tinkerstreet.com',
-      state: 'IN',
     });
 
     expect(r.finalDecision).toBe('plausible_unverified');
@@ -160,7 +158,6 @@ describe('runValidation — invalid website', () => {
     const r = await runValidation({
       restaurantName: 'Halstead',
       website: 'https://www.halstead.com',
-      state: 'CA',
     });
 
     expect(r.finalDecision).toBe('invalid_website');
@@ -487,7 +484,6 @@ describe('runValidation — clear_non_fit (vendor/SaaS)', () => {
     const r = await runValidation({
       restaurantName,
       website,
-      state: 'TX',
     });
 
     expect(r.finalDecision).not.toBe('verified_restaurant');
@@ -498,22 +494,23 @@ describe('runValidation — clear_non_fit (vendor/SaaS)', () => {
 
 describe('runValidation — confidence bundle (50–59 score)', () => {
   it('restaurantSignalScore 50–59, negativeSignalScore 0, 3+ independent signals → verified_restaurant', async () => {
+    // No Restaurant schema so score stays below 60; phone number provides the 3rd confidence-bundle
+    // signal. capUnanchoredRestaurantScore caps at 59 (no operational anchor = no schema/widgets/ogImage).
     const confidenceBundleHtml = `
 <html>
 <head>
-  <title>Test Restaurant</title>
+  <title>Test Grill</title>
   <meta name="description" content="A welcoming restaurant for all guests.">
-  <meta property="og:title" content="Test Restaurant">
-  <script type="application/ld+json">{"@type":"Restaurant","name":"Test Restaurant"}</script>
+  <meta property="og:title" content="Test Grill">
 </head>
 <body>
   <nav><a href="/menu">Menu</a></nav>
-  <p>Dine-in available for all guests. Enjoy a relaxed experience.</p>
+  <p>Dine-in available. Call us: (512) 555-1234</p>
 </body>
 </html>
 `;
     mockFetch.mockResolvedValue(makeHtmlResponse(confidenceBundleHtml));
-    const r = await runValidation({ ...baseInput, website: 'https://testrestaurant.com' });
+    const r = await runValidation({ ...baseInput, website: 'https://testgrill.com' });
     expect(r.finalDecision).toBe('verified_restaurant');
     expect(r.restaurantSignalScore).toBeGreaterThanOrEqual(50);
     expect(r.restaurantSignalScore).toBeLessThan(60);

@@ -402,7 +402,6 @@ async function main(): Promise<void> {
       const validation = await runValidation({
         website: example.url,
         restaurantName: '',
-        state: example.state || 'CA',
       });
       const diagnostics = await fetchDiagnostics(validation.finalUrl || example.url);
       examples.push({
