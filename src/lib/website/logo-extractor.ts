@@ -8,18 +8,20 @@
 // headers, a 12 s timeout, 403-body reading (Cloudflare challenge pages still contain
 // og:image), and one retry on timeout.
 //
-// Sources 1–4 and 7 are icon-format or explicitly labelled — zero photo false-positives.
+// Sources 1–4 are icon-format or explicitly labelled — zero photo false-positives.
 // Sources 5–6 are social-sharing tags filtered by URL keyword (logo/brand/favicon/icon)
 // and a 150 KB content-length cap to prevent hero photos from reaching the PDF.
 //
 // Source 1: Schema.org JSON-LD logo (structured data — actual brand logo URL)
-// Source 2: apple-touch-icon        (iOS home screen icon — always logo format)
-// Source 3: link[rel=icon][png]     (PNG favicon — always logo format)
+// Source 2: apple-touch-icon        (iOS home screen icon — only ≥180px or ≥5 KB)
+// Source 3: link[rel=icon][png]     (PNG favicon — only if Content-Length ≥ 5000 bytes)
 // Source 4: img with alt="logo"     (explicit semantic label)
 // Source 5: og:image                (social sharing — logo-URL-filtered + 150 KB cap)
 // Source 6: twitter:image           (social sharing — logo-URL-filtered)
-// Source 7: Google Favicon HD       (free, no key — icon format, reliable)
 // Source 8: Largest img in header/nav (logo-URL-filtered)
+//
+// Source 7 (Google Favicon HD) was removed — a 128px favicon is never acceptable as a PDF logo.
+// No logo is better than a favicon.
 
 import { extractDomain } from '@/lib/website/normalize-url';
 
@@ -100,21 +102,23 @@ export async function extractLogoUrl(
       }
     }
 
-    // Source 2: apple-touch-icon (icon format — zero false-positive risk)
+    // Source 2: apple-touch-icon — only ≥180px (by URL size hint) or ≥5 KB content-length.
+    // Small apple-touch-icon sizes (57, 76, 120, 152) are phone-era low-res icons, not logos.
     const appleTouchIcon = extractAppleTouchIcon(html);
     if (appleTouchIcon) {
       const resolved = resolveUrl(appleTouchIcon, websiteUrl);
-      if (resolved && await isValidImageUrl(resolved)) {
+      if (resolved && isAppleTouchIconAcceptable(resolved) && await isValidImageUrl(resolved, undefined, 5_000)) {
         console.log('[FSIQ LOGO] source: apple-touch-icon');
         return resolved;
       }
     }
 
-    // Source 3: link[rel=icon][type=image/png] (favicon format — zero false-positive risk)
+    // Source 3: link[rel=icon][type=image/png] — only if Content-Length ≥ 5000 bytes.
+    // Small PNG icons (< 5 KB) are almost certainly favicons, not brand logos.
     const pngIcon = extractPngIcon(html);
     if (pngIcon) {
       const resolved = resolveUrl(pngIcon, websiteUrl);
-      if (resolved && await isValidImageUrl(resolved)) {
+      if (resolved && await isValidImageUrl(resolved, undefined, 5_000)) {
         console.log('[FSIQ LOGO] source: png-icon');
         return resolved;
       }
@@ -159,13 +163,6 @@ export async function extractLogoUrl(
         return resolved;
       }
     }
-  }
-
-  // Source 7: Google Favicon HD (always icon-format, no false-positive risk)
-  const googleUrl = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
-  if (await isValidImageUrl(googleUrl)) {
-    console.log('[FSIQ LOGO] source: google');
-    return googleUrl;
   }
 
   if (html) {
@@ -254,15 +251,32 @@ function isValidImageUrlStructure(url: string): boolean {
   ) {
     return false;
   }
+  // Reject URLs that are clearly favicons — favicons are never acceptable as PDF logos
+  const urlPath = (url.split('?')[0] ?? '').toLowerCase();
+  if (
+    urlPath.includes('/favicon') ||
+    urlPath.includes('favicon.') ||
+    urlPath.includes('-favicon') ||
+    urlPath.includes('_favicon')
+  ) {
+    return false;
+  }
   return true;
 }
 
 /**
  * HEAD-validates an image URL.
- * @param maxContentLengthBytes  Optional upper bound on Content-Length. Pass
- *   SOCIAL_IMAGE_MAX_BYTES for og:image/twitter:image to reject hero photos.
+ * @param maxContentLengthBytes  Optional upper bound on Content-Length.
+ *   Pass SOCIAL_IMAGE_MAX_BYTES for og:image/twitter:image to reject hero photos.
+ * @param minContentLengthBytes  Optional lower bound on Content-Length.
+ *   Pass 5000 for apple-touch-icon/png-icon to reject tiny favicons.
+ *   When Content-Length is absent the min check is skipped (can't know size).
  */
-async function isValidImageUrl(url: string, maxContentLengthBytes?: number): Promise<boolean> {
+async function isValidImageUrl(
+  url: string,
+  maxContentLengthBytes?: number,
+  minContentLengthBytes?: number,
+): Promise<boolean> {
   // Structure checks before spending network time
   if (!isValidImageUrlStructure(url)) return false;
 
@@ -287,10 +301,36 @@ async function isValidImageUrl(url: string, maxContentLengthBytes?: number): Pro
     if (bytes !== null && bytes < 200) return false;
     // Reject oversized images for social-sharing sources (likely hero photos)
     if (maxContentLengthBytes !== undefined && bytes !== null && bytes > maxContentLengthBytes) return false;
+    // Reject undersized images — likely tiny favicons, not brand logos
+    if (minContentLengthBytes !== undefined && bytes !== null && bytes < minContentLengthBytes) return false;
     return true;
   } catch {
     return false;
   }
+}
+
+// ── Apple touch icon size gate ────────────────────────────────────────────────
+
+// Sizes that are too small to be a useful PDF logo.
+const APPLE_TOUCH_ICON_REJECT_SIZES = [57, 76, 120, 152];
+
+// Minimum size (px) to accept when a size hint is present in the URL.
+const APPLE_TOUCH_ICON_MIN_SIZE = 180;
+
+/**
+ * Returns true when an apple-touch-icon URL is acceptable as a PDF logo candidate.
+ * - If the URL contains a px size hint (e.g. "apple-touch-icon-180x180"), only
+ *   accept sizes ≥ 180. Explicitly reject known small sizes (57, 76, 120, 152).
+ * - If no size hint is present, allow the URL through — the caller's
+ *   minContentLengthBytes check (5 KB) acts as the quality gate instead.
+ */
+function isAppleTouchIconAcceptable(url: string): boolean {
+  const path = (url.split('?')[0] ?? '').toLowerCase();
+  const sizeMatch = path.match(/[^0-9](\d{2,3})(?:x\d{2,3})?(?:[^0-9]|$)/);
+  if (!sizeMatch) return true; // no size hint — defer to content-length gate
+  const size = parseInt(sizeMatch[1], 10);
+  if (APPLE_TOUCH_ICON_REJECT_SIZES.includes(size)) return false;
+  return size >= APPLE_TOUCH_ICON_MIN_SIZE;
 }
 
 // ── HTML extraction helpers ───────────────────────────────────────────────────

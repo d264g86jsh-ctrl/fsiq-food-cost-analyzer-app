@@ -187,16 +187,168 @@ describe('extractLogoUrl — apple-touch-icon (source 2)', () => {
   });
 });
 
+// ── Source 2: apple-touch-icon size gate ─────────────────────────────────────
+
+describe('extractLogoUrl — apple-touch-icon size gate', () => {
+  it('accepts apple-touch-icon with no size hint when content-length is absent', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/apple-icon.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<link rel="apple-touch-icon" href="https://casaroberto.com/apple-icon.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBe('https://casaroberto.com/apple-icon.png');
+  });
+
+  it('accepts apple-touch-icon-180x180', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/apple-touch-icon-180x180.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<link rel="apple-touch-icon" href="https://casaroberto.com/apple-touch-icon-180x180.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBe('https://casaroberto.com/apple-touch-icon-180x180.png');
+  });
+
+  it('accepts apple-touch-icon-512x512', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/apple-touch-icon-512x512.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<link rel="apple-touch-icon" href="https://casaroberto.com/apple-touch-icon-512x512.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBe('https://casaroberto.com/apple-touch-icon-512x512.png');
+  });
+
+  it('rejects apple-touch-icon-57x57 — too small', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/apple-touch-icon-57x57.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<link rel="apple-touch-icon" href="https://casaroberto.com/apple-touch-icon-57x57.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+
+  it('rejects apple-touch-icon-76x76 — too small', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/apple-touch-icon-76x76.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<link rel="apple-touch-icon" href="https://casaroberto.com/apple-touch-icon-76x76.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+
+  it('rejects apple-touch-icon-120x120 — too small', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/apple-touch-icon-120x120.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<link rel="apple-touch-icon" href="https://casaroberto.com/apple-touch-icon-120x120.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+
+  it('rejects apple-touch-icon-152x152 — too small', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/apple-touch-icon-152x152.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<link rel="apple-touch-icon" href="https://casaroberto.com/apple-touch-icon-152x152.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+
+  it('rejects apple-touch-icon with no size hint when content-length < 5000', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/apple-icon.png': { status: 200, contentType: 'image/png', contentLength: 2000 },
+    });
+    const html = `<link rel="apple-touch-icon" href="https://casaroberto.com/apple-icon.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+
+  it('accepts apple-touch-icon with no size hint when content-length >= 5000', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/apple-icon.png': { status: 200, contentType: 'image/png', contentLength: 8000 },
+    });
+    const html = `<link rel="apple-touch-icon" href="https://casaroberto.com/apple-icon.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBe('https://casaroberto.com/apple-icon.png');
+  });
+});
+
 // ── Source 3: link[rel=icon][type=image/png] ──────────────────────────────────
 
 describe('extractLogoUrl — png-icon (source 3)', () => {
-  it('returns PNG icon URL', async () => {
+  it('returns PNG icon URL when content-length is absent', async () => {
     mockFetchByUrl({
       'casaroberto.com/icon.png': { status: 200, contentType: 'image/png' },
     });
     const html = `<link rel="icon" type="image/png" href="https://casaroberto.com/icon.png" />`;
     const result = await extractLogoUrl('https://casaroberto.com', html);
     expect(result).toBe('https://casaroberto.com/icon.png');
+  });
+
+  it('accepts PNG icon when content-length >= 5000', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/icon.png': { status: 200, contentType: 'image/png', contentLength: 10_000 },
+    });
+    const html = `<link rel="icon" type="image/png" href="https://casaroberto.com/icon.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBe('https://casaroberto.com/icon.png');
+  });
+
+  it('rejects PNG icon when content-length < 5000 — tiny favicon', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/icon.png': { status: 200, contentType: 'image/png', contentLength: 3_000 },
+    });
+    const html = `<link rel="icon" type="image/png" href="https://casaroberto.com/icon.png" />`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+});
+
+// ── Favicon URL rejection ─────────────────────────────────────────────────────
+
+describe('extractLogoUrl — favicon URL rejection', () => {
+  it('rejects URL containing /favicon', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/favicon.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<script type="application/ld+json">{"@type":"Restaurant","logo":"https://casaroberto.com/favicon.png"}</script>`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+
+  it('rejects URL containing favicon. (e.g. favicon.ico)', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/favicon.ico': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<script type="application/ld+json">{"@type":"Restaurant","logo":"https://casaroberto.com/favicon.ico"}</script>`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+
+  it('rejects URL containing -favicon', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/site-favicon.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<script type="application/ld+json">{"@type":"Restaurant","logo":"https://casaroberto.com/site-favicon.png"}</script>`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+
+  it('rejects URL containing _favicon', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/brand_favicon.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<script type="application/ld+json">{"@type":"Restaurant","logo":"https://casaroberto.com/brand_favicon.png"}</script>`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBeNull();
+  });
+
+  it('accepts URL with logo keyword even if path has no favicon pattern', async () => {
+    mockFetchByUrl({
+      'casaroberto.com/brand-logo.png': { status: 200, contentType: 'image/png' },
+    });
+    const html = `<script type="application/ld+json">{"@type":"Restaurant","logo":"https://casaroberto.com/brand-logo.png"}</script>`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
+    expect(result).toBe('https://casaroberto.com/brand-logo.png');
   });
 });
 
@@ -261,7 +413,6 @@ describe('extractLogoUrl — og:image (source 5, logo URLs only)', () => {
   it('rejects og:image with "hero" in URL — hero photo guard', async () => {
     mockFetchByUrl({
       'casaroberto.com/home-hero.jpg': { status: 200, contentType: 'image/jpeg' },
-      's2/favicons': { status: 404, contentType: 'text/html' },
     });
     const result = await extractLogoUrl('https://casaroberto.com', SAMPLE_HTML_WITH_OG_HERO);
     expect(result).toBeNull();
@@ -270,7 +421,6 @@ describe('extractLogoUrl — og:image (source 5, logo URLs only)', () => {
   it('rejects og:image with no logo keyword in URL', async () => {
     mockFetchByUrl({
       'casaroberto.com/social.jpg': { status: 200, contentType: 'image/jpeg' },
-      's2/favicons': { status: 404, contentType: 'text/html' },
     });
     const result = await extractLogoUrl('https://casaroberto.com', SAMPLE_HTML_WITH_OG_GENERIC);
     expect(result).toBeNull();
@@ -283,7 +433,6 @@ describe('extractLogoUrl — og:image (source 5, logo URLs only)', () => {
         contentType: 'image/jpeg',
         contentLength: 200_000,
       },
-      's2/favicons': { status: 404, contentType: 'text/html' },
     });
     const result = await extractLogoUrl('https://casaroberto.com', SAMPLE_HTML_WITH_OG_LOGO);
     expect(result).toBeNull();
@@ -310,14 +459,12 @@ describe('extractLogoUrl — og:image (source 5, logo URLs only)', () => {
   });
 
   it('rejects og:image that does not start with http', async () => {
-    mockFetchByUrl({ 's2/favicons': { status: 404, contentType: 'text/html' } });
     const html = `<meta property="og:image" content="/relative/logo.png" />`;
     const result = await extractLogoUrl('https://casaroberto.com', html);
     expect(result).toBeNull();
   });
 
   it('rejects og:image with /placeholder in path', async () => {
-    mockFetchByUrl({ 's2/favicons': { status: 404, contentType: 'text/html' } });
     const html = `<meta property="og:image" content="https://casaroberto.com/placeholder/logo.png" />`;
     const result = await extractLogoUrl('https://casaroberto.com', html);
     expect(result).toBeNull();
@@ -339,7 +486,6 @@ describe('extractLogoUrl — twitter:image (source 6, logo URLs only)', () => {
   it('rejects twitter:image with no logo keyword', async () => {
     mockFetchByUrl({
       'casaroberto.com/twitter-card.jpg': { status: 200, contentType: 'image/jpeg' },
-      's2/favicons': { status: 404, contentType: 'text/html' },
     });
     const html = `<meta name="twitter:image" content="https://casaroberto.com/twitter-card.jpg" />`;
     const result = await extractLogoUrl('https://casaroberto.com', html);
@@ -356,26 +502,33 @@ describe('extractLogoUrl — twitter:image (source 6, logo URLs only)', () => {
   });
 });
 
-// ── Source 7: Google Favicon HD ───────────────────────────────────────────────
+// ── Source 7: Google Favicon HD — REMOVED ────────────────────────────────────
+// A 128px favicon is never acceptable as a PDF logo.
+// No logo is better than a favicon. google.com/s2/favicons is explicitly banned.
 
-describe('extractLogoUrl — Google Favicon (source 7)', () => {
-  it('returns Google favicon URL when no earlier sources match', async () => {
-    mockFetchByUrl({
-      's2/favicons': { status: 200, contentType: 'image/png' },
-    });
+describe('extractLogoUrl — Google Favicon (source 7) removed', () => {
+  it('returns null when no earlier sources match — Google Favicon is NOT called', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(null, { status: 404, headers: { 'content-type': 'text/html' } }),
+    );
     const result = await extractLogoUrl('https://casaroberto.com');
-    expect(result).toContain('google.com/s2/favicons');
-    expect(result).toContain('sz=128');
+    expect(result).toBeNull();
+    const googleCalled = fetchSpy.mock.calls.some(([u]) =>
+      typeof u === 'string' && u.includes('s2/favicons'),
+    );
+    expect(googleCalled).toBe(false);
   });
 
-  it('Google fires after filtered og:image fails', async () => {
-    mockFetchByUrl({
+  it('returns null when og:image is filtered — Google Favicon is NOT called', async () => {
+    const fetchSpy = mockFetchByUrl({
       'casaroberto.com/social.jpg': { status: 200, contentType: 'image/jpeg' },
-      's2/favicons': { status: 200, contentType: 'image/png' },
     });
-    // og:image has no logo keyword → filtered → Google fires
     const result = await extractLogoUrl('https://casaroberto.com', SAMPLE_HTML_WITH_OG_GENERIC);
-    expect(result).toContain('google.com/s2/favicons');
+    expect(result).toBeNull();
+    const googleCalled = fetchSpy.mock.calls.some(([u]) =>
+      typeof u === 'string' && u.includes('s2/favicons'),
+    );
+    expect(googleCalled).toBe(false);
   });
 });
 
@@ -384,8 +537,7 @@ describe('extractLogoUrl — Google Favicon (source 7)', () => {
 describe('extractLogoUrl — nav-img (source 8, logo URLs only)', () => {
   it('accepts nav-img when src URL contains logo keyword', async () => {
     mockFetchByUrl({
-      's2/favicons':                         { status: 404, contentType: 'text/html' },
-      'casaroberto.com/brand-logo.png':      { status: 200, contentType: 'image/png' },
+      'casaroberto.com/brand-logo.png': { status: 200, contentType: 'image/png' },
     });
     const html = `<header><img src="https://casaroberto.com/brand-logo.png" alt="header" /></header>`;
     const result = await extractLogoUrl('https://casaroberto.com', html);
@@ -394,7 +546,6 @@ describe('extractLogoUrl — nav-img (source 8, logo URLs only)', () => {
 
   it('rejects nav-img when src URL has no logo keyword', async () => {
     mockFetchByUrl({
-      's2/favicons':                 { status: 404, contentType: 'text/html' },
       'casaroberto.com/marquee-1.jpg': { status: 200, contentType: 'image/jpeg' },
     });
     const html = `<header><img src="https://casaroberto.com/marquee-1.jpg" alt="header" /></header>`;
@@ -404,8 +555,7 @@ describe('extractLogoUrl — nav-img (source 8, logo URLs only)', () => {
 
   it('accepts nav-img from <nav> when src URL contains logo keyword', async () => {
     mockFetchByUrl({
-      's2/favicons':                      { status: 404, contentType: 'text/html' },
-      'casaroberto.com/nav-logo.png':     { status: 200, contentType: 'image/png' },
+      'casaroberto.com/nav-logo.png': { status: 200, contentType: 'image/png' },
     });
     const html = `<nav><img src="https://casaroberto.com/nav-logo.png" alt="nav" /></nav>`;
     const result = await extractLogoUrl('https://casaroberto.com', html);
@@ -418,25 +568,28 @@ describe('extractLogoUrl — nav-img (source 8, logo URLs only)', () => {
 describe('extractLogoUrl — isValidImageUrl improvements', () => {
   it('rejects ICO content-type (image/x-icon)', async () => {
     mockFetchByUrl({
-      's2/favicons': { status: 200, contentType: 'image/x-icon' },
+      'casaroberto.com/images/logo.png': { status: 200, contentType: 'image/x-icon' },
     });
-    const result = await extractLogoUrl('https://casaroberto.com');
+    const html = `<script type="application/ld+json">{"@type":"Restaurant","logo":"https://casaroberto.com/images/logo.png"}</script>`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
     expect(result).toBeNull();
   });
 
   it('rejects ICO content-type (image/vnd.microsoft.icon)', async () => {
     mockFetchByUrl({
-      's2/favicons': { status: 200, contentType: 'image/vnd.microsoft.icon' },
+      'casaroberto.com/images/logo.png': { status: 200, contentType: 'image/vnd.microsoft.icon' },
     });
-    const result = await extractLogoUrl('https://casaroberto.com');
+    const html = `<script type="application/ld+json">{"@type":"Restaurant","logo":"https://casaroberto.com/images/logo.png"}</script>`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
     expect(result).toBeNull();
   });
 
   it('rejects when Content-Length < 200 (tracking pixel guard)', async () => {
     mockFetchByUrl({
-      's2/favicons': { status: 200, contentType: 'image/png', contentLength: 100 },
+      'casaroberto.com/images/logo.png': { status: 200, contentType: 'image/png', contentLength: 100 },
     });
-    const result = await extractLogoUrl('https://casaroberto.com');
+    const html = `<script type="application/ld+json">{"@type":"Restaurant","logo":"https://casaroberto.com/images/logo.png"}</script>`;
+    const result = await extractLogoUrl('https://casaroberto.com', html);
     expect(result).toBeNull();
   });
 });
@@ -445,17 +598,17 @@ describe('extractLogoUrl — isValidImageUrl improvements', () => {
 
 describe('extractLogoUrl — null fallback', () => {
   it('returns null when all sources fail', async () => {
-    mockFetchByUrl({
-      's2/favicons': { status: 404, contentType: 'text/html' },
-    });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(null, { status: 404, headers: { 'content-type': 'text/html' } }),
+    );
     const result = await extractLogoUrl('https://casaroberto.com');
     expect(result).toBeNull();
   });
 
   it('returns null when no rawHtml provided and all network sources fail', async () => {
-    mockFetchByUrl({
-      's2/favicons': { status: 404, contentType: 'text/html' },
-    });
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(null, { status: 404, headers: { 'content-type': 'text/html' } }),
+    );
     const result = await extractLogoUrl('https://casaroberto.com');
     expect(result).toBeNull();
   });
@@ -470,11 +623,10 @@ describe('extractLogoUrl — null fallback', () => {
 // ── Waterfall order guarantee ─────────────────────────────────────────────────
 
 describe('extractLogoUrl — waterfall stops at first valid source', () => {
-  it('JSON-LD stops the waterfall — apple-touch-icon and Google not called', async () => {
+  it('JSON-LD stops the waterfall — apple-touch-icon not called', async () => {
     const fetchSpy = mockFetchByUrl({
       'casaroberto.com/images/logo.png': { status: 200, contentType: 'image/png' },
       'casaroberto.com/apple-icon.png':  { status: 200, contentType: 'image/png' },
-      's2/favicons':                     { status: 200, contentType: 'image/png' },
     });
     const html = `
       <script type="application/ld+json">
@@ -484,10 +636,10 @@ describe('extractLogoUrl — waterfall stops at first valid source', () => {
     `;
     const result = await extractLogoUrl('https://casaroberto.com', html);
     expect(result).toBe('https://casaroberto.com/images/logo.png');
-    const googleCalled = fetchSpy.mock.calls.some(([u]) =>
-      typeof u === 'string' && u.includes('s2/favicons'),
+    const appleCalled = fetchSpy.mock.calls.some(([u]) =>
+      typeof u === 'string' && u.includes('apple-icon'),
     );
-    expect(googleCalled).toBe(false);
+    expect(appleCalled).toBe(false);
   });
 
   it('apple-touch-icon fires before og:image in the waterfall', async () => {

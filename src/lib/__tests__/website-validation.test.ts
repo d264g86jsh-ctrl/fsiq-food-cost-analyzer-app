@@ -224,7 +224,7 @@ describe('runValidation — plausible_unverified cases', () => {
 
     const r = await runValidation({ ...baseInput, website: 'https://casaroberto.com' });
 
-    expect(mockFetch).toHaveBeenCalledTimes(3);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
     expect(mockFetch.mock.calls[0]?.[0]).toBe('https://casaroberto.com/');
     expect(mockFetch.mock.calls[1]?.[0]).toBe('https://casaroberto.com/');
     expect(r.finalDecision).toBe('verified_restaurant');

@@ -37,6 +37,19 @@ Non-negotiable constraints derived from production incidents. Never override wit
 
 ---
 
+## Logo Quality
+
+**Favicons must never be used as the restaurant logo in the PDF.**
+
+- Google Favicon HD (`google.com/s2/favicons`) is explicitly banned as a logo source — it is a 128px favicon, not a brand logo. It has been removed from the extraction waterfall.
+- If no high-quality logo is found, `logoUrl` must be `null` — no logo in the PDF is always better than a favicon.
+- Apple touch icons below 180px (57, 76, 120, 152) are treated as favicons and rejected. Only apple-touch-icon ≥ 180px or with unknown size but Content-Length ≥ 5 KB is accepted.
+- PNG icons (`link[rel=icon][type=image/png]`) with Content-Length < 5000 bytes are treated as favicons and rejected.
+- Any URL containing `/favicon`, `favicon.`, `-favicon`, or `_favicon` is rejected by `isValidImageUrlStructure()` regardless of source.
+- These rules are enforced in `src/lib/website/logo-extractor.ts`.
+
+---
+
 ## User-Facing Labels
 
 **Never expose internal identifiers or raw system values in any visible UI element.**
