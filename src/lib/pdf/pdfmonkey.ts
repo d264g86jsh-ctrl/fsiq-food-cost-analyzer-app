@@ -229,8 +229,8 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
     // Initial response has status: "pending" and no URLs.
     const polled = await pollForDownloadUrl(apiKey, doc.id);
 
-    if (polled.urlType === 'download') {
-      console.warn(`[FSIQ PDF] preview_url unavailable — fell back to S3 download_url for document: ${doc.id}`);
+    if (polled.urlType === 'viewer') {
+      console.warn(`[FSIQ PDF] download_url unavailable — fell back to preview_url for document: ${doc.id}`);
     }
 
     return {
@@ -262,7 +262,7 @@ interface PdfMonkeyResponse {
   document?: {
     id: string;
     download_url?: string | null;
-    preview_url?: string | null;  // web viewer URL — preferred for storage and GHL
+    preview_url?: string | null;  // web viewer URL — fallback only; CTA links unreliable in cross-origin iframes
     status?: string;
   };
 }
@@ -346,7 +346,9 @@ async function ensureTemplateSafe(
 // ── Polling helper — waits for PDFMonkey to finish generating the document ────
 // PDFMonkey statuses: pending → generating → success | failure
 // Polls every 3 s, up to 10 attempts (30 s total).
-// Returns preview_url (web viewer) when available; falls back to download_url.
+// Returns download_url (direct S3 PDF binary) when available; falls back to preview_url.
+// Browser-native PDF rendering in iframes honours annotation links; the PDFMonkey
+// viewer (preview_url) does not reliably forward CTA clicks out of a cross-origin iframe.
 // FIX: status === 'success' with both URLs null returns error immediately (unrecoverable).
 
 async function pollForDownloadUrl(
@@ -370,13 +372,15 @@ async function pollForDownloadUrl(
       const status     = data?.document?.status;
       const viewerUrl  = data?.document?.preview_url ?? null;
       const s3Url      = data?.document?.download_url ?? null;
-      const resolvedUrl = viewerUrl ?? s3Url;
+      // Prefer download_url (S3 binary) — embeds natively in <iframe> with CTA links intact.
+      // Fall back to preview_url only if download_url is absent.
+      const resolvedUrl = s3Url ?? viewerUrl;
 
       if (status === 'success') {
         if (resolvedUrl) {
           return {
             downloadUrl: resolvedUrl,
-            urlType: viewerUrl ? 'viewer' : 'download',
+            urlType: s3Url ? 'download' : 'viewer',
             error: null,
           };
         }

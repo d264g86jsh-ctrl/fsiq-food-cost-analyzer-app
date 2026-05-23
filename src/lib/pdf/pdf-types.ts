@@ -113,5 +113,5 @@ export interface GeneratePdfResult {
   pdfDownloadUrl: string | null;
   pdfError: string | null;
   pdfRetryCount: number;
-  pdfUrlType: 'viewer' | 'download' | null; // 'viewer' = preview_url; 'download' = S3 fallback; null = no URL
+  pdfUrlType: 'viewer' | 'download' | null; // 'download' = S3 binary (primary, iframe CTA-safe); 'viewer' = preview_url fallback; null = no URL
 }
