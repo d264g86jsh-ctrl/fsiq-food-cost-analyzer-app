@@ -37,6 +37,7 @@ export const LIST_SELECT = {
   countryEligibility:   true,
   dqReason:             true,
   pdfStatus:            true,
+  pdfUrlType:           true,
   crmSyncStatus:        true,
   metaStatus:           true,
   workflowStage:        true,

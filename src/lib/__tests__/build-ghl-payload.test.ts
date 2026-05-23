@@ -54,6 +54,7 @@ function makeSubmission(overrides: Partial<Submission> = {}): Submission {
     pdfStatus: 'complete' as Submission['pdfStatus'],
     pdfMonkeyDocumentId: 'doc_abc',
     pdfDownloadUrl: 'https://cdn.pdfmonkey.io/report.pdf',
+    pdfUrlType: 'download',
     pdfError: null,
     pdfRetryCount: 0,
     emailStatus: null,

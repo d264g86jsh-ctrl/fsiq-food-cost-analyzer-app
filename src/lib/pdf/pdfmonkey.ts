@@ -224,8 +224,8 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
     // Initial response has status: "pending" and no URLs.
     const polled = await pollForDownloadUrl(apiKey, doc.id);
 
-    if (polled.urlType === 'download') {
-      console.warn(`[FSIQ PDF] preview_url unavailable — fell back to S3 download_url for document: ${doc.id}`);
+    if (polled.urlType === 'viewer') {
+      console.warn(`[FSIQ PDF] download_url unavailable — fell back to preview_url for document: ${doc.id}`);
     }
 
     return {
@@ -365,13 +365,16 @@ async function pollForDownloadUrl(
       const status     = data?.document?.status;
       const viewerUrl  = data?.document?.preview_url ?? null;
       const s3Url      = data?.document?.download_url ?? null;
-      const resolvedUrl = viewerUrl ?? s3Url;
+      // Prefer download_url (direct PDF binary) — browser-native PDF rendering
+      // honours annotation links. Fall back to preview_url only when download_url
+      // is absent (PDFMonkey has not yet uploaded to S3).
+      const resolvedUrl = s3Url ?? viewerUrl;
 
       if (status === 'success') {
         if (resolvedUrl) {
           return {
             downloadUrl: resolvedUrl,
-            urlType: viewerUrl ? 'viewer' : 'download',
+            urlType: s3Url ? 'download' : 'viewer',
             error: null,
           };
         }

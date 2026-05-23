@@ -152,6 +152,7 @@ model Submission {
   pdfStatus           PdfStatus?
   pdfMonkeyDocumentId String?
   pdfDownloadUrl      String?
+  pdfUrlType          String?   // 'download' = S3 binary (iframe-safe); 'viewer' = PDFMonkey preview page
   pdfError            String?
   pdfRetryCount       Int      @default(0)
 

@@ -161,16 +161,16 @@ describe('generatePdf — successful API call', () => {
     expect(r.pdfMonkeyDocumentId).toBe('doc_abc123');
   });
 
-  it('returns pdfDownloadUrl as web viewer URL (preview_url preferred over download_url)', async () => {
+  it('returns pdfDownloadUrl as S3 download URL (download_url preferred over preview_url)', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
     const r = await runWithTimers(() => generatePdf(baseInput));
-    expect(r.pdfDownloadUrl).toBe(VIEWER_URL);
+    expect(r.pdfDownloadUrl).toBe('https://cdn.pdfmonkey.io/doc_abc123.pdf');
   });
 
-  it('returns pdfUrlType viewer when preview_url is present', async () => {
+  it('returns pdfUrlType download when download_url is present', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
     const r = await runWithTimers(() => generatePdf(baseInput));
-    expect(r.pdfUrlType).toBe('viewer');
+    expect(r.pdfUrlType).toBe('download');
   });
 
   it('falls back to download_url when preview_url is absent', async () => {

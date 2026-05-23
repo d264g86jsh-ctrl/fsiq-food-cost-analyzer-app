@@ -345,6 +345,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       pdfStatus:           pdfResult.pdfStatus as PdfStatus,
       pdfMonkeyDocumentId: pdfResult.pdfMonkeyDocumentId,
       pdfDownloadUrl:      pdfResult.pdfDownloadUrl,
+      pdfUrlType:          pdfResult.pdfUrlType,
       pdfError:            pdfResult.pdfError,
       pdfRetryCount:       pdfResult.pdfRetryCount,
       workflowStage:       'pdf_generation',

@@ -218,6 +218,16 @@ export function SubmissionDetail({ submission }: SubmissionDetailProps) {
             </span>
           ) : '—'}
         </Row>
+        {submission.pdfDownloadUrl && submission.pdfUrlType === 'download' && (
+          <div className="mt-3">
+            <iframe
+              src={submission.pdfDownloadUrl}
+              title="PDF Preview"
+              className="w-full rounded-lg border border-[#eef0ea]"
+              style={{ height: '640px' }}
+            />
+          </div>
+        )}
         <Row label="PDF error">
           {submission.pdfError ? sanitizeErrorString(submission.pdfError) : '—'}
         </Row>
