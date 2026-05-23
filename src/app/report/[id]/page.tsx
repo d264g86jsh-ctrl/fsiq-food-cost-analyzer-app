@@ -37,7 +37,6 @@ export default async function ReportPage({
       <iframe
         src={`/api/report/${id}`}
         title="Your Food Cost Analysis Report"
-        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
         style={{
           display: 'block',
           width: '100%',

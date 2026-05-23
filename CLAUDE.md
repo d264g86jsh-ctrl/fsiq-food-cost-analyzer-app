@@ -98,10 +98,18 @@ AI does **not** include: savings math, spend bucket selection, DQ decisions, cas
 
 ## Hard Rule: Calendly CTA Links
 **The Calendly CTA buttons inside the PDF must always open in a new browser tab.**
-- The `/report/[id]` iframe must always have `sandbox="allow-scripts allow-same-origin allow-popups allow-forms"` so the browser permits new tab navigation from PDF annotation clicks
-- The `/api/report/[id]` proxy route must always include `Content-Security-Policy: sandbox allow-scripts allow-same-origin allow-popups allow-forms`
-- Never remove the `allow-popups` directive from either the iframe sandbox or the CSP header
-- Any change to the report page or proxy route must preserve this behavior
+- Chrome's native PDF viewer opens annotation links in new tabs by default — no sandbox or CSP manipulation is required
+- The `/report/[id]` iframe must NOT have a `sandbox` attribute — sandbox restricts the native PDF viewer and `allow-scripts + allow-same-origin` together causes Chrome to block the page entirely
+- The `/api/report/[id]` proxy route must NOT set a `Content-Security-Policy: sandbox` header — CSP sandbox on a binary PDF response is ignored by browsers and causes Chrome blocks if present
+- The CTA link behavior (`target="_blank"` in the PDF template annotation) is handled at the PDFMonkey template level — see `src/lib/pdf/pdfmonkey-template.ts`
+- See also: `docs/hard-rules.md` — browser compatibility rules
+
+## Hard Rule: Browser Compatibility
+**The report page and proxy route must work in Chrome, Safari, and Firefox without any browser security block.**
+- Never add `sandbox` to the report iframe — it triggers Chrome's "This page has been blocked" error
+- Never add `Content-Security-Policy: sandbox` to the proxy route response — it is ineffective on binary PDF content and can cause browser blocks
+- Any security header added to the proxy route or report page must be tested in Chrome before shipping
+- See `docs/hard-rules.md` for the full list of hard rules
 
 ## Claude Code Workflow
 1. **Inspect** — read relevant spec and existing code first

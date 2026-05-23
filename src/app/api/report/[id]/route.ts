@@ -29,7 +29,6 @@ export async function GET(
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'inline; filename="Food-Cost-Analyzer.pdf"',
       'Cache-Control': 'private, max-age=3600',
-      'Content-Security-Policy': 'sandbox allow-scripts allow-same-origin allow-popups allow-forms',
     },
   });
 }

@@ -1,5 +1,6 @@
 // Tests for /report/[id] page component.
-// Verifies iframe is configured correctly for inline PDF viewing and CTA popups.
+// Verifies iframe src points to the proxy route and no sandbox attribute is present.
+// sandbox on the iframe causes Chrome to block the page — it must not be set.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderToString } from 'react-dom/server';
@@ -52,20 +53,9 @@ describe('ReportPage', () => {
       expect(html).not.toContain('cdn.example.com');
     });
 
-    it('iframe sandbox includes allow-popups', async () => {
-      expect(await getHtml()).toContain('allow-popups');
-    });
-
-    it('iframe sandbox includes allow-scripts', async () => {
-      expect(await getHtml()).toContain('allow-scripts');
-    });
-
-    it('iframe sandbox includes allow-same-origin', async () => {
-      expect(await getHtml()).toContain('allow-same-origin');
-    });
-
-    it('iframe sandbox includes allow-forms', async () => {
-      expect(await getHtml()).toContain('allow-forms');
+    it('iframe has NO sandbox attribute — sandbox causes Chrome security block', async () => {
+      const html = await getHtml();
+      expect(html).not.toContain('sandbox');
     });
   });
 

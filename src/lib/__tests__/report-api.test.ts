@@ -1,5 +1,6 @@
 // Tests for GET /api/report/[id] proxy route.
 // Verifies PDF is served inline with correct headers — no download triggered.
+// CSP sandbox headers must NOT be present (they cause Chrome to block the page).
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
@@ -52,29 +53,16 @@ describe('GET /api/report/[id]', () => {
       expect(res.headers.get('Content-Type')).toBe('application/pdf');
     });
 
-    it('sets Content-Disposition with inline (no download)', async () => {
+    it('sets Content-Disposition with inline — no download', async () => {
       const res = await GET(makeRequest(), makeParams('test-id'));
       const cd = res.headers.get('Content-Disposition') ?? '';
       expect(cd).toContain('inline');
       expect(cd).not.toContain('attachment');
     });
 
-    it('CSP contains allow-popups', async () => {
+    it('does NOT set Content-Security-Policy — CSP sandbox causes Chrome block', async () => {
       const res = await GET(makeRequest(), makeParams('test-id'));
-      const csp = res.headers.get('Content-Security-Policy') ?? '';
-      expect(csp).toContain('allow-popups');
-    });
-
-    it('CSP contains allow-same-origin', async () => {
-      const res = await GET(makeRequest(), makeParams('test-id'));
-      const csp = res.headers.get('Content-Security-Policy') ?? '';
-      expect(csp).toContain('allow-same-origin');
-    });
-
-    it('CSP contains allow-scripts', async () => {
-      const res = await GET(makeRequest(), makeParams('test-id'));
-      const csp = res.headers.get('Content-Security-Policy') ?? '';
-      expect(csp).toContain('allow-scripts');
+      expect(res.headers.get('Content-Security-Policy')).toBeNull();
     });
 
     it('proxies the PDF bytes from upstream', async () => {
