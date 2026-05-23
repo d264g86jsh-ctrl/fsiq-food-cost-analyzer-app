@@ -6,6 +6,7 @@ import type { Submission } from '@prisma/client';
 import type { GhlHandoffPayload } from './ghl-types';
 import type { LeadStatus, CommunicationRoute } from './lead-status';
 import type { GhlTag } from './ghl-tags';
+import { buildReportUrl } from '@/lib/pdf/report-url';
 
 export function buildGhlPayload(
   submission: Submission,
@@ -52,7 +53,9 @@ export function buildGhlPayload(
     // PDF
     fsiq_pdf_mode:              submission.pdfMode ?? null,
     fsiq_pdf_status:            submission.pdfStatus ?? 'pending',
-    fsiq_pdf_url:               submission.pdfDownloadUrl ?? null,
+    fsiq_pdf_url:               submission.pdfDownloadUrl !== null
+                                  ? buildReportUrl(submission.id)
+                                  : null,
     fsiq_pdf_ready_at:          submission.pdfDownloadUrl !== null
                                   ? submission.updatedAt.toISOString()
                                   : null,

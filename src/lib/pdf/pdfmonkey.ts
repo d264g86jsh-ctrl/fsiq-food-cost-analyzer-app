@@ -16,7 +16,12 @@ const LOGO_VALIDATE_TIMEOUT_MS = 5_000;
 // Private IP patterns that PDFMonkey's network can't reach
 const PRIVATE_IP_PATTERNS = ['127.0.0.1', 'localhost', '192.168.', '10.0.', '172.16.'];
 
+// Version token changes whenever the patch logic changes, invalidating warm-instance caches.
+// Bump this string whenever patchPdfMonkeyTemplateHtml is updated so ensureTemplateSafe
+// re-fetches and re-PUTs even if the Vercel instance was not cold-started.
+const PATCH_VERSION = 'v2-target-blank';
 const patchedTemplateIds = new Set<string>();
+function patchCacheKey(templateId: string) { return `${PATCH_VERSION}:${templateId}`; }
 
 // ── Logo validation ───────────────────────────────────────────────────────────
 
@@ -277,7 +282,7 @@ async function ensureTemplateSafe(
   apiKey: string,
   templateId: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (patchedTemplateIds.has(templateId)) return { ok: true };
+  if (patchedTemplateIds.has(patchCacheKey(templateId))) return { ok: true };
 
   const templateUrl = `${PDFMONKEY_TEMPLATE_API_URL}/${templateId}`;
 
@@ -312,7 +317,7 @@ async function ensureTemplateSafe(
   }
 
   if (Object.keys(update).length === 0) {
-    patchedTemplateIds.add(templateId);
+    patchedTemplateIds.add(patchCacheKey(templateId));
     return { ok: true };
   }
 
@@ -334,7 +339,7 @@ async function ensureTemplateSafe(
   }
 
   console.log(`[FSIQ PDF TEMPLATE] safety patch applied: ${templateId}`);
-  patchedTemplateIds.add(templateId);
+  patchedTemplateIds.add(patchCacheKey(templateId));
   return { ok: true };
 }
 
