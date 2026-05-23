@@ -1,5 +1,10 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/db';
+
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: 'Food Cost Analyzer | FoodServiceIQ' };
+}
 
 export default async function ReportPage({
   params,
@@ -32,6 +37,7 @@ export default async function ReportPage({
       <iframe
         src={`/api/report/${id}`}
         title="Your Food Cost Analysis Report"
+        sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
         style={{
           display: 'block',
           width: '100%',

@@ -96,6 +96,13 @@ AI does **not** include: savings math, spend bucket selection, DQ decisions, cas
 - The only browser-safe way to embed a PDF inline without triggering a download is to proxy it through `src/app/api/report/[id]/route.ts`, which fetches the PDF bytes server-side and returns them with `Content-Type: application/pdf` and `Content-Disposition: inline`
 - The `/report/[id]` page iframe `src` must always point to `/api/report/[id]`, never to a raw PDFMonkey URL
 
+## Hard Rule: Calendly CTA Links
+**The Calendly CTA buttons inside the PDF must always open in a new browser tab.**
+- The `/report/[id]` iframe must always have `sandbox="allow-scripts allow-same-origin allow-popups allow-forms"` so the browser permits new tab navigation from PDF annotation clicks
+- The `/api/report/[id]` proxy route must always include `Content-Security-Policy: sandbox allow-scripts allow-same-origin allow-popups allow-forms`
+- Never remove the `allow-popups` directive from either the iframe sandbox or the CSP header
+- Any change to the report page or proxy route must preserve this behavior
+
 ## Claude Code Workflow
 1. **Inspect** — read relevant spec and existing code first
 2. **Propose** — write a plan, wait for approval before any code
