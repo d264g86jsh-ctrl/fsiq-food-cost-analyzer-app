@@ -37,6 +37,17 @@ Non-negotiable constraints derived from production incidents. Never override wit
 
 ---
 
+## User-Facing Labels
+
+**Never expose internal identifiers or raw system values in any visible UI element.**
+
+- The PDF filename shown in Chrome's native PDF viewer toolbar must always be `Food-Cost-Analyzer.pdf`.
+- This is controlled by the `Content-Disposition: inline; filename="Food-Cost-Analyzer.pdf"` header in `src/app/api/report/[id]/route.ts`.
+- Never use the submission ID, PDFMonkey document ID, or any raw system identifier as a filename.
+- The `filename` value in `Content-Disposition` must never be changed to a dynamic value derived from the submission.
+
+---
+
 ## AI Constraints
 
 **AI must never determine savings math or qualification outcomes.**

@@ -60,6 +60,12 @@ describe('GET /api/report/[id]', () => {
       expect(cd).not.toContain('attachment');
     });
 
+    it('sets Content-Disposition filename to Food-Cost-Analyzer.pdf', async () => {
+      const res = await GET(makeRequest(), makeParams('test-id'));
+      const cd = res.headers.get('Content-Disposition') ?? '';
+      expect(cd).toContain('filename="Food-Cost-Analyzer.pdf"');
+    });
+
     it('does NOT set Content-Security-Policy — CSP sandbox causes Chrome block', async () => {
       const res = await GET(makeRequest(), makeParams('test-id'));
       expect(res.headers.get('Content-Security-Policy')).toBeNull();
