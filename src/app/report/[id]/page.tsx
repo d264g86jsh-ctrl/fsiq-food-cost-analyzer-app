@@ -30,7 +30,7 @@ export default async function ReportPage({
       }}
     >
       <iframe
-        src={submission.pdfDownloadUrl}
+        src={`/api/report/${id}`}
         title="Your Food Cost Analysis Report"
         style={{
           display: 'block',

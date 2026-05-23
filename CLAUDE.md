@@ -88,6 +88,14 @@ AI does **not** include: savings math, spend bucket selection, DQ decisions, cas
 - **No Zapier.** The app backend calls PDFMonkey directly via `PDFMONKEY_API_KEY` and `PDFMONKEY_TEMPLATE_ID`.
 - PDF generation is its own phase — calls PDFMonkey, persists `pdfStatus`, `pdfMonkeyDocumentId`, `downloadUrl`, and retry state independently from the AI pipeline.
 
+## Hard Rule: PDF Delivery
+**PDFs must NEVER be downloaded by the user. All PDF delivery must be web-view only.**
+- The `/report/[id]` page must display the PDF inline in the browser — never trigger a download
+- No link, redirect, or response may have `Content-Disposition: attachment` or cause a file download
+- Using a raw S3/CDN `download_url` directly as an iframe `src` or redirect causes Chrome to download the file instead of displaying it — this is NOT acceptable
+- The only browser-safe way to embed a PDF inline without triggering a download is to proxy it through `src/app/api/report/[id]/route.ts`, which fetches the PDF bytes server-side and returns them with `Content-Type: application/pdf` and `Content-Disposition: inline`
+- The `/report/[id]` page iframe `src` must always point to `/api/report/[id]`, never to a raw PDFMonkey URL
+
 ## Claude Code Workflow
 1. **Inspect** — read relevant spec and existing code first
 2. **Propose** — write a plan, wait for approval before any code
