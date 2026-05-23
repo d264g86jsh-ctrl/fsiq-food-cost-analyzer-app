@@ -55,7 +55,7 @@ const safeTemplateBody = `
         <img src="data:image/png;base64,abc" alt="FoodServiceIQ">
       </div>
 </div>
-<a href="{{ calendlyUrl }}">Book</a>`;
+<a href="{{ calendlyUrl }}" target="_blank">Book</a>`;
 
 const unsafeTemplateBody = `
 <div class="cover-logos">
@@ -161,16 +161,16 @@ describe('generatePdf — successful API call', () => {
     expect(r.pdfMonkeyDocumentId).toBe('doc_abc123');
   });
 
-  it('returns pdfDownloadUrl as S3 download URL (download_url preferred over preview_url)', async () => {
+  it('returns pdfDownloadUrl as web viewer URL (preview_url preferred over download_url)', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
     const r = await runWithTimers(() => generatePdf(baseInput));
-    expect(r.pdfDownloadUrl).toBe('https://cdn.pdfmonkey.io/doc_abc123.pdf');
+    expect(r.pdfDownloadUrl).toBe(VIEWER_URL);
   });
 
-  it('returns pdfUrlType download when download_url is present', async () => {
+  it('returns pdfUrlType viewer when preview_url is present', async () => {
     const { generatePdf } = await import('../pdf/pdfmonkey');
     const r = await runWithTimers(() => generatePdf(baseInput));
-    expect(r.pdfUrlType).toBe('download');
+    expect(r.pdfUrlType).toBe('viewer');
   });
 
   it('falls back to download_url when preview_url is absent', async () => {
@@ -400,7 +400,7 @@ describe('PDFMonkey template safety patch', () => {
     expect(patchedHtml).toContain('.cover-operator-logo {');
     expect(patchedHtml).not.toContain('cover-operator-logo">\n      {% if hasLogo %}');
     expect(patchedHtml).not.toContain('15-minute-meeting-clone-1');
-    expect(patchedHtml).toContain('href="{{ calendlyUrl }}"');
+    expect(patchedHtml).toContain('href="{{ calendlyUrl }}" target="_blank"');
   });
 
   it('blocks PDF generation when the template safety check fails', async () => {

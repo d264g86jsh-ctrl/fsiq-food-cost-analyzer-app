@@ -28,6 +28,7 @@ export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatch
 
   next = injectLogoSafetyStyle(next);
   next = next.replaceAll(`href="${OLD_CALENDLY_URL}"`, 'href="{{ calendlyUrl }}"');
+  next = ensureCtaTargetBlank(next);
 
   next = next.replace(
     /<div class="cover-logos">\s*<div class="cover-operator-logo">[\s\S]*?{%\s*endif\s*%}\s*<\/div>\s*<div class="fsiq-cover-logo">/m,
@@ -38,6 +39,16 @@ export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatch
     html: next,
     changed: next !== html,
   };
+}
+
+// Adds target="_blank" to every <a> whose href is {{ calendlyUrl }}, so that
+// PDFMonkey's preview viewer can open the Calendly link in a new browser tab.
+// The negative lookahead on [^>]*target= makes the replacement idempotent.
+function ensureCtaTargetBlank(html: string): string {
+  return html.replace(
+    /href="{{ calendlyUrl }}"(?![^>]*target=)/g,
+    'href="{{ calendlyUrl }}" target="_blank"',
+  );
 }
 
 function injectLogoSafetyStyle(html: string): string {
