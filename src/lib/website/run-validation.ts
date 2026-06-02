@@ -668,6 +668,7 @@ function computeProtectedRestaurantContextScore(options: {
 
   const isProtectedOrThin =
     reachabilityStatus === 'blocked' ||
+    reachabilityStatus === 'inaccessible' ||
     reachabilityStatus === 'thin' ||
     (signals?.hasBotProtection ?? false);
 

@@ -99,9 +99,11 @@ export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
 
   const hasOrderingWidget = /toasttab|chownow|popmenu|olo\.com|squareup|doordash|ubereats|grubhub|slice\.life/.test(linkedAssetsLower);
 
+  const hasPhone = /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/.test(bodyText);
   const hasAddressPhoneBlock =
-    /\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}/.test(bodyText) &&
-    /\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b/.test(bodyText);
+    hasPhone &&
+    (/\b[A-Z]{2}\s+\d{5}(?:-\d{4})?\b/.test(bodyText) ||
+      /\b\d{1,6}\s+[A-Za-z0-9.' -]+(?:st|street|ave|avenue|rd|road|blvd|boulevard|dr|drive|ln|lane|way|hwy|highway|pkwy|parkway)\b/i.test(bodyText));
 
   const hasFoodImageAltText = imageAltTexts.some((text) =>
     /\b(pasta|burger|cocktail|entree|entrée|pizza|taco|sushi|bbq|barbecue|steak|seafood|oyster|brunch|dessert|sandwich|salad|wine|beer|dish|plate)\b/i.test(text),
