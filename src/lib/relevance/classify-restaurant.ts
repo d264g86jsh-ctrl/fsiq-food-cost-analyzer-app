@@ -171,6 +171,12 @@ export function computeRestaurantScores(signals: WebsiteSignals, domain: string)
   // Embedded restaurant commerce / reservation infrastructure.
   if (!hasStrongNonRestaurantExclusion && signals.hasReservationWidget) restaurantRaw += 12;
   if (!hasStrongNonRestaurantExclusion && signals.hasOrderingWidget) restaurantRaw += 10;
+  // Squarespace/Wix native ordering/menu widgets — strong CMS-specific signals
+  // Same weight as external vendor ordering (toasttab, chownow, etc.)
+  if (!hasStrongNonRestaurantExclusion && (signals.hasSquarespaceBizWidget || signals.hasWixRestaurantWidget)) restaurantRaw += 10;
+  // Google Maps embedded iframe — strong physical location signal
+  // Restaurants universally embed maps; SaaS companies almost never do
+  if (signals.hasGoogleMapsEmbed) restaurantRaw += 8;
 
   // Hours-of-operation pattern in body text — strong positive
   if (/(?:mon|tue|wed|thu|fri|sat|sun)[\s\S]{0,30}(?:\d{1,2}:\d{2}|\d{1,2}\s*(?:am|pm))/i.test(signals.bodyText)) {

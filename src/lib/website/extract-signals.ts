@@ -32,6 +32,9 @@ export interface WebsiteSignals {
   hasLinkInBio: boolean;
   hasAgeGate: boolean;
   hasCookieGate: boolean;
+  hasSquarespaceBizWidget: boolean;
+  hasWixRestaurantWidget: boolean;
+  hasGoogleMapsEmbed: boolean;
 }
 
 const RESTAURANT_SCHEMA_TYPES = [
@@ -140,6 +143,22 @@ export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
     html.includes('cookieconsent') ||
     /accept.*cookies|cookie.*policy|we use cookies/i.test(textLower);
 
+  const hasSquarespaceBizWidget =
+    html.includes('sqs-block-checkout') ||
+    html.includes('sqs-block-menu') ||
+    /data-block-type=["'][^"']*(?:commerce|menu)/i.test(html);
+
+  const hasWixRestaurantWidget =
+    htmlLower.includes('wixrestaurants') ||
+    htmlLower.includes('wix-restaurant') ||
+    htmlLower.includes('wix-menus');
+
+  const hasGoogleMapsEmbed =
+    htmlLower.includes('maps.google.com') ||
+    htmlLower.includes('maps.googleapis.com') ||
+    htmlLower.includes('google.com/maps/embed') ||
+    htmlLower.includes('openstreetmap.org');
+
   return {
     pageTitle,
     metaDescription,
@@ -172,6 +191,9 @@ export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
     hasLinkInBio,
     hasAgeGate,
     hasCookieGate,
+    hasSquarespaceBizWidget,
+    hasWixRestaurantWidget,
+    hasGoogleMapsEmbed,
   };
 }
 
