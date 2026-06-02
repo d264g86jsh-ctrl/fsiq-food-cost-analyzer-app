@@ -11,7 +11,17 @@ export interface RestaurantScores {
 
 // ── Strong restaurant positive signals ────────────────────────────────────────
 
-const STRONG_POSITIVE_NAV = ['menu', 'reservations', 'book a table', 'order online', 'catering', 'private dining'];
+const STRONG_POSITIVE_NAV = [
+  'menu', 'reservations', 'book a table', 'order online', 'catering', 'private dining',
+  'book now', 'reserve now', 'reserve a table', 'book your table', 'reserve your table',
+  'make a reservation', 'make a booking', 'reserve your spot', 'book your spot',
+  'book a seat', 'reserve a seat', 'request a table', 'request seating',
+  'check availability', 'find availability', 'book online', 'reserve online',
+  'online reservations', 'dining reservations', 'table reservations', 'book dining',
+  'reserve seating', 'book seating', 'schedule a reservation', 'get reservations',
+  'book a reservation', 'book a time', 'reserve a time',
+  'group reservations', 'group bookings', 'book groups',
+];
 
 const STRONG_POSITIVE_TEXT = [
   'dine-in', 'dine in', 'happy hour', 'brunch', 'tasting menu', 'prix fixe',
