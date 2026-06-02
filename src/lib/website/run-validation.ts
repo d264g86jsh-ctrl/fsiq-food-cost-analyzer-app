@@ -478,7 +478,12 @@ function applyDecisionRules(options: {
   if (negativeSignalScore >= 70 && restaurantSignalScore < 30 && googlePlacesScore < 30) {
     return { decision: 'clear_non_fit', reason: 'high_negative_score' };
   }
-  if (restaurantSignalScore >= 60 && negativeSignalScore < 20 && nationalChainScore < 85) {
+  // Tier 1: very high restaurant confidence tolerates moderate negative noise
+  if (restaurantSignalScore >= 80 && negativeSignalScore < 40 && nationalChainScore < 85) {
+    return { decision: 'verified_restaurant', reason: 'high_restaurant_score_strong' };
+  }
+  // Tier 2: standard verified threshold, tightened negative guard
+  if (restaurantSignalScore >= 60 && negativeSignalScore < 30 && nationalChainScore < 85) {
     return { decision: 'verified_restaurant', reason: 'high_restaurant_score' };
   }
   if (googlePlacesScore >= 80 && nationalChainScore < 50 && negativeSignalScore < 60) {

@@ -187,6 +187,9 @@ export function computeRestaurantScores(signals: WebsiteSignals, domain: string)
   // Google Maps embedded iframe — strong physical location signal
   // Restaurants universally embed maps; SaaS companies almost never do
   if (signals.hasGoogleMapsEmbed) restaurantRaw += 8;
+  // Price + food keyword proximity — structured menu indicator
+  // Guarded by hasStrongNonRestaurantExclusion to avoid food blogs, recipes
+  if (!hasStrongNonRestaurantExclusion && signals.hasPriceMenuPattern) restaurantRaw += 8;
 
   // Hours-of-operation pattern in body text — strong positive
   if (/(?:mon|tue|wed|thu|fri|sat|sun)[\s\S]{0,30}(?:\d{1,2}:\d{2}|\d{1,2}\s*(?:am|pm))/i.test(signals.bodyText)) {

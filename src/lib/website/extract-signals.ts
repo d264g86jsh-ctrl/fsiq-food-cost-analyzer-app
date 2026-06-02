@@ -35,6 +35,7 @@ export interface WebsiteSignals {
   hasSquarespaceBizWidget: boolean;
   hasWixRestaurantWidget: boolean;
   hasGoogleMapsEmbed: boolean;
+  hasPriceMenuPattern: boolean;
 }
 
 const RESTAURANT_SCHEMA_TYPES = [
@@ -159,6 +160,30 @@ export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
     htmlLower.includes('google.com/maps/embed') ||
     htmlLower.includes('openstreetmap.org');
 
+  const hasPriceMenuPattern = (() => {
+    const priceRegex = /\$\d{1,3}(?:\.\d{2})?/g;
+    const priceIndices: number[] = [];
+    let m: RegExpExecArray | null;
+    while ((m = priceRegex.exec(bodyText)) !== null) priceIndices.push(m.index);
+    if (priceIndices.length < 2) return false;
+    const foodKeywords = [
+      'dine-in', 'dine in', 'happy hour', 'brunch', 'tasting menu', 'prix fixe',
+      'appetizer', 'dessert', 'diner',
+      'pizza', 'pasta', 'burger', 'wine', 'lunch', 'dinner', 'steak', 'sushi',
+      'tacos', 'salad', 'cocktail', 'beer', 'chef', 'cuisine',
+    ];
+    const lowerBody = bodyText.toLowerCase();
+    let hits = 0;
+    for (const idx of priceIndices) {
+      const window = lowerBody.substring(Math.max(0, idx - 200), Math.min(lowerBody.length, idx + 200));
+      if (foodKeywords.some((kw) => window.includes(kw))) {
+        hits++;
+        if (hits >= 2) return true;
+      }
+    }
+    return false;
+  })();
+
   return {
     pageTitle,
     metaDescription,
@@ -194,6 +219,7 @@ export function extractSignals(html: string, pageUrl: string): WebsiteSignals {
     hasSquarespaceBizWidget,
     hasWixRestaurantWidget,
     hasGoogleMapsEmbed,
+    hasPriceMenuPattern,
   };
 }
 
