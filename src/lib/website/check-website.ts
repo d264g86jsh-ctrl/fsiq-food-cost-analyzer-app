@@ -128,13 +128,7 @@ function buildFetchCandidates(url: string): string[] {
 }
 
 async function fetchWithTimeoutRetry(url: string): Promise<Response> {
-  try {
-    return await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
-  } catch (err) {
-    const errorType = classifyFetchError(err);
-    if (errorType !== 'timeout' && errorType !== 'abort') throw err;
-    return fetchWithTimeout(url, RETRY_TIMEOUT_MS);
-  }
+  return fetchWithTimeout(url, FETCH_TIMEOUT_MS);
 }
 
 async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {

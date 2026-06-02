@@ -216,17 +216,17 @@ describe('runValidation — plausible_unverified cases', () => {
     expect(r.manualReviewRequired).toBe(true);
   });
 
-  it('timeout retry succeeds → validates retry response', async () => {
+  it('https timeout falls back to http variant (no same-URL retry)', async () => {
     const err = Object.assign(new Error('AbortError'), { name: 'AbortError' });
     mockFetch
       .mockRejectedValueOnce(err)
-      .mockResolvedValueOnce(makeHtmlResponse(RESTAURANT_HTML, 200, 'https://casaroberto.com/'));
+      .mockResolvedValueOnce(makeHtmlResponse(RESTAURANT_HTML, 200, 'http://casaroberto.com/'));
 
     const r = await runValidation({ ...baseInput, website: 'https://casaroberto.com' });
 
     expect(mockFetch).toHaveBeenCalledTimes(2);
     expect(mockFetch.mock.calls[0]?.[0]).toBe('https://casaroberto.com/');
-    expect(mockFetch.mock.calls[1]?.[0]).toBe('https://casaroberto.com/');
+    expect(mockFetch.mock.calls[1]?.[0]).toBe('http://casaroberto.com/');
     expect(r.finalDecision).toBe('verified_restaurant');
     expect(r.httpStatus).toBe(200);
   });
@@ -236,13 +236,13 @@ describe('runValidation — plausible_unverified cases', () => {
     mockFetch
       .mockRejectedValueOnce(err)
       .mockRejectedValueOnce(err)
-      .mockResolvedValueOnce(makeHtmlResponse(RESTAURANT_HTML, 200, 'http://casaroberto.com/'));
+      .mockResolvedValueOnce(makeHtmlResponse(RESTAURANT_HTML, 200, 'https://www.casaroberto.com/'));
 
     const r = await runValidation({ ...baseInput, website: 'https://casaroberto.com' });
 
     expect(mockFetch.mock.calls[0]?.[0]).toBe('https://casaroberto.com/');
-    expect(mockFetch.mock.calls[1]?.[0]).toBe('https://casaroberto.com/');
-    expect(mockFetch.mock.calls[2]?.[0]).toBe('http://casaroberto.com/');
+    expect(mockFetch.mock.calls[1]?.[0]).toBe('http://casaroberto.com/');
+    expect(mockFetch.mock.calls[2]?.[0]).toBe('https://www.casaroberto.com/');
     expect(r.finalDecision).toBe('verified_restaurant');
   });
 
