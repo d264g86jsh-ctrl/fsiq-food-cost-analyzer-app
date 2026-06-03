@@ -56,6 +56,7 @@ export const CONCEPT_TYPE_OPTIONS = [
 ] as const;
 
 export const LOCATIONS_OPTIONS = [
+  'Single location',
   '2-4 locations',
   '5-10 locations',
   '10+ locations',
