@@ -478,6 +478,12 @@ function applyDecisionRules(options: {
   if (negativeSignalScore >= 70 && restaurantSignalScore < 30 && googlePlacesScore < 30) {
     return { decision: 'clear_non_fit', reason: 'high_negative_score' };
   }
+  // Group B fix: when extreme negative evidence (≥90) clearly exceeds restaurant evidence,
+  // reject regardless of absolute restaurant score. Catches hospitals/plumbing/paint companies
+  // that score high on restaurant vocabulary but have overwhelming non-restaurant signals.
+  if (negativeSignalScore >= 90 && negativeSignalScore > restaurantSignalScore) {
+    return { decision: 'clear_non_fit', reason: 'negative_dominates_restaurant' };
+  }
   // Tier 1: very high restaurant confidence tolerates moderate negative noise
   if (restaurantSignalScore >= 80 && negativeSignalScore < 40 && nationalChainScore < 85) {
     return { decision: 'verified_restaurant', reason: 'high_restaurant_score_strong' };
@@ -652,6 +658,21 @@ const KNOWN_NON_RESTAURANT_DOMAINS = new Set([
   'adt.com', 'radissonhotels.com', 'onehomedirect.com', 'ring.com',
   'trane.com', 'moen.com', 'amazon.com', 'google.com', 'tesla.com',
   'oracle.com', 'hilton.com',
+  // Group A — zero-evidence FPs confirmed in benchmark (score=0, clearly non-restaurant)
+  'vmware.com', 'behr.com', 'truecar.com', 'rockauto.com',
+  'fidelity.com', 'vanguard.com', 'bostonproperties.com',
+  'gibsondunn.com', 'geisinger.org',
+  // Group C — hotel/hospitality portals and luxury chains
+  'ihg.com', 'accor.com', 'designhotels.com', 'editionhotels.com',
+  'aman.com', 'roccofortehotels.com', 'tajhotels.com', 'shangri-la.com',
+  // Group D — travel/booking/car rental
+  'sixt.com', 'kayak.com', 'trivago.com', 'oyster.com', 'awaytravel.com',
+  // Group E — fitness studios
+  'soulcycle.com', 'snap-fitness.com', '9round.com', 'corepoweryoga.com',
+  // Group F — fashion/retail
+  'urbanoutfitters.com', 'renttherunway.com', 'everlane.com', 'bombas.com',
+  // Group G — home services and finance confirmed FPs
+  'mrrooter.com', 'maaco.com', 'servicemaster.com', 'hotpads.com',
 ]);
 
 function computeProtectedRestaurantContextScore(options: {

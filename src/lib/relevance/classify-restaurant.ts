@@ -75,6 +75,16 @@ const STRONG_NEGATIVE_TEXT = [
   'auto repair', 'vehicle repair', 'car dealership', 'collision center',
   'hotel rooms', 'book your stay', 'guest rooms', 'home services',
   'plumbing', 'hvac', 'roofing', 'remodeling', 'contractor',
+  // Group C — hotel/hospitality brands (in-hotel dining inflates restaurant score)
+  'hotel collection', 'hotel group', 'hotel brand', 'nightly rate', 'book a room',
+  // Group D — car rental / travel (booking UX fires same signals as restaurant reservations)
+  'car rental', 'rental car', 'rent a car',
+  // Group E — fitness / wellness studios (class booking UX mirrors restaurant reservations)
+  'fitness class', 'yoga class', 'workout class', 'gym membership',
+  // Group F — e-commerce / retail (furniture dining vocabulary, fashion editorial)
+  'add to cart', 'add to bag', 'return policy', 'free returns',
+  // Group G — home services / cleaning
+  'maid service', 'cleaning service', 'damage restoration',
 ];
 
 const STRONG_NEGATIVE_NAV = ['/pricing', '/demo', '/enterprise', '/solutions', '/integrations', '/docs', '/developers'];
@@ -89,6 +99,14 @@ const MODERATE_NEGATIVE_TEXT = [
   'urgent care', 'primary care', 'therapy', 'brokerage', 'listing',
   'realtor', 'wealth management', 'payroll', 'audit', 'tire', 'brake',
   'oil change', 'reservations hotel', 'check-in', 'amenities',
+  // Group C — hotel nuance signals
+  'room type', 'check-out date',
+  // Group D — travel/rental additional signals
+  'pick-up location', 'flight search',
+  // Group E — fitness studio nuance
+  'class pass', 'unlimited classes', 'class schedule',
+  // Group F — retail/e-commerce nuance
+  'free shipping', 'size guide', 'new arrivals',
 ];
 
 export function computeRestaurantScores(signals: WebsiteSignals, domain: string): RestaurantScores {

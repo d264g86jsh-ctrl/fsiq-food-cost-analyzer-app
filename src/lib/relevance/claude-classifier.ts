@@ -114,6 +114,12 @@ export function isAmbiguous(options: {
   if (nationalChainScore >= 85) return false;
   if (reachabilityStatus === 'invalid') return false;
 
+  // Group A fix: no positive restaurant evidence → not worth Claude's time.
+  // Sites with score < 15 have virtually no restaurant signals; calling Claude
+  // wastes tokens and adds latency without improving accuracy. The fallback
+  // (plausible_unverified or rule-based clear_non_fit) is the correct outcome.
+  if (restaurantSignalScore < 15 && negativeSignalScore < 25) return false;
+
   // Clear non-fit threshold met
   if (negativeSignalScore >= 70 && restaurantSignalScore < 30 && googlePlacesScore < 30) return false;
 

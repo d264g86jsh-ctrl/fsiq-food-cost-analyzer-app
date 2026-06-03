@@ -1,0 +1,447 @@
+{
+  "generatedAt": "2026-06-03T20:49:20.607198Z",
+  "totalFalsePositives": 50,
+  "rootCauseGroups": [
+    {
+      "id": "A",
+      "name": "Zero-evidence sites sent to Claude tiebreaker",
+      "count": 15,
+      "description": "score < 15 AND neg < 30 \u2014 no restaurant evidence, no disqualifying evidence, so Claude is called. Claude returns plausible_unverified because it can't disprove either way.",
+      "examples": [
+        {
+          "url": "https://www.geisinger.org",
+          "score": 0,
+          "neg": 0,
+          "type": "healthcare"
+        },
+        {
+          "url": "https://www.gibsondunn.com",
+          "score": 0,
+          "neg": 0,
+          "type": "law_firm"
+        },
+        {
+          "url": "https://www.vmware.com",
+          "score": 0,
+          "neg": 20,
+          "type": "software"
+        },
+        {
+          "url": "https://www.truecar.com",
+          "score": 0,
+          "neg": 0,
+          "type": "auto_marketplace"
+        },
+        {
+          "url": "https://www.behr.com",
+          "score": 0,
+          "neg": 0,
+          "type": "paint_manufacturer"
+        },
+        {
+          "url": "https://www.sixt.com",
+          "score": 0,
+          "neg": 0,
+          "type": "car_rental"
+        },
+        {
+          "url": "https://www.urbanoutfitters.com",
+          "score": 0,
+          "neg": 0,
+          "type": "fashion_retail"
+        },
+        {
+          "url": "https://www.snap-fitness.com",
+          "score": 0,
+          "neg": 0,
+          "type": "gym"
+        },
+        {
+          "url": "https://www.cedars-sinai.org",
+          "score": 0,
+          "neg": 20,
+          "type": "hospital"
+        },
+        {
+          "url": "https://www.9round.com",
+          "score": 0,
+          "neg": 20,
+          "type": "gym"
+        },
+        {
+          "url": "https://www.apartments.com",
+          "score": 0,
+          "neg": 20,
+          "type": "real_estate"
+        },
+        {
+          "url": "https://www.fidelity.com",
+          "score": 0,
+          "neg": 20,
+          "type": "finance"
+        },
+        {
+          "url": "https://www.maaco.com",
+          "score": 0,
+          "neg": 20,
+          "type": "auto_body"
+        },
+        {
+          "url": "https://www.rockauto.com",
+          "score": 0,
+          "neg": 20,
+          "type": "auto_parts"
+        },
+        {
+          "url": "https://www.kayak.com",
+          "score": 0,
+          "neg": 20,
+          "type": "travel_search"
+        }
+      ],
+      "proposedFix": {
+        "type": "threshold_change",
+        "description": "Raise isAmbiguous minimum: don't invoke Claude when restaurantSignalScore < 15. Return plausible_unverified_fallback immediately. Sites with zero positive evidence should not spend tokens on Claude and should not get a 'pass' they haven't earned.",
+        "location": "src/lib/relevance/claude-classifier.ts \u2014 isAmbiguous()",
+        "change": "Add condition: if restaurantSignalScore < 15, return false (not ambiguous \u2014 just unknown)",
+        "estimatedRescue": 15,
+        "riskLevel": "low",
+        "riskNote": "A restaurant with a completely dead website (score=0) would stop getting Claude's tiebreaker. But those sites already get plausible_unverified_fallback anyway \u2014 no behavior change for legitimate restaurants."
+      }
+    },
+    {
+      "id": "B",
+      "name": "High neg + high score conflict \u2014 no DQ rule fires",
+      "count": 7,
+      "description": "score >= 40 AND neg >= 40. Current clear_non_fit rules only fire when neg is HIGH and score is LOW. These sites have genuinely high restaurant vocabulary (hotels with restaurants, 'reserve your car' UX) AND high negative vocabulary \u2014 no rule covers the conflict.",
+      "examples": [
+        {
+          "url": "https://www.budget.com",
+          "score": 94,
+          "neg": 90,
+          "why": "Car rental: 'reservations' fires +15 everywhere in booking UX"
+        },
+        {
+          "url": "https://www.ihg.com",
+          "score": 92,
+          "neg": 80,
+          "why": "Hotel chain: genuine restaurants inside hotels"
+        },
+        {
+          "url": "https://nyulangone.org",
+          "score": 84,
+          "neg": 100,
+          "why": "Hospital: cafeteria/dining programs"
+        },
+        {
+          "url": "https://www.mrrooter.com",
+          "score": 83,
+          "neg": 100,
+          "why": "Plumbing: 'book now', hours, phone identical to restaurant"
+        },
+        {
+          "url": "https://www.sherwin-williams.com",
+          "score": 66,
+          "neg": 100,
+          "why": "Paint: 'find your color' + store hours + phone"
+        },
+        {
+          "url": "https://www.merrymaids.com",
+          "score": 53,
+          "neg": 40,
+          "why": "Cleaning service: 'book', hours, phone, address"
+        },
+        {
+          "url": "https://www.crateandbarrel.com",
+          "score": 41,
+          "neg": 60,
+          "why": "Furniture: 'dining table', 'bar cart', 'wine rack'"
+        }
+      ],
+      "proposedFix": {
+        "type": "new_decision_rule",
+        "description": "Add rule: if negativeSignalScore > restaurantSignalScore AND negativeSignalScore >= 70 \u2192 clear_non_fit. When negative evidence EXCEEDS restaurant evidence by a clear margin and negative score is high, the site should be rejected regardless of absolute restaurant score.",
+        "location": "src/lib/website/run-validation.ts \u2014 applyDecisionRules()",
+        "change": "Insert before verified_restaurant rules: if (negativeSignalScore >= 70 && negativeSignalScore > restaurantSignalScore) \u2192 clear_non_fit",
+        "estimatedRescue": 4,
+        "riskLevel": "medium",
+        "riskNote": "A bakery/brewery that has 'wholesale' (+20 neg) plus is 'booking a table' might have neg=70, score=80 \u2014 neg < score so rule would not fire. But must test carefully."
+      }
+    },
+    {
+      "id": "C",
+      "name": "Hotels/luxury hospitality \u2014 restaurant vocabulary from in-hotel dining",
+      "count": 8,
+      "description": "score 27-60, neg 20-50. Luxury hotel chains (IHG, Rocco Forte, Taj, Shangri-La, Aman, Edition, Accor, Design Hotels) score high because they genuinely describe multiple restaurants, bars, chefs, tasting menus. STRONG_NEGATIVE_TEXT catches 'hotel rooms', 'book your stay', 'guest rooms' \u2014 but restaurant vocabulary overwhelms.",
+      "examples": [
+        {
+          "url": "https://www.roccofortehotels.com",
+          "score": 60,
+          "neg": 30
+        },
+        {
+          "url": "https://www.tajhotels.com",
+          "score": 59,
+          "neg": 30
+        },
+        {
+          "url": "https://www.shangri-la.com",
+          "score": 50,
+          "neg": 20
+        },
+        {
+          "url": "https://www.aman.com",
+          "score": 30,
+          "neg": 30
+        },
+        {
+          "url": "https://www.editionhotels.com",
+          "score": 30,
+          "neg": 20
+        },
+        {
+          "url": "https://www.accor.com",
+          "score": 27,
+          "neg": 50
+        },
+        {
+          "url": "https://www.designhotels.com",
+          "score": 27,
+          "neg": 40
+        }
+      ],
+      "proposedFix": {
+        "type": "new_negative_keywords",
+        "description": "Add hotel-brand signals to STRONG_NEGATIVE_TEXT (+20): 'hotel collection', 'resort collection', 'hotel group', 'hotel brand', 'number of rooms', 'property portfolio', 'loyalty program', 'points redemption'. Also add moderate negatives (+10): 'book a room', 'check-in date', 'check-out date', 'nightly rate', 'room type'.",
+        "location": "src/lib/relevance/classify-restaurant.ts \u2014 STRONG_NEGATIVE_TEXT, MODERATE_NEGATIVE_TEXT",
+        "estimatedRescue": 6,
+        "riskLevel": "low",
+        "riskNote": "A standalone restaurant in a hotel (e.g., a restaurant that happens to mention 'loyalty program' in a partnership) is edge case. But 'nightly rate', 'check-in date', 'book a room' are unambiguous hotel signals."
+      }
+    },
+    {
+      "id": "D",
+      "name": "Travel/car rental \u2014 'reserve' UX fires STRONG_POSITIVE_NAV",
+      "count": 3,
+      "description": "score 18-48, neg 20-30. budget.com, avis.com, awaytravel.com, trivago.com, oyster.com (already counted in B and C). Core problem: 'reserve your car', 'book now', 'reservations' in car rental booking UX fires the same +15 nav signal as a restaurant reservation CTA.",
+      "examples": [
+        {
+          "url": "https://www.awaytravel.com",
+          "score": 48,
+          "neg": 30,
+          "why": "Luggage brand: 'away' + 'book' for try-before-buy"
+        },
+        {
+          "url": "https://www.trivago.com",
+          "score": 24,
+          "neg": 20,
+          "why": "Hotel search: 'dining', 'restaurant', 'bar' on hotel pages"
+        },
+        {
+          "url": "https://www.avis.com",
+          "score": 18,
+          "neg": 30,
+          "why": "'Reserve', 'pick up location', hours, phone"
+        }
+      ],
+      "proposedFix": {
+        "type": "new_negative_keywords",
+        "description": "Add to STRONG_NEGATIVE_TEXT (+20): 'car rental', 'rental car', 'rent a car', 'reserve your vehicle', 'rental agreement', 'luggage', 'baggage'. Add to MODERATE_NEGATIVE_TEXT (+10): 'pick-up location', 'drop-off', 'free cancellation' (travel context).",
+        "estimatedRescue": 3,
+        "riskLevel": "low"
+      }
+    },
+    {
+      "id": "E",
+      "name": "Fitness/wellness studios \u2014 class booking UX fires same signals as restaurant",
+      "count": 4,
+      "description": "score 0-25, neg 0-30. SoulCycle, CorePower Yoga, Pure Barre, Snap Fitness, 9Round. 'Reserve a spot', 'book a class', hours, phone \u2014 identical reservation pattern to restaurants. The fitness industry gap in negative signals.",
+      "examples": [
+        {
+          "url": "https://www.purebarre.com",
+          "score": 25,
+          "neg": 30
+        },
+        {
+          "url": "https://www.ymca.org",
+          "score": 14,
+          "neg": 30
+        },
+        {
+          "url": "https://www.corepoweryoga.com",
+          "score": 10,
+          "neg": 30
+        },
+        {
+          "url": "https://www.soulcycle.com",
+          "score": 0,
+          "neg": 30
+        }
+      ],
+      "proposedFix": {
+        "type": "new_negative_keywords",
+        "description": "Add to STRONG_NEGATIVE_TEXT (+20): 'fitness class', 'yoga class', 'workout class', 'personal training', 'gym membership', 'class schedule'. Add to MODERATE_NEGATIVE_TEXT (+10): 'instructor', 'studio membership', 'class pass', 'unlimited classes'.",
+        "estimatedRescue": 4,
+        "riskLevel": "low",
+        "riskNote": "Restaurants rarely mention 'fitness class' or 'gym membership'. 'Instructor' might appear on cooking class pages \u2014 guard with context."
+      }
+    },
+    {
+      "id": "F",
+      "name": "Fashion/retail/home furnishings \u2014 furniture 'dining' and retail 'book appointment'",
+      "count": 5,
+      "description": "score 6-51, neg 20-60. Pottery Barn, Crate&Barrel, West Elm score high because 'dining table', 'bar cart', 'wine rack', 'brunch collection' fire restaurant keywords. Fashion sites (Rent the Runway, Everlane, Patagonia, Bombas, Urban Outfitters) have lower scores but leak through Claude.",
+      "examples": [
+        {
+          "url": "https://www.potterybarn.com",
+          "score": 51,
+          "neg": 20,
+          "why": "'dining', 'bar', 'brunch' in furniture product names"
+        },
+        {
+          "url": "https://www.westelm.com",
+          "score": 38,
+          "neg": 30,
+          "why": "Same furniture vocabulary"
+        },
+        {
+          "url": "https://www.renttherunway.com",
+          "score": 26,
+          "neg": 20
+        },
+        {
+          "url": "https://www.everlane.com",
+          "score": 6,
+          "neg": 30
+        },
+        {
+          "url": "https://bombas.com",
+          "score": 32,
+          "neg": 30
+        }
+      ],
+      "proposedFix": {
+        "type": "new_negative_keywords",
+        "description": "Add to STRONG_NEGATIVE_TEXT (+20): 'add to bag', 'add to cart', 'free returns', 'return policy', 'size guide'. Add to MODERATE_NEGATIVE_TEXT (+10): 'free shipping', 'new arrivals', 'shop the collection', 'limited edition'.",
+        "estimatedRescue": 5,
+        "riskLevel": "low",
+        "riskNote": "Restaurant merch stores could have 'add to cart' \u2014 but those are clearly restaurant sites already scored high on other signals."
+      }
+    },
+    {
+      "id": "G",
+      "name": "Remaining miscellaneous",
+      "count": 8,
+      "description": "Home services (Merry Maids, Molly Maid, ServiceMaster), real estate (HotPads, Boston Properties), finance (Vanguard), travel (Oyster reviews), home products (Kohler, Sherwin-Williams partially covered in B). Many already have moderate negative signals but score leaks through Claude at low scores.",
+      "examples": [
+        {
+          "url": "https://www.molly-maid.com",
+          "score": 38,
+          "neg": 20
+        },
+        {
+          "url": "https://www.hotpads.com",
+          "score": 32,
+          "neg": 30
+        },
+        {
+          "url": "https://www.servicemaster.com",
+          "score": 32,
+          "neg": 60
+        },
+        {
+          "url": "https://www.vanguard.com",
+          "score": 24,
+          "neg": 60
+        },
+        {
+          "url": "https://www.bostonproperties.com",
+          "score": 5,
+          "neg": 60
+        },
+        {
+          "url": "https://www.kohler.com",
+          "score": 29,
+          "neg": 60
+        },
+        {
+          "url": "https://www.oyster.com",
+          "score": 59,
+          "neg": 20
+        },
+        {
+          "url": "https://www.aamco.com",
+          "score": 8,
+          "neg": 30
+        }
+      ],
+      "proposedFix": {
+        "type": "combined",
+        "description": "Combination: Fix A (isAmbiguous threshold) catches the zero-score ones. Fix B (neg > score rule) catches high-neg ones. Add 'maid service', 'cleaning service', 'damage restoration' to STRONG_NEGATIVE_TEXT for home services. Add specific domains (oyster.com is a hotel review site \u2014 add to KNOWN_NON_RESTAURANT_DOMAINS).",
+        "estimatedRescue": 6
+      }
+    }
+  ],
+  "proposedRescueSummary": {
+    "A_zeroEvidence_isAmbigiousThreshold": {
+      "fixes": 15,
+      "risk": "low"
+    },
+    "B_highNegHighScore_newRule": {
+      "fixes": 4,
+      "risk": "medium"
+    },
+    "C_hotels_newNegKeywords": {
+      "fixes": 6,
+      "risk": "low"
+    },
+    "D_carRental_newNegKeywords": {
+      "fixes": 3,
+      "risk": "low"
+    },
+    "E_fitness_newNegKeywords": {
+      "fixes": 4,
+      "risk": "low"
+    },
+    "F_retail_newNegKeywords": {
+      "fixes": 5,
+      "risk": "low"
+    },
+    "G_misc_combined": {
+      "fixes": 6,
+      "risk": "low"
+    }
+  },
+  "totalProposedRescues": 43,
+  "expectedFpAfterFixes": 7,
+  "residualFps": [
+    {
+      "url": "https://www.budget.com",
+      "note": "score=94 overwhelms neg=90 \u2014 'reservations' fires too broadly in car rental UX. Might need domain list."
+    },
+    {
+      "url": "https://www.ihg.com",
+      "note": "Hotel chain with genuine restaurants \u2014 edge case of who 'owns' the restaurant"
+    },
+    {
+      "url": "https://www.shangri-la.com",
+      "note": "Same as IHG \u2014 luxury hotel group with extensive F&B"
+    },
+    {
+      "url": "https://www.tajhotels.com",
+      "note": "Same class"
+    },
+    {
+      "url": "https://www.roccofortehotels.com",
+      "note": "score=60 via Tier 2 \u2014 hotel neg keywords don't fully counter restaurant vocabulary"
+    },
+    {
+      "url": "https://www.oyster.com",
+      "note": "Hotel review site scoring 59 \u2014 'dining', 'restaurant', 'bar' from hotel reviews"
+    },
+    {
+      "url": "https://www.patagonia.com",
+      "note": "Outdoor apparel with caf\u00e9/food partnerships \u2014 genuinely ambiguous"
+    }
+  ]
+}
