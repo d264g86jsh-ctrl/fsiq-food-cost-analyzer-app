@@ -1,6 +1,22 @@
 #!/usr/bin/env npx tsx
 // Runs post-overhaul validation analysis and writes Phase 4 artifacts.
 
+// Load .env.local so BROWSERLESS_API_KEY and other vars are available when
+// running as a standalone script (tsx does not auto-load Next.js env files).
+import { readFileSync } from 'node:fs';
+try {
+  const envLocal = readFileSync(new URL('../.env.local', import.meta.url), 'utf8');
+  for (const line of envLocal.split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eqIdx = trimmed.indexOf('=');
+    if (eqIdx === -1) continue;
+    const key = trimmed.slice(0, eqIdx).trim();
+    const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+    if (key && !(key in process.env)) process.env[key] = val;
+  }
+} catch { /* .env.local is optional */ }
+
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { FinalDecision, ValidationResult } from '../src/lib/website/types';
