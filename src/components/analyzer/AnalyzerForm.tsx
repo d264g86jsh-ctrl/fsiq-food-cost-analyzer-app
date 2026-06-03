@@ -398,7 +398,7 @@ export function AnalyzerForm() {
                 value={formData.annual_food_spend ?? ''}
                 onChange={(e) => update('annual_food_spend', e.target.value)}
               />
-              <p className="text-[11px] text-[#64748b] mt-1">Enter your total annual food &amp; beverage spend</p>
+              <p className="text-[11px] text-[#64748b] mt-1">Enter your annual distributor spend</p>
             </FormField>
           </div>
         )}
@@ -432,7 +432,7 @@ export function AnalyzerForm() {
               </select>
             </FormField>
 
-            <FormField label="Top SKUs / spend categories" required>
+            <FormField label="What food items do you purchase the most each year?" required>
               <textarea
                 value={formData.top_skus ?? ''}
                 onChange={(e) => update('top_skus', e.target.value)}

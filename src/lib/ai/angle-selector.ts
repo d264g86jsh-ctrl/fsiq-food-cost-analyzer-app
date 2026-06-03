@@ -62,7 +62,10 @@ export function selectNarrativeAngle(input: AiResearchInput): NarrativeAngleId {
 export function hasMultiUnitModifier(locations: string): boolean {
   if (!locations) return false;
   const s = locations.toLowerCase();
-  return s.includes('2') || s.includes('5+') || s.includes('5 or more') || s.includes('multiple');
+  // All current form options ('2-4', '5-10', '10+') are multi-unit.
+  // 'single' is the only non-multi-unit value (legacy/backward compat).
+  if (s.includes('single')) return false;
+  return s.length > 0;
 }
 
 export function buildAngleContext(input: AiResearchInput): AngleContext {

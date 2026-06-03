@@ -181,7 +181,9 @@ export function computeSkuMod(topSkus: string): number {
 
 export function parseLocationCategory(raw: string): LocationCategory {
   const s = raw.toLowerCase().trim();
-  if (s === '5+' || s.includes('5+') || s.includes('5 or more') || s.includes('five or more') || s.includes('five+')) return '5+';
+  // New form options '5-10 locations' and '10+ locations' both map to '5+' tier
+  if (s === '5+' || s.includes('5+') || s.includes('5 or more') || s.includes('five or more') || s.includes('five+')
+    || s.includes('5-10') || s.includes('5–10') || s.includes('10+') || s.includes('10 or more')) return '5+';
   if (
     s === '2-4' || s === '2–4' ||
     s.includes('2-4') || s.includes('2–4') ||

@@ -90,13 +90,13 @@ describe('canAdvanceFromStep2', () => {
   it('all Step 2 fields present → can advance', () => {
     expect(canAdvanceFromStep2({
       concept_type: 'Fast casual',
-      locations: 'Single location',
+      locations: '2-4 locations',
       annual_food_spend: '$1M–$3M',
     })).toBe(true);
   });
 
   it('missing concept_type → blocks', () => {
-    expect(canAdvanceFromStep2({ locations: 'Single location', annual_food_spend: '$1M–$3M' })).toBe(false);
+    expect(canAdvanceFromStep2({ locations: '2-4 locations', annual_food_spend: '$1M–$3M' })).toBe(false);
   });
 
   it('missing locations → blocks', () => {
@@ -104,7 +104,7 @@ describe('canAdvanceFromStep2', () => {
   });
 
   it('missing annual_food_spend → blocks', () => {
-    expect(canAdvanceFromStep2({ concept_type: 'Fast casual', locations: 'Single location' })).toBe(false);
+    expect(canAdvanceFromStep2({ concept_type: 'Fast casual', locations: '2-4 locations' })).toBe(false);
   });
 });
 
@@ -289,7 +289,7 @@ describe('lead payload is never erased by eligibility decisions', () => {
   const fullPayload: Partial<AnalyzerFormPayload> = {
     ...baseStep1,
     concept_type: 'Fast casual',
-    locations: 'Single location',
+    locations: '2-4 locations',
     annual_food_spend: '$1M–$3M',
     distributor_type: 'National broadliners (Sysco, US Foods)',
     procurement_strategy: 'Market price, single distributor',

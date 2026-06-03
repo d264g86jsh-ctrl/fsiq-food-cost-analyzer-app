@@ -56,9 +56,9 @@ export const CONCEPT_TYPE_OPTIONS = [
 ] as const;
 
 export const LOCATIONS_OPTIONS = [
-  'Single location',
-  '2 – 4 locations',
-  '5+ locations',
+  '2-4 locations',
+  '5-10 locations',
+  '10+ locations',
 ] as const;
 
 // Ranges align with savings-formula.ts spend buckets. parseSpend handles all of these.
@@ -81,6 +81,5 @@ export const DISTRIBUTOR_TYPE_OPTIONS: { value: string; label: string }[] = [
 export const PROCUREMENT_STRATEGY_OPTIONS: { value: string; label: string }[] = [
   { value: 'market_price_single',   label: 'I buy at market price through one distributor' },
   { value: 'market_price_multiple', label: 'I buy at market price across multiple distributors' },
-  { value: 'gpo',                   label: 'I use a GPO or Group Purchasing Organization' },
   { value: 'negotiated_cost_plus',  label: 'I have a negotiated cost-plus agreement' },
 ];

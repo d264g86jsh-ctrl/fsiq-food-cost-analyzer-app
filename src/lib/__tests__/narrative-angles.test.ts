@@ -11,7 +11,7 @@ function makeInput(overrides: Partial<AiResearchInput> = {}): AiResearchInput {
     restaurantName: 'Test Restaurant',
     website: 'https://testrestaurant.com',
     conceptType: 'Casual dining',
-    locations: 'Single location',
+    locations: '2-4 locations',
     annualFoodSpend: '$1M–$3M',
     distributorType: 'national_broadliners',
     procurementStrategy: 'market_price_single',
@@ -110,7 +110,7 @@ describe('selectNarrativeAngle', () => {
       distributorType: 'local_specialty',
       procurementStrategy: 'negotiated_cost_plus',
       conceptType: 'Fine dining',
-      locations: '5+ locations',
+      locations: '5-10 locations',
     }));
     expect(angle).toBe('optimized_buyer');
   });
@@ -119,16 +119,20 @@ describe('selectNarrativeAngle', () => {
 // ── Multi-unit modifier ───────────────────────────────────────────────────────
 
 describe('hasMultiUnitModifier', () => {
-  it('Single location → false', () => {
+  it('Single location → false (legacy value)', () => {
     expect(hasMultiUnitModifier('Single location')).toBe(false);
   });
 
-  it('2 – 4 locations → true', () => {
-    expect(hasMultiUnitModifier('2 – 4 locations')).toBe(true);
+  it('2-4 locations → true', () => {
+    expect(hasMultiUnitModifier('2-4 locations')).toBe(true);
   });
 
-  it('5+ locations → true', () => {
-    expect(hasMultiUnitModifier('5+ locations')).toBe(true);
+  it('5-10 locations → true', () => {
+    expect(hasMultiUnitModifier('5-10 locations')).toBe(true);
+  });
+
+  it('10+ locations → true', () => {
+    expect(hasMultiUnitModifier('10+ locations')).toBe(true);
   });
 
   it('empty string → false', () => {
@@ -139,21 +143,21 @@ describe('hasMultiUnitModifier', () => {
 // ── buildAngleContext ─────────────────────────────────────────────────────────
 
 describe('buildAngleContext', () => {
-  it('single-unit captive buyer → no multi-unit modifier', () => {
+  it('captive buyer with 2-4 locations → has multi-unit modifier', () => {
     const ctx = buildAngleContext(makeInput({
       distributorType: 'national_broadliners',
       procurementStrategy: 'market_price_single',
-      locations: 'Single location',
+      locations: '2-4 locations',
     }));
     expect(ctx.primaryAngle).toBe('captive_buyer');
-    expect(ctx.hasMultiUnitModifier).toBe(false);
+    expect(ctx.hasMultiUnitModifier).toBe(true);
   });
 
   it('multi-unit captive buyer → has multi-unit modifier', () => {
     const ctx = buildAngleContext(makeInput({
       distributorType: 'national_broadliners',
       procurementStrategy: 'market_price_single',
-      locations: '5+ locations',
+      locations: '5-10 locations',
     }));
     expect(ctx.primaryAngle).toBe('captive_buyer');
     expect(ctx.hasMultiUnitModifier).toBe(true);
@@ -200,7 +204,7 @@ describe('buildNarrativeUserPrompt — angle injection', () => {
     const prompt = buildNarrativeUserPrompt(makeInput({
       distributorType: 'national_broadliners',
       procurementStrategy: 'market_price_single',
-      locations: 'Single location',
+      locations: '2-4 locations',
     }));
     expect(prompt).toContain('Captive Buyer');
     expect(prompt).toContain('urgent');
@@ -232,7 +236,7 @@ describe('buildNarrativeUserPrompt — angle injection', () => {
     const prompt = buildNarrativeUserPrompt(makeInput({
       distributorType: 'national_broadliners',
       procurementStrategy: 'market_price_single',
-      locations: '5+ locations',
+      locations: '5-10 locations',
     }));
     expect(prompt).toContain('MULTI-UNIT MODIFIER');
   });
