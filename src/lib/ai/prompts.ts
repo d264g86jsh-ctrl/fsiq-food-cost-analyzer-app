@@ -9,6 +9,8 @@
 // - Tone: premium, direct, operator-focused (per docs/brand-guidelines.md)
 
 import type { AiResearchInput } from './ai-types';
+import { NARRATIVE_ANGLES } from './narrative-angles';
+import { buildAngleContext } from './angle-selector';
 
 // ── Researcher prompts ────────────────────────────────────────────────────────
 
@@ -58,6 +60,26 @@ export function buildNarrativeUserPrompt(input: AiResearchInput): string {
       ? `READ-ONLY savings estimate (already calculated by deterministic code, do not change): $${input.dollarEstimate.toLocaleString('en-US')}/year at ${input.finalPct}% of food spend. Use "estimated," "potential," "based on your profile," or "conservative estimate" if referencing this figure.`
       : 'No savings estimate available (lead not yet qualified or spend below threshold).';
 
+  // Deterministic angle selection — shapes tone and section emphasis
+  const angleCtx = buildAngleContext(input);
+  const angle = NARRATIVE_ANGLES[angleCtx.primaryAngle];
+
+  const multiUnitAddendum = angleCtx.hasMultiUnitModifier
+    ? `\nMULTI-UNIT MODIFIER: This operator has ${input.locations}. Weave in purchasing leverage, portfolio-level optimization, and scale advantages naturally — do not treat each location as independent.`
+    : '';
+
+  const angleGuidance = `
+NARRATIVE ANGLE: ${angle.name}
+Core message to convey (do not quote verbatim, weave naturally): "${angle.coreMessage}"
+Tone: ${angle.tone}
+
+Section-specific guidance:
+- narrativeDistributor: ${angle.distributorGuidance}
+- narrativeProcurement: ${angle.procurementGuidance}
+- narrativeSku: ${angle.skuGuidance}
+
+Avoid in all sections: ${angle.avoidance.join('; ')}.${multiUnitAddendum}`;
+
   return `Write three narrative sections for a food cost analysis report for the following restaurant.
 
 RESTAURANT CONTEXT:
@@ -69,6 +91,7 @@ RESTAURANT CONTEXT:
 - Procurement strategy: ${input.procurementStrategy}
 - ${skuContext}
 - ${savingsContext}
+${angleGuidance}
 
 OUTPUT REQUIREMENTS:
 Return exactly this JSON structure — no other text:
