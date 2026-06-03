@@ -64,8 +64,8 @@ export const LOCATIONS_OPTIONS = [
 
 // Ranges align with savings-formula.ts spend buckets. parseSpend handles all of these.
 export const ANNUAL_FOOD_SPEND_OPTIONS = [
-  'Under $500K',
-  '$500K–$800K',
+  'Under $600K',
+  '$600K–$800K',
   '$800K–$1M',
   '$1M–$3M',
   '$3M–$7M',

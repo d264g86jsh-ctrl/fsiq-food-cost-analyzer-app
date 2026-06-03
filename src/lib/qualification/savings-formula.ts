@@ -4,7 +4,7 @@
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-export type SpendBucket = '$500K–$800K' | '$800K–$1M' | '$1M–$3M' | '$3M–$7M' | '$7M+';
+export type SpendBucket = '$600K–$800K' | '$800K–$1M' | '$1M–$3M' | '$3M–$7M' | '$7M+';
 export type LocationCategory = 'single' | '2-4' | '5+';
 
 export interface BucketResult {
@@ -64,17 +64,27 @@ export interface SavingsResult {
 // ── Constants (source of truth: docs/savings-formula.md) ─────────────────────
 
 const BUCKETS: Array<{ bucket: SpendBucket; min: number; max: number; midpoint: number; basePct: number }> = [
-  { bucket: '$500K–$800K', min: 500_000,   max: 799_999,   midpoint: 650_000,   basePct: 5.00 },
-  { bucket: '$800K–$1M',   min: 800_000,   max: 999_999,   midpoint: 900_000,   basePct: 5.25 },
-  { bucket: '$1M–$3M',     min: 1_000_000, max: 2_999_999, midpoint: 2_000_000, basePct: 5.50 },
-  { bucket: '$3M–$7M',     min: 3_000_000, max: 6_999_999, midpoint: 5_000_000, basePct: 5.75 },
-  { bucket: '$7M+',        min: 7_000_000, max: Infinity,  midpoint: 8_500_000, basePct: 6.00 },
+  { bucket: '$600K–$800K', min: 600_000,   max: 799_999,   midpoint: 700_000,   basePct: 2.00 },
+  { bucket: '$800K–$1M',   min: 800_000,   max: 999_999,   midpoint: 900_000,   basePct: 3.60 },
+  { bucket: '$1M–$3M',     min: 1_000_000, max: 2_999_999, midpoint: 2_000_000, basePct: 4.95 },
+  { bucket: '$3M–$7M',     min: 3_000_000, max: 6_999_999, midpoint: 5_000_000, basePct: 3.15 },
+  { bucket: '$7M+',        min: 7_000_000, max: Infinity,  midpoint: 8_500_000, basePct: 3.66 },
 ];
+
+// Per-bucket ceiling applied before the global clamp.
+// Designed so base + max modifiers (0.70+0.70+0.30+0.30 = 2.00) equals bucketMax.
+const BUCKET_MAX_PCT: Record<SpendBucket, number> = {
+  '$600K–$800K': 4.00,
+  '$800K–$1M':   5.60,
+  '$1M–$3M':     6.95,
+  '$3M–$7M':     5.15,
+  '$7M+':        5.66,
+};
 
 const INFLATION_RATE = 0.039; // USDA food-away-from-home, per docs/savings-formula.md §12
 const MIN_BAR_HEIGHT = 8;     // Minimum bar height percentage for chart display
 const FINAL_PCT_FLOOR = 4.0;
-const FINAL_PCT_CEILING = 8.0;
+const FINAL_PCT_CEILING = 6.95;
 
 const PROTEIN_KEYWORDS = [
   'chicken', 'beef', 'pork', 'fish', 'seafood', 'brisket', 'ribs', 'steak',
@@ -86,7 +96,7 @@ const COMMODITY_KEYWORDS = [
 ];
 
 const CASE_STUDIES: Record<SpendBucket, Record<LocationCategory, string>> = {
-  '$500K–$800K': { single: "Black's BBQ",  '2-4': "MaryAnn's Diner", '5+': "MaryAnn's Diner" },
+  '$600K–$800K': { single: "Black's BBQ",  '2-4': "MaryAnn's Diner", '5+': "MaryAnn's Diner" },
   '$800K–$1M':   { single: "Black's BBQ",  '2-4': "MaryAnn's Diner", '5+': "MaryAnn's Diner" },
   '$1M–$3M':     { single: 'Spirits',      '2-4': "MaryAnn's Diner", '5+': "MaryAnn's Diner" },
   '$3M–$7M':     { single: 'The Oasis',    '2-4': 'Dish Society',    '5+': 'Thunderdome' },
@@ -95,7 +105,7 @@ const CASE_STUDIES: Record<SpendBucket, Record<LocationCategory, string>> = {
 
 // ── Bucket assignment ─────────────────────────────────────────────────────────
 
-// Returns null if spend is below the $500K threshold (below_threshold DQ territory).
+// Returns null if spend is below the $600K threshold (below_threshold DQ territory).
 export function assignBucket(annualSpend: number): BucketResult | null {
   const match = BUCKETS.find((b) => annualSpend >= b.min && annualSpend <= b.max);
   if (!match) return null;
@@ -257,7 +267,9 @@ export function computeSavings(
   modifierInputs: ModifierInputs,
 ): SavingsResult {
   const modifiers = computeModifiers(modifierInputs, bucketResult.basePct);
-  const finalPct = clampFinalPct(modifiers.rawTotal);
+  // Apply per-bucket ceiling first, then global floor/ceiling clamp.
+  const bucketClamped = round2(Math.min(BUCKET_MAX_PCT[bucketResult.bucket], modifiers.rawTotal));
+  const finalPct = clampFinalPct(bucketClamped);
   const dollarEstimate = computeDollarEstimate(finalPct, bucketResult.midpoint);
   const projections = computeProjections(dollarEstimate);
   const caseStudy = selectCaseStudy(bucketResult.bucket, modifiers.locationCategory);

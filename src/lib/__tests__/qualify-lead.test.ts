@@ -143,8 +143,14 @@ describe('DQ: below_minimum', () => {
 // ── DQ: below_threshold ───────────────────────────────────────────────────────
 
 describe('DQ: below_threshold', () => {
-  it('$499,999 → DQ below_threshold', () => {
-    const r = qualifyLead(makeInput({ annualFoodSpend: '499999' }));
+  it('$599,999 → DQ below_threshold', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '599999' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+  });
+
+  it('$500,000 → DQ below_threshold (below new $600K minimum)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '500000' }));
     expect(r.qualified).toBe(false);
     expect(r.dqReason).toBe('below_threshold');
   });
@@ -154,8 +160,8 @@ describe('DQ: below_threshold', () => {
     expect(r.dqReason).toBe('below_threshold');
   });
 
-  it('$500,000 → qualified (exactly at threshold)', () => {
-    const r = qualifyLead(makeInput({ annualFoodSpend: '500000' }));
+  it('$600,000 → qualified (exactly at threshold)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '600000' }));
     expect(r.qualified).toBe(true);
     expect(r.dqReason).toBeNull();
   });

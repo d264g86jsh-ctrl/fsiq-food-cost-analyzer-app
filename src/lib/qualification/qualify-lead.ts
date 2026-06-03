@@ -135,7 +135,7 @@ export function qualifyLead(input: QualifyLeadInput): QualifyLeadResult {
   if (spendParse.parseFallback) flags.push('spend_parse_fallback');
 
   const BELOW_MINIMUM_THRESHOLD = 50_000;
-  const BELOW_SPEND_THRESHOLD = 500_000;
+  const BELOW_SPEND_THRESHOLD = 600_000;
 
   if (annualSpend < BELOW_MINIMUM_THRESHOLD) {
     reasons.push(`below_minimum:$${annualSpend}`);

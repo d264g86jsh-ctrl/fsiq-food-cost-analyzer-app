@@ -12,47 +12,51 @@ import {
 } from '../qualification/savings-formula';
 
 describe('assignBucket', () => {
-  it('$499,999 → null (below threshold)', () => {
-    expect(assignBucket(499_999)).toBeNull();
+  it('$599,999 → null (below $600K threshold)', () => {
+    expect(assignBucket(599_999)).toBeNull();
   });
 
-  it('$500,000 → $500K–$800K', () => {
-    const r = assignBucket(500_000);
-    expect(r?.bucket).toBe('$500K–$800K');
-    expect(r?.midpoint).toBe(650_000);
-    expect(r?.basePct).toBe(5.00);
+  it('$500,000 → null (below $600K threshold)', () => {
+    expect(assignBucket(500_000)).toBeNull();
   });
 
-  it('$799,999 → $500K–$800K', () => {
-    expect(assignBucket(799_999)?.bucket).toBe('$500K–$800K');
+  it('$600,000 → $600K–$800K', () => {
+    const r = assignBucket(600_000);
+    expect(r?.bucket).toBe('$600K–$800K');
+    expect(r?.midpoint).toBe(700_000);
+    expect(r?.basePct).toBe(2.00);
+  });
+
+  it('$799,999 → $600K–$800K', () => {
+    expect(assignBucket(799_999)?.bucket).toBe('$600K–$800K');
   });
 
   it('$800,000 → $800K–$1M', () => {
     const r = assignBucket(800_000);
     expect(r?.bucket).toBe('$800K–$1M');
     expect(r?.midpoint).toBe(900_000);
-    expect(r?.basePct).toBe(5.25);
+    expect(r?.basePct).toBe(3.60);
   });
 
   it('$1,000,000 → $1M–$3M', () => {
     const r = assignBucket(1_000_000);
     expect(r?.bucket).toBe('$1M–$3M');
     expect(r?.midpoint).toBe(2_000_000);
-    expect(r?.basePct).toBe(5.50);
+    expect(r?.basePct).toBe(4.95);
   });
 
   it('$3,000,000 → $3M–$7M', () => {
     const r = assignBucket(3_000_000);
     expect(r?.bucket).toBe('$3M–$7M');
     expect(r?.midpoint).toBe(5_000_000);
-    expect(r?.basePct).toBe(5.75);
+    expect(r?.basePct).toBe(3.15);
   });
 
   it('$7,000,000 → $7M+', () => {
     const r = assignBucket(7_000_000);
     expect(r?.bucket).toBe('$7M+');
     expect(r?.midpoint).toBe(8_500_000);
-    expect(r?.basePct).toBe(6.00);
+    expect(r?.basePct).toBe(3.66);
   });
 
   it('$50,000,000 → $7M+', () => {
@@ -185,8 +189,8 @@ describe('clampFinalPct', () => {
     expect(clampFinalPct(0)).toBe(4.0);
   });
 
-  it('9.1 → 8.0 (ceiling)', () => {
-    expect(clampFinalPct(9.1)).toBe(8.0);
+  it('9.1 → 6.95 (ceiling)', () => {
+    expect(clampFinalPct(9.1)).toBe(6.95);
   });
 
   it('5.5 → 5.5 (within range, unchanged)', () => {
@@ -197,8 +201,8 @@ describe('clampFinalPct', () => {
     expect(clampFinalPct(4.0)).toBe(4.0);
   });
 
-  it('8.0 → 8.0 (exactly at ceiling)', () => {
-    expect(clampFinalPct(8.0)).toBe(8.0);
+  it('6.95 → 6.95 (exactly at ceiling)', () => {
+    expect(clampFinalPct(6.95)).toBe(6.95);
   });
 });
 
@@ -207,12 +211,12 @@ describe('computeDollarEstimate', () => {
     expect(computeDollarEstimate(5.5, 2_000_000)).toBe(110_000);
   });
 
-  it('$500K–$800K bucket at 4.0% (clamped floor) → $26,000', () => {
-    expect(computeDollarEstimate(4.0, 650_000)).toBe(26_000);
+  it('$600K–$800K bucket at 4.0% (floor) → $28,000', () => {
+    expect(computeDollarEstimate(4.0, 700_000)).toBe(28_000);
   });
 
-  it('$7M+ bucket at 8.0% (clamped ceiling) → $680,000', () => {
-    expect(computeDollarEstimate(8.0, 8_500_000)).toBe(680_000);
+  it('$7M+ bucket at 5.66% (bucket max) → $481,100', () => {
+    expect(computeDollarEstimate(5.66, 8_500_000)).toBe(481_100);
   });
 });
 
@@ -264,11 +268,11 @@ describe('computeProjections', () => {
 
 describe('selectCaseStudy', () => {
   it('$500K–$800K single → Black\'s BBQ', () => {
-    expect(selectCaseStudy('$500K–$800K', 'single')).toBe("Black's BBQ");
+    expect(selectCaseStudy('$600K–$800K', 'single')).toBe("Black's BBQ");
   });
 
   it('$500K–$800K 2-4 → MaryAnn\'s Diner', () => {
-    expect(selectCaseStudy('$500K–$800K', '2-4')).toBe("MaryAnn's Diner");
+    expect(selectCaseStudy('$600K–$800K', '2-4')).toBe("MaryAnn's Diner");
   });
 
   it('$1M–$3M single → Spirits', () => {
@@ -298,7 +302,7 @@ describe('selectCaseStudy', () => {
 
 describe('computeSavings — integration', () => {
   it('returns dollarEstimateDisplay formatted as dollars', () => {
-    const bucket = { bucket: '$1M–$3M' as const, midpoint: 2_000_000, basePct: 5.5 };
+    const bucket = { bucket: '$1M–$3M' as const, midpoint: 2_000_000, basePct: 4.95 };
     const r = computeSavings(bucket, {
       distributorType: 'national_broadliner',
       procurementStrategy: 'market_price_single',
@@ -309,8 +313,8 @@ describe('computeSavings — integration', () => {
     expect(r.finalPctDisplay).toMatch(/%$/);
   });
 
-  it('finalPct is clamped between 4.0 and 8.0', () => {
-    const bucket = { bucket: '$7M+' as const, midpoint: 8_500_000, basePct: 6.0 };
+  it('finalPct is clamped between 4.0 and 6.95', () => {
+    const bucket = { bucket: '$7M+' as const, midpoint: 8_500_000, basePct: 3.66 };
     const r = computeSavings(bucket, {
       distributorType: 'national_broadliner',
       procurementStrategy: 'market_price_single',
@@ -318,11 +322,11 @@ describe('computeSavings — integration', () => {
       locations: '5+',
     });
     expect(r.finalPct).toBeGreaterThanOrEqual(4.0);
-    expect(r.finalPct).toBeLessThanOrEqual(8.0);
+    expect(r.finalPct).toBeLessThanOrEqual(6.95);
   });
 
   it('all projection years are positive integers', () => {
-    const bucket = { bucket: '$1M–$3M' as const, midpoint: 2_000_000, basePct: 5.5 };
+    const bucket = { bucket: '$1M–$3M' as const, midpoint: 2_000_000, basePct: 4.95 };
     const r = computeSavings(bucket, {
       distributorType: 'local_specialty',
       procurementStrategy: 'negotiated_cost_plus',
