@@ -1,8 +1,11 @@
 // Browserless.io API client for production headless rendering.
 // Used by headless-fetch.ts when BROWSERLESS_API_KEY is set.
 // Local Playwright is used instead when HEADLESS_ENABLED=true (dev only).
+//
+// Uses the Browserless v2 /content endpoint (returns raw HTML).
+// Auth: API key passed as ?token= query param (Bearer header not supported on v2).
 
-const BROWSERLESS_SCRAPE_URL = 'https://chrome.browserless.io/scrape';
+const BROWSERLESS_BASE_URL = 'https://production-sfo.browserless.io/content';
 const BROWSERLESS_MAX_TIMEOUT_MS = 30_000;
 
 export interface BrowserlessResult {
@@ -15,18 +18,15 @@ export async function fetchWithBrowserless(
   apiKey: string,
   timeoutMs: number = 15_000,
 ): Promise<BrowserlessResult> {
-  const response = await fetch(BROWSERLESS_SCRAPE_URL, {
+  const response = await fetch(`${BROWSERLESS_BASE_URL}?token=${encodeURIComponent(apiKey)}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-cache',
-      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       url,
-      timeout: Math.min(timeoutMs, BROWSERLESS_MAX_TIMEOUT_MS),
-      waitFor: 'networkidle',
-      elements: [{ selector: 'body' }],
+      waitForTimeout: Math.min(timeoutMs, BROWSERLESS_MAX_TIMEOUT_MS),
     }),
     signal: AbortSignal.timeout(timeoutMs + 5_000), // outer timeout > inner
   });
@@ -36,11 +36,11 @@ export async function fetchWithBrowserless(
     throw new Error(`Browserless API error: ${response.status} ${body.slice(0, 200)}`);
   }
 
-  const data = (await response.json()) as { data: Array<{ html: string }> };
-  const html = data?.data?.[0]?.html ?? '';
+  // /content returns raw HTML text, not JSON
+  const html = await response.text();
 
-  if (!html) {
-    throw new Error('Browserless returned empty HTML');
+  if (!html || html.length < 200) {
+    throw new Error('Browserless returned empty or minimal HTML');
   }
 
   return { html, finalUrl: url };
