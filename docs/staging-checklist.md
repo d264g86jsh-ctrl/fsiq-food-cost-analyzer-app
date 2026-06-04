@@ -97,7 +97,7 @@ These degrade gracefully when absent. Set based on your environment.
    - P3: 3 narrative blocks present, no em-dashes or en-dashes
    - P4: 4 quadrants, "Book Your Full Analysis Call" → Calendly URL resolves
    - P5: Correct case study for the spend bucket + locations combo used in the test
-   - P6: "Book Your Free Analysis Call" → Calendly URL, disclaimer left-aligned, footer: `FoodServiceIQ — CONFIDENTIAL`
+   - P6: "Book Your Free Analysis Call" → Calendly URL, directional estimate disclaimer present and left-aligned, footer: `FoodServiceIQ — CONFIDENTIAL`
    - All pages: Inter font rendered, no overlapping headers/footers
 
 ---

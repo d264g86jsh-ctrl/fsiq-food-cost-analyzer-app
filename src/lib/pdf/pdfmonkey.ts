@@ -19,7 +19,7 @@ const PRIVATE_IP_PATTERNS = ['127.0.0.1', 'localhost', '192.168.', '10.0.', '172
 // Version token changes whenever the patch logic changes, invalidating warm-instance caches.
 // Bump this string whenever patchPdfMonkeyTemplateHtml is updated so ensureTemplateSafe
 // re-fetches and re-PUTs even if the Vercel instance was not cold-started.
-const PATCH_VERSION = 'v2-target-blank';
+const PATCH_VERSION = 'v3-directional-disclaimer';
 const patchedTemplateIds = new Set<string>();
 function patchCacheKey(templateId: string) { return `${PATCH_VERSION}:${templateId}`; }
 
