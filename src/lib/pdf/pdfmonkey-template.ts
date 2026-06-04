@@ -26,6 +26,8 @@ const SAFE_COVER_LOGO_BLOCK = `<div class="cover-logos">
 export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatchResult {
   let next = html;
 
+  // Strip any previously-injected directional disclaimer before applying other patches.
+  next = removeDirectionalDisclaimer(next);
   next = injectLogoSafetyStyle(next);
   next = next.replaceAll(`href="${OLD_CALENDLY_URL}"`, 'href="{{ calendlyUrl }}"');
   next = ensureCtaTargetBlank(next);
@@ -39,6 +41,16 @@ export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatch
     html: next,
     changed: next !== html,
   };
+}
+
+// Removes the directional disclaimer paragraph that was injected by commit 34120e0.
+// Matches the HTML comment marker + the following <p> tag containing the disclaimer text.
+// Safe to run on templates that never had the disclaimer — returns html unchanged.
+function removeDirectionalDisclaimer(html: string): string {
+  return html.replace(
+    /<!-- fsiq-directional-disclaimer --><p[^>]*>[\s\S]*?Your estimate is directional[\s\S]*?<\/p>/,
+    '',
+  );
 }
 
 // Adds target="_blank" to every <a> whose href is {{ calendlyUrl }}, so that
