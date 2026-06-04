@@ -33,6 +33,7 @@ import {
 } from '@/lib/analyzer/form-validation';
 import { persistTrackingParams, getTrackingParams, readMetaCookies } from '@/lib/meta/tracking-params';
 import { generateEventId } from '@/lib/meta/event-id';
+import { isKnownFoodItem, validateFoodItemsWithAI, type SkuValidationState } from '@/lib/qualification/sku-validation';
 import { fireAnalyzerStarted, fireBrowserLead } from '@/lib/meta/browser-events';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ export function AnalyzerForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [skuValidation, setSkuValidation] = useState<SkuValidationState>('idle');
   const analyzerStartedFired = useRef(false);
 
   // Persist tracking params on mount (first-touch sessionStorage), then read them back.
@@ -200,6 +202,21 @@ export function AnalyzerForm() {
   function handleWebsiteBlur() {
     const website = formData.website?.trim();
     if (website) triggerValidation(website);
+  }
+
+  // ── SKU validation (Layer 1 static → Layer 2 AI on blur) ─────────────────────
+
+  async function handleSkuBlur() {
+    const topSkus = (formData.top_skus ?? '').trim();
+    if (!topSkus) { setSkuValidation('idle'); return; }
+
+    // Layer 1: instant static match
+    if (isKnownFoodItem(topSkus)) { setSkuValidation('valid'); return; }
+
+    // Layer 2: async AI check (only on Layer 1 miss)
+    setSkuValidation('validating');
+    const result = await validateFoodItemsWithAI(topSkus);
+    setSkuValidation(result.state);
   }
 
   // ── Step navigation ───────────────────────────────────────────────────────────
@@ -436,11 +453,23 @@ export function AnalyzerForm() {
             <FormField label="What food items do you purchase the most each year?" required>
               <textarea
                 value={formData.top_skus ?? ''}
-                onChange={(e) => update('top_skus', e.target.value)}
+                onChange={(e) => { update('top_skus', e.target.value); setSkuValidation('idle'); }}
+                onBlur={handleSkuBlur}
                 placeholder="Chicken, beef, seafood, dairy, produce, fryer oil…"
                 rows={3}
                 className={textareaCls}
               />
+              {skuValidation === 'validating' && (
+                <p className="mt-1 text-[11px] text-[#64748b]">Checking your items…</p>
+              )}
+              {skuValidation === 'valid' && (
+                <p className="mt-1 text-[11px] text-[#52C275]">✓ Food items recognized</p>
+              )}
+              {skuValidation === 'invalid' && (
+                <p className="mt-1 text-[11px] text-[#94a3b8]">
+                  These don&apos;t look like food items — you can still continue, but our analysis works best with food &amp; beverage spend categories.
+                </p>
+              )}
             </FormField>
           </div>
         )}
