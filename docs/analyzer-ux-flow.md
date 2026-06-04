@@ -23,10 +23,10 @@ Contact information is collected **at the end**, after the user has completed al
 | `website` | Text + real-time validation | Triggers validation on blur (Phase 2 endpoint) |
 | `us_business_confirmed` | Checkbox | "I confirm this is a U.S.-based restaurant or foodservice operation" — required before submit |
 | `concept_type` | Dropdown | Dropdown values per SOP §5 |
-| `locations` | Dropdown | Single / 2–4 / 5+ |
-| `annual_food_spend` | Dropdown | Ranges per SOP §5 |
-| `distributor_type` | Dropdown | Per SOP §5 |
-| `procurement_strategy` | Dropdown | Per SOP §5 |
+| `locations` | Dropdown | Single location / 2-4 locations / 5-10 locations / 10+ locations |
+| `annual_food_spend` | Dropdown | Under $600K / $600K–$800K / $800K–$1M / $1M–$3M / $3M–$7M / $7M+ |
+| `distributor_type` | Dropdown | national_broadliners / combination / regional / local_specialty |
+| `procurement_strategy` | Dropdown | market_price_single / market_price_multiple / negotiated_cost_plus (GPO removed) |
 | `top_skus` | Free text | Label: "What are your biggest food spend categories or key items?" Placeholder: "Chicken, beef, seafood, dairy, produce, fryer oil…" — no predefined categories in v1 |
 
 ### Step 2 — Contact Info (shown last, before final submission)
@@ -49,6 +49,7 @@ Contact information is collected **at the end**, after the user has completed al
 - **Block only on missing or malformed required fields** (empty required field, invalid email format, malformed ZIP).
 - **Show inline validation state** for `clear_non_fit`, `national_chain`, `invalid_website`, or `plausible_unverified` — inform the user, but do not prevent them from submitting.
 - **Show conservative-mode notice** for `plausible_unverified` — informational only, not a block.
+- **Confidence-driven messaging for `plausible_unverified`:** Message tone varies by confidence score (0–100). Confidence ≥ 50 → "We're still working on verifying your website, you can continue." Confidence < 50 → "We weren't able to fully verify this website, but you can still continue. Our team may follow up." The server computes this and returns it as `userFacingMessage` in the `ValidationResult`. See `docs/website-validation-spec.md` §G2.
 - **Progress indicator** — show step progress so users know how far they are in the quiz.
 
 ---

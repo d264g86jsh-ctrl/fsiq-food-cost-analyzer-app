@@ -84,7 +84,7 @@ emails before the PDF is ready.
 | `qualified_full_pdf_ready` | Full personalized PDF generated, `pdfDownloadUrl` confirmed — ready for report email |
 | `qualified_conservative_pdf_ready` | Conservative PDF generated, `pdfDownloadUrl` confirmed — ready for report email |
 | `disqualified_invalid_website` | 404/NXDOMAIN — DQ email route |
-| `disqualified_below_threshold` | Spend < $500K — DQ email route |
+| `disqualified_below_threshold` | Spend < $600K — DQ email route |
 | `disqualified_national_chain` | National chain detected — DQ email route |
 | `disqualified_clear_non_fit` | Other clear non-fit (non-restaurant, non-operator, etc.) |
 | `disqualified_non_us` | Non-US location detected — kept separate for distinct GHL messaging |

@@ -169,6 +169,13 @@ The AI pipeline is Claude-generated research and narrative content **only**. It 
 
 Logo URL must be verbatim from `websiteLogoHints` — never fabricated. 1s delay between calls.
 
+**Narrative Angle System:** Before the AI Narrative Builder is called, a deterministic angle is
+selected from the submission's form inputs (`procurementStrategy`, `distributorType`, `conceptType`,
+`locations`). The angle shapes tone, emphasis, and avoidances for each narrative section.
+Active angles: `captive_buyer`, `fragmented_buyer`, `optimized_buyer`, `premium_independent`,
+`multi_unit_operator` (modifier). Selection is in `src/lib/ai/angle-selector.ts`.
+See `docs/ai-narrative.md` for full angle definitions.
+
 ---
 
 ## PDF (SOP §19, §22)
