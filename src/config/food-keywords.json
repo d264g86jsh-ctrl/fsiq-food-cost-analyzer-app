@@ -1,0 +1,28 @@
+{
+  "_comment": "Layer 1 SKU validation keywords. Edit and redeploy to add terms. No code change required.",
+  "proteins": [
+    "chicken", "beef", "pork", "fish", "seafood", "brisket", "ribs", "steak",
+    "lamb", "salmon", "shrimp", "turkey", "bacon", "sausage",
+    "ribeye", "sirloin", "tenderloin", "wing", "breast", "thigh", "drumstick",
+    "filet", "fillet", "ground beef", "ground pork", "crab", "lobster",
+    "clam", "oyster", "mussels", "tuna", "tilapia", "cod", "halibut",
+    "scallop", "squid", "octopus", "duck", "veal", "venison", "bison"
+  ],
+  "commodities": [
+    "oil", "dairy", "eggs", "cheese", "milk", "butter", "produce", "lettuce",
+    "tomato", "onion", "flour", "sugar", "potato", "fries",
+    "cream", "yogurt", "avocado", "pepper", "garlic", "vinegar",
+    "shortening", "lard", "yeast", "salt", "corn", "rice", "wheat", "beans",
+    "lentils", "pasta", "bread", "dough", "tortilla"
+  ],
+  "extended": [
+    "meat", "poultry", "vegetables", "fruit", "herbs", "spices", "sauce",
+    "stock", "broth", "chips", "salad", "greens", "mushroom", "tofu",
+    "soy", "protein", "commodity", "beverage", "juice", "coffee", "tea",
+    "alcohol", "beer", "wine", "spirits", "liquor", "water", "soda",
+    "condiment", "dressing", "wrap", "bun", "roll", "pizza", "taco",
+    "burger", "sandwich", "syrup", "honey", "jam", "mayo", "ketchup",
+    "mustard", "hot sauce", "olive oil", "vegetable oil", "canola",
+    "sourdough", "brioche", "focaccia", "pita", "naan"
+  ]
+}
