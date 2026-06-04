@@ -8,10 +8,11 @@ import { headlessFetch } from '@/lib/website/headless-fetch';
 import { extractLogoUrl } from '@/lib/website/logo-extractor';
 import { extractSignals } from '@/lib/website/extract-signals';
 import { detectNationalChain } from '@/lib/qualification/national-chains';
-import { computeRestaurantScores } from '@/lib/relevance/classify-restaurant';
+import { computeRestaurantScores, hasRestaurantKeywordInDomain } from '@/lib/relevance/classify-restaurant';
 import { computeWebsiteRelationship } from '@/lib/relevance/website-relationship';
 import { classifyWithClaude, isAmbiguous } from '@/lib/relevance/claude-classifier';
 import { computeCountryEligibility } from '@/lib/relevance/location-eligibility';
+import { computeValidationConfidence, buildConfidenceAwareMessage } from '@/lib/website/confidence-score';
 import type { ValidationResult, ValidateWebsiteRequest, FinalDecision } from '@/lib/website/types';
 
 export async function runValidation(input: ValidateWebsiteRequest): Promise<ValidationResult> {
@@ -1172,6 +1173,16 @@ function isOperationalRestaurantSubpage(signals: ExtractSignalsResult): boolean 
   return hasMenuLanguage && ((hasPhone && hasAddress) || hasHours);
 }
 
-function buildResult(input: ValidationResult): ValidationResult {
-  return input;
+function buildResult(input: Omit<ValidationResult, 'confidence'>): ValidationResult {
+  const confidence = computeValidationConfidence({
+    httpStatus: input.httpStatus,
+    logoHints: input.websiteLogoHints,
+    restaurantSignalScore: input.restaurantSignalScore,
+    negativeSignalScore: input.negativeSignalScore,
+    hasRestaurantInDomain: hasRestaurantKeywordInDomain(input.normalizedUrl),
+  });
+  // Override userFacingMessage with confidence-aware version so plausible_unverified
+  // sites with logos/domain keywords get an encouraging tone instead of the cautious default.
+  const userFacingMessage = buildConfidenceAwareMessage(input.finalDecision, confidence);
+  return { ...input, confidence, userFacingMessage };
 }

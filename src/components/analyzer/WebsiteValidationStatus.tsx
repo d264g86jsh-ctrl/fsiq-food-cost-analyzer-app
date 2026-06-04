@@ -19,6 +19,9 @@ export type ValidationUIState =
 export interface WebsiteValidationStatusProps {
   state: ValidationUIState;
   allowSubmit: boolean;
+  // Optional: server-computed message overrides the static STATE_CONFIG message.
+  // Used to surface confidence-driven text for plausible_unverified results.
+  messageOverride?: string | null;
 }
 
 // Maps finalDecision + internalFlags to the ValidationUIState shown in the UI.
@@ -99,10 +102,14 @@ const STATE_CONFIG: Record<
   },
 };
 
-export function WebsiteValidationStatus({ state, allowSubmit }: WebsiteValidationStatusProps) {
+export function WebsiteValidationStatus({ state, allowSubmit, messageOverride }: WebsiteValidationStatusProps) {
   const config = STATE_CONFIG[state];
 
   if (state === 'idle' || !config.message) return null;
+
+  // Use server-computed confidence-aware message when provided (plausible_unverified),
+  // otherwise fall back to the static STATE_CONFIG message.
+  const displayMessage = messageOverride ?? config.message;
 
   const icon =
     state === 'checking' ? (
@@ -128,7 +135,7 @@ export function WebsiteValidationStatus({ state, allowSubmit }: WebsiteValidatio
       className={`mt-2 flex items-start gap-2 text-[12px] leading-snug ${config.colorClass}`}
     >
       {icon}
-      <span>{config.message}</span>
+      <span>{displayMessage}</span>
     </div>
   );
 }

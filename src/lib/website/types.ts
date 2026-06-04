@@ -1,5 +1,7 @@
 // Shared types for the Phase 2 website validator.
 
+export type { ValidationConfidence } from './confidence-score';
+
 export type FinalDecision =
   | 'verified_restaurant'
   | 'plausible_unverified'
@@ -54,6 +56,10 @@ export interface ValidationResult {
   // Pre-validated logo URL from the extraction waterfall (Clearbit → Google → og:image → null).
   // AI Researcher uses this directly — does not pick from websiteLogoHints.
   logoUrl: string | null;
+
+  // Validation confidence (0–100) — how certain we are this is a real restaurant.
+  // Used by the UI to choose between encouraging and cautious messaging tiers.
+  confidence: import('./confidence-score').ValidationConfidence;
 }
 
 export interface ValidateWebsiteRequest {

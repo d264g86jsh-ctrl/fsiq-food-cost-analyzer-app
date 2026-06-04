@@ -88,7 +88,7 @@ export function AnalyzerForm() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({});
   const [validationState, setValidationState] = useState<ValidationUIState>('idle');
-  const [, setValidationResult] = useState<ValidationResult | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -329,6 +329,7 @@ export function AnalyzerForm() {
               <WebsiteValidationStatus
                 state={isValidating ? 'checking' : validationState}
                 allowSubmit={!blocked}
+                messageOverride={validationResult?.userFacingMessage ?? null}
               />
             </FormField>
 

@@ -40,6 +40,7 @@ const baseValidation: ValidationResult = {
   manualReviewRequired: false,
   websiteLogoHints: ['https://casaroberto.com/logo.png', 'https://casaroberto.com/images/logo.svg'],
   logoUrl: 'https://casaroberto.com/logo.png',
+  confidence: { score: 90, hasLogoHint: true, hasRestaurantSignals: true, hasNegativeSignals: false, reasoning: 'website_exists,logo_found,restaurant_signals,low_negative_signals' },
 };
 
 const baseQualification: QualifyLeadResult = {

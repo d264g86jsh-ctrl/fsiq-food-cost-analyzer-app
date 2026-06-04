@@ -334,6 +334,69 @@ interface ValidationResult {
 
 ---
 
+## G2. Domain-Based Restaurant Detection & Confidence Scoring
+
+### Domain Keyword Detection
+
+`hasRestaurantKeywordInDomain(domain: string): boolean` — returns `true` if the first
+label of the domain (before the first `.`) contains any of:
+
+`restaurant`, `diner`, `cafe`, `bistro`, `pizzeria`, `steakhouse`, `grill`, `bbq`,
+`kitchen`, `dining`, `eatery`, `gastropub`, `trattoria`, `brasserie`, `cantina`,
+`chophouse`, `smokehouse`
+
+Example: `centurionrestaurantgroup.com` → label = `centurionrestaurantgroup` → contains `restaurant` → `true`
+
+**Important:** Domain keyword is a confidence booster, NOT a bypass. A site still requires
+HTTP status ≠ 404 and at least some signals to pass. `restaurant.com` returning 404 → still
+`invalid_website`.
+
+### Validation Confidence Score (0–100)
+
+Every `ValidationResult` includes a `confidence` object:
+
+```ts
+interface ValidationConfidence {
+  score: number;              // 0–100
+  hasLogoHint: boolean;
+  hasRestaurantSignals: boolean;
+  hasNegativeSignals: boolean;
+  reasoning: string;          // comma-separated signal codes
+}
+```
+
+**Scoring:**
+
+| Signal | Points | Gate |
+|---|---|---|
+| Website exists (HTTP ≠ 404 and ≠ 0) | +20 | Hard gate: 404 → score = 0 |
+| Logo hint found | +40 | — |
+| Restaurant keyword in domain | +30 | — |
+| `restaurantSignalScore` > 30 | +20 | — |
+| `negativeSignalScore` < 40 | +10 | — |
+
+Score is capped at 100. A 404 response always returns score = 0.
+
+**Example:** `centurionrestaurantgroup.com`, HTTP 200, logo present, signals > 30, neg < 40:
+`20 + 40 + 30 + 20 + 10 = 120 → capped at 100`
+
+### Dynamic User Message
+
+Only `plausible_unverified` varies by confidence. All other decisions use fixed messages.
+
+| `finalDecision` | Confidence | Message |
+|---|---|---|
+| `verified_restaurant` | — | `null` (UI shows green checkmark) |
+| `plausible_unverified` | ≥ 50 | "We're still working on verifying your website, you can continue." |
+| `plausible_unverified` | < 50 | "We weren't able to fully verify this website, but you can still continue. Our team may follow up." |
+| `clear_non_fit` | — | "This website doesn't appear to match a restaurant..." |
+| `national_chain` | — | "Our program is designed for independent operators..." |
+| `invalid_website` | — | "We couldn't reach that website. Please check the URL and try again." |
+
+**Implementation:** `buildConfidenceAwareMessage()` in `src/lib/website/confidence-score.ts`
+
+---
+
 ## H. Decision Rules
 
 | Decision | Trigger conditions |

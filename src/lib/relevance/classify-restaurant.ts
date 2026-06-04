@@ -389,3 +389,25 @@ function splitDomainWords(domain: string): string[] {
 
   return [...words];
 }
+
+// ── Domain keyword detection ──────────────────────────────────────────────────
+
+// Returns true if the first domain label (before the first dot) contains any
+// of the known restaurant keywords. Used as a confidence booster — NOT a bypass
+// of standard validation. A 404 site with 'restaurant' in the domain still DQs.
+export function hasRestaurantKeywordInDomain(domain: string): boolean {
+  const label = domain
+    .toLowerCase()
+    .replace(/^https?:\/\//i, '')
+    .replace(/^www\./i, '')
+    .split('/')[0]  // strip path
+    .split('.')[0]; // first label only (before TLD)
+
+  const keywords = [
+    'restaurant', 'diner', 'cafe', 'bistro', 'pizzeria', 'steakhouse',
+    'grill', 'bbq', 'kitchen', 'dining', 'eatery', 'gastropub',
+    'trattoria', 'brasserie', 'cantina', 'chophouse', 'smokehouse',
+  ];
+
+  return keywords.some((kw) => label.includes(kw));
+}
