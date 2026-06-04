@@ -267,11 +267,11 @@ describe('computeProjections', () => {
 });
 
 describe('selectCaseStudy', () => {
-  it('$500K–$800K single → Black\'s BBQ', () => {
+  it('$600K–$800K single → Black\'s BBQ', () => {
     expect(selectCaseStudy('$600K–$800K', 'single')).toBe("Black's BBQ");
   });
 
-  it('$500K–$800K 2-4 → MaryAnn\'s Diner', () => {
+  it('$600K–$800K 2-4 → MaryAnn\'s Diner', () => {
     expect(selectCaseStudy('$600K–$800K', '2-4')).toBe("MaryAnn's Diner");
   });
 
