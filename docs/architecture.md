@@ -17,7 +17,7 @@ Form submit
       → Manual review path:
           → Assign fsiq_communication_route = manual_review_hold
           → Final GHL handoff — FSIQ Manual Review tag, no PDF-ready tag, no email fires
-      → Qualified ($500K+):
+      → Qualified ($600K+):
           → Determine PDF mode:
               verified_restaurant + us_verified/likely_us → full personalized PDF
               plausible_unverified + likely_us/unknown    → conservative profile-based PDF
@@ -136,13 +136,13 @@ Source of truth: `docs/savings-formula.md`. Implemented in `src/lib/qualificatio
 
 ### Spend Buckets & Midpoints
 
-| Bucket | Midpoint | Base % |
-|---|---|---|
-| $500K–$800K | $650K | 5.00% |
-| $800K–$1M | $900K | 5.25% |
-| $1M–$3M | $2M | 5.50% |
-| $3M–$7M | $5M | 5.75% |
-| $7M+ | $8.5M | 6.00% |
+| Bucket | Midpoint | Base % | Max % |
+|---|---|---|---|
+| $600K–$800K | $700K | 2.00% | 4.00% |
+| $800K–$1M | $900K | 3.60% | 5.60% |
+| $1M–$3M | $2M | 4.95% | 6.95% |
+| $3M–$7M | $5M | 3.15% | 5.15% |
+| $7M+ | $8.5M | 3.66% | 5.66% |
 
 ### Modifiers (additive)
 - Distributor: national broadliner +0.70%, combo/regional +0.35%
@@ -151,7 +151,7 @@ Source of truth: `docs/savings-formula.md`. Implemented in `src/lib/qualificatio
 - Locations: 5+ +0.30%, 2–4 +0.15%
 
 ### Guardrail Rules (non-negotiable)
-- `finalPct` = `max(4.0, min(8.0, basePct + modifiers))` — **clamped to 4.0%–8.0%** (approved product decision; overrides SOP's prior 5.0% floor).
+- `finalPct` = `max(4.0, min(6.95, min(bucketMax, basePct + modifiers)))` — bucket-level ceiling first, then global 4.0%–6.95% clamp (approved product decision).
 - `dollarEstimate` = `round(finalPct / 100 × bucketMidpoint)`. No other formula.
 - 5-year projections: cumulative, 3.9% USDA inflation annually.
 - **AI (Claude) generates narrative text only.** AI must never determine `finalPct`, `spendBucket`, `dollarEstimate`, `caseStudy`, DQ status, or any qualifying decision.

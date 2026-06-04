@@ -101,7 +101,7 @@ export type QualifyLeadResult = DqResult | QualifiedResult;
 // DQ priority (docs/savings-formula.md §2):
 // 1. national_chain
 // 2. invalid_website  (404 / NXDOMAIN — NOT 403/503/timeout/blocked)
-// 3. below_threshold  (spend < $500K)
+// 3. below_threshold  (spend < $600K)
 // 4. below_minimum    (spend < $50K — sub-case of below_threshold)
 export function qualifyLead(input: QualifyLeadInput): QualifyLeadResult {
   const reasons: string[] = [];

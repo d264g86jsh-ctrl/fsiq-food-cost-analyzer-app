@@ -9,8 +9,9 @@ Implemented in: `src/lib/qualification/savings-formula.ts`, `src/lib/qualificati
 
 ## Approved Product Decision
 
-The approved `finalPct` clamp is **4.0%–8.0%**.  
-This intentionally overrides the SOP's prior 5.0%–8.0% clamp.  
+The approved `finalPct` range is **4.0%–6.95%** (global floor/ceiling).  
+Each spend bucket also has its own per-bucket maximum (see §5).  
+The formula applies bucket clamp first, then global clamp.  
 Any future change requires explicit approval and updated tests.
 
 ---
@@ -49,7 +50,7 @@ Check in this exact order. First match wins.
 
 1. `national_chain` — restaurant name matches NATIONAL_CHAINS list
 2. `invalid_website` — `websiteStatus === 404` (only HTTP 404; not 403, 503, 0, or timeout)
-3. `below_threshold` — `annualSpend < $500,000`
+3. `below_threshold` — `annualSpend < $600,000`
 4. `below_minimum` — `annualSpend < $50,000` (sub-case of below_threshold)
 
 If none match → `qualified = true`, proceed to scoring.
@@ -76,25 +77,30 @@ File: `src/lib/qualification/spend-parser.ts`
 
 | Bucket | Range | Midpoint |
 |---|---|---|
-| `$500K–$800K` | $500,000–$799,999 | $650,000 |
+| `$600K–$800K` | $600,000–$799,999 | $700,000 |
 | `$800K–$1M` | $800,000–$999,999 | $900,000 |
 | `$1M–$3M` | $1,000,000–$2,999,999 | $2,000,000 |
 | `$3M–$7M` | $3,000,000–$6,999,999 | $5,000,000 |
 | `$7M+` | $7,000,000+ | $8,500,000 |
 
-Spend below $500K → DQ (`below_threshold`). No bucket assigned.
+Spend below $600K → DQ (`below_threshold`). No bucket assigned.
 
 ---
 
-## 5. Base Percentage by Spend Bucket
+## 5. Base and Maximum Percentages by Spend Bucket
 
-| Bucket | Base % |
-|---|---|
-| `$500K–$800K` | 5.00% |
-| `$800K–$1M` | 5.25% |
-| `$1M–$3M` | 5.50% |
-| `$3M–$7M` | 5.75% |
-| `$7M+` | 6.00% |
+Each bucket has a **BASE** percentage (starting point before modifiers) and a **MAX** percentage (per-bucket ceiling before the global clamp). The MAX equals BASE + maximum possible modifiers (0.70 + 0.70 + 0.30 + 0.30 = 2.00).
+
+| Bucket | Base % | Max % |
+|---|---|---|
+| `$600K–$800K` | 2.00% | 4.00% |
+| `$800K–$1M` | 3.60% | 5.60% |
+| `$1M–$3M` | 4.95% | 6.95% |
+| `$3M–$7M` | 3.15% | 5.15% |
+| `$7M+` | 3.66% | 5.66% |
+
+Peak savings opportunity at **$1M–$3M** — where FSIQ delivers most value.  
+Lower BASE at $3M+ reflects larger operators' existing buying power.
 
 ---
 
@@ -149,12 +155,14 @@ Detected by keyword match against `topSkus` free-text field.
 ## 10. finalPct Calculation and Clamp
 
 ```
-rawTotal = basePct + distributorMod + procurementMod + skuMod + locationsMod
-finalPct = max(4.0, min(8.0, rawTotal))
+rawTotal     = basePct + distributorMod + procurementMod + skuMod + locationsMod
+bucketClamped = max(basePct, min(bucketMax, rawTotal))   // per-bucket ceiling first
+finalPct     = max(4.0, min(6.95, bucketClamped))        // then global floor/ceiling
 ```
 
-**Approved clamp: 4.0%–8.0%.**  
-Do not change floor or ceiling without explicit product approval.  
+**Bucket clamp:** Each spend bucket has its own maximum (e.g., `$1M–$3M` max is 6.95%).  
+**Global clamp:** 4.0%–6.95% — all `finalPct` values fit this range.  
+Do not change floor, ceiling, or bucket maxima without explicit product approval.  
 `finalPct` is rounded to one decimal for display (e.g. `6.4%`).
 
 ---
@@ -194,7 +202,7 @@ File: `src/lib/qualification/savings-formula.ts` (or inline in `qualify-lead.ts`
 
 | Bucket | Single location | 2–4 locations | 5+ locations |
 |---|---|---|---|
-| `$500K–$800K` | Black's BBQ | MaryAnn's Diner | MaryAnn's Diner |
+| `$600K–$800K` | Black's BBQ | MaryAnn's Diner | MaryAnn's Diner |
 | `$800K–$1M` | Black's BBQ | MaryAnn's Diner | MaryAnn's Diner |
 | `$1M–$3M` | Spirits | MaryAnn's Diner | MaryAnn's Diner |
 | `$3M–$7M` | The Oasis | Dish Society | Thunderdome |
@@ -210,8 +218,8 @@ File: `src/lib/__tests__/savings-formula.test.ts`
 
 ### Spend Parser
 - `1` → $1,000,000 (`$1M–$3M` bucket)
-- `500` → $500,000 (`$500K–$800K` bucket)
-- `500k` → $500,000 (`$500K–$800K` bucket)
+- `600` → $600,000 (`$600K–$800K` bucket)
+- `600k` → $600,000 (`$600K–$800K` bucket)
 - `1-2M` → $1,500,000 midpoint (`$1M–$3M` bucket)
 - `one million` → $1,000,000
 - `depends` → $2,000,000 fallback, `parseFallback: true`
@@ -222,13 +230,13 @@ File: `src/lib/__tests__/savings-formula.test.ts`
 - National chain name → `national_chain` regardless of spend or website
 - 404 website + valid spend → `invalid_website` (only after chain check)
 - 403/503/0/timeout website + valid spend → not `invalid_website`; proceed to spend check
-- Spend $499,999 → `below_threshold`
-- Spend $500,000 → `qualified = true`
+- Spend $599,999 → `below_threshold`
+- Spend $600,000 → `qualified = true`
 
 ### Bucket Boundaries
-- $499,999 → `below_threshold`
-- $500,000 → `$500K–$800K`
-- $799,999 → `$500K–$800K`
+- $599,999 → `below_threshold`
+- $600,000 → `$600K–$800K`
+- $799,999 → `$600K–$800K`
 - $800,000 → `$800K–$1M`
 - $999,999 → `$800K–$1M`
 - $1,000,000 → `$1M–$3M`
@@ -238,16 +246,17 @@ File: `src/lib/__tests__/savings-formula.test.ts`
 - $7,000,000 → `$7M+`
 
 ### finalPct Clamp
-- `rawTotal` = 3.5 → `finalPct` = 4.0 (floor applied)
-- `rawTotal` = 4.0 → `finalPct` = 4.0 (at floor, no clamp)
-- `rawTotal` = 6.5 → `finalPct` = 6.5 (no clamp)
-- `rawTotal` = 8.0 → `finalPct` = 8.0 (at ceiling, no clamp)
-- `rawTotal` = 9.1 → `finalPct` = 8.0 (ceiling applied)
+- `rawTotal` = 3.5 → `finalPct` = 4.0 (global floor applied)
+- `rawTotal` = 4.0 → `finalPct` = 4.0 (at floor)
+- `rawTotal` = 6.5 → `finalPct` = 6.5 (within range)
+- `rawTotal` = 6.95 → `finalPct` = 6.95 (at global ceiling)
+- `rawTotal` = 9.1 → `finalPct` = 6.95 (global ceiling applied)
+- `rawTotal` = 7.5, bucket `$1M–$3M` → `bucketClamped` = 6.95, `finalPct` = 6.95
 
 ### dollarEstimate
-- `$1M–$3M` bucket, `finalPct` 5.5% → `round(0.055 × 2,000,000)` = `$110,000`
-- `$500K–$800K` bucket, `finalPct` 4.0% → `round(0.04 × 650,000)` = `$26,000`
-- `$7M+` bucket, `finalPct` 8.0% → `round(0.08 × 8,500,000)` = `$680,000`
+- `$1M–$3M` bucket, `finalPct` 4.95% → `round(0.0495 × 2,000,000)` = `$99,000`
+- `$600K–$800K` bucket, `finalPct` 4.0% → `round(0.04 × 700,000)` = `$28,000`
+- `$7M+` bucket, `finalPct` 5.66% → `round(0.0566 × 8,500,000)` = `$481,100`
 
 ### 5-Year Projections
 - Year 1 = `dollarEstimate`
@@ -257,8 +266,8 @@ File: `src/lib/__tests__/savings-formula.test.ts`
 - Inflation rate = 3.9% annually, cumulative
 
 ### Case Study Selection
-- `$500K–$800K` + single → Black's BBQ
-- `$500K–$800K` + 2–4 → MaryAnn's Diner
+- `$600K–$800K` + single → Black's BBQ
+- `$600K–$800K` + 2–4 → MaryAnn's Diner
 - `$1M–$3M` + single → Spirits
 - `$3M–$7M` + 2–4 → Dish Society
 - `$7M+` + 5+ → Thunderdome
