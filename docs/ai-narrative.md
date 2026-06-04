@@ -95,6 +95,33 @@ interface AiResearchInput {
 
 ---
 
+## Narrative Angle System: Angle-Guided Generation
+
+Before the AI Narrative Builder is called, a **deterministic angle is selected** from the submission's
+form inputs (`procurementStrategy`, `distributorType`, `conceptType`, `locations`) via
+`src/lib/ai/angle-selector.ts`.
+
+**Important:** Narratives are **Claude-generated prose, not templates.** The angle shapes the prompt context:
+
+1. **Angle is selected** (deterministically from form inputs)
+2. **Angle context is computed** — `angle.distributorGuidance`, `angle.procurementGuidance`,
+   `angle.skuGuidance`, `angle.avoidance[]` are injected into the Claude prompt
+3. **Claude receives angle context** — tone, emphasis, guidance, and avoidances
+4. **Claude generates original prose** — not filling in template blanks, but guided by angle constraints
+5. **Result:** 5 active angle profiles produce 5 different tones, each genuinely written by Claude
+
+| Angle | Trigger | Prose Tone |
+|---|---|---|
+| `captive_buyer` | Broadliner + market_price_single | Urgent, direct |
+| `fragmented_buyer` | market_price_multiple (any distributor) | Analytical |
+| `optimized_buyer` | negotiated_cost_plus | Sophisticated, mature |
+| `premium_independent` | Local/specialty distributor + fine dining | Respectful |
+| `multi_unit_operator` | 2+ locations (modifier on top of primary angle) | Strategic |
+
+**See also:** `src/lib/ai/narrative-angles.ts` (angle definitions), `src/lib/ai/angle-selector.ts` (selection logic)
+
+---
+
 ## AI Narrative
 
 **File:** `src/lib/ai/ai-narrative.ts`
