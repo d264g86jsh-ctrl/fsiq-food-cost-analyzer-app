@@ -80,15 +80,15 @@ Source of truth: `docs/savings-formula.md`
 - `src/lib/qualification/qualify-lead.ts` — DQ priority logic, bucket assignment, full scoring pipeline
 
 **Non-negotiable rules:**
-- `finalPct` clamped to **4.0%–8.0%** (approved product decision — overrides SOP's prior 5.0% floor)
+- `finalPct` clamped to **4.0%–6.95%** globally; each bucket also has its own per-bucket max (see `docs/savings-formula.md §5`)
 - `dollarEstimate` = `round(finalPct / 100 × bucketMidpoint)` — no other formula
 - AI must not influence `finalPct`, `spendBucket`, `dollarEstimate`, `caseStudy`, or DQ decisions
 
 Required unit tests (`src/lib/__tests__/savings-formula.test.ts`):
 - Spend parser: all edge cases from `docs/savings-formula.md §14`
 - DQ priority: `national_chain` → `invalid_website` (404 only) → `below_threshold`
-- Bucket boundaries: all 6 breakpoints including $500K floor
-- `finalPct` clamp: floor at 4.0, ceiling at 8.0, mid-range passthrough
+- Bucket boundaries: all 5 breakpoints including $600K floor
+- `finalPct` clamp: floor at 4.0, global ceiling at 6.95, bucket max applied first
 - `dollarEstimate`: verify `round(finalPct / 100 × bucketMidpoint)` for each bucket
 - Case study: all bucket × locations combinations
 - 5-year projections: 3.9% USDA inflation, cumulative; Year 5 always largest

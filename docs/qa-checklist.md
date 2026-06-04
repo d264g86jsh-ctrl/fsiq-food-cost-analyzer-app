@@ -106,13 +106,21 @@ For each: confirm no Claude steps fire, no PDF generated, correct `fsiq_communic
 
 ## Website Validation (Real-Time)
 
-- [ ] Valid U.S. restaurant URL + valid U.S. ZIP → `verified_restaurant` or `plausible_unverified`, submit enabled
+- [ ] Valid U.S. restaurant URL → `verified_restaurant` or `plausible_unverified`, submit enabled
 - [ ] National chain name + valid URL → `national_chain`, submit blocked
 - [ ] URL returning 404 → `invalid_website`, submit blocked
 - [ ] Cloudflare-protected URL (403) → `plausible_unverified` or `verified_restaurant`, submit enabled
 - [ ] Timeout / unreachable → `plausible_unverified`, submit enabled, `manualReviewRequired = true`
-- [ ] Google Places returns restaurant match → `googlePlacesScore` > 0, logged in response
-- [ ] Google Places unavailable → validation degrades gracefully, does not block submission
+
+### Confidence-Driven Messaging (section G2 of website-validation-spec.md)
+
+- [ ] `centurionrestaurantgroup.com` (restaurant in domain + exists) → confidence ≥ 50 → shows: "We're still working on verifying your website, you can continue."
+- [ ] `example.com` (no signals, generic domain) → confidence < 50 → shows: "We weren't able to fully verify this website, but you can still continue. Our team may follow up."
+- [ ] 404 URL → shows: "We couldn't reach that website. Please check the URL and try again."
+- [ ] National chain → shows: chain-specific message, submit blocked
+- [ ] `verified_restaurant` → shows green checkmark (no text message)
+- [ ] `confidence` object present in `ValidationResult` (score 0–100, reasoning field populated)
+- [ ] `messageOverride` from server overrides static STATE_CONFIG message in UI
 
 ---
 
@@ -125,8 +133,8 @@ Source of truth: `docs/savings-formula.md`. Run after Phase 3 and after any chan
 | Input | Expected parse | Expected bucket |
 |---|---|---|
 | `1` | $1,000,000 | $1M–$3M |
-| `500` | $500,000 | $500K–$800K |
-| `500k` | $500,000 | $500K–$800K |
+| `600` | $600,000 | $600K–$800K |
+| `600k` | $600,000 | $600K–$800K |
 | `1-2M` | $1,500,000 (range midpoint) | $1M–$3M |
 | `one million` | $1,000,000 | $1M–$3M |
 | `depends` | $2,000,000 fallback, `parseFallback: true` | $1M–$3M |
@@ -138,13 +146,13 @@ Source of truth: `docs/savings-formula.md`. Run after Phase 3 and after any chan
 - [ ] National chain name → `national_chain` regardless of spend or website
 - [ ] 404 website + valid spend → `invalid_website` (only after chain check)
 - [ ] 403/503/0/timeout website + valid spend → NOT `invalid_website`; proceed to spend check
-- [ ] Spend $499,999 → `below_threshold`
-- [ ] Spend $500,000 → `qualified = true`
+- [ ] Spend $599,999 → `below_threshold`
+- [ ] Spend $600,000 → `qualified = true`
 
 ### Spend Bucket Boundaries
-- [ ] $499,999 → `below_threshold`
-- [ ] $500,000 → `$500K–$800K` bucket
-- [ ] $799,999 → `$500K–$800K` bucket
+- [ ] $599,999 → `below_threshold`
+- [ ] $600,000 → `$600K–$800K` bucket
+- [ ] $799,999 → `$600K–$800K` bucket
 - [ ] $800,000 → `$800K–$1M` bucket
 - [ ] $999,999 → `$800K–$1M` bucket
 - [ ] $1,000,000 → `$1M–$3M` bucket
@@ -153,21 +161,22 @@ Source of truth: `docs/savings-formula.md`. Run after Phase 3 and after any chan
 - [ ] $6,999,999 → `$3M–$7M` bucket
 - [ ] $7,000,000 → `$7M+` bucket
 
-### finalPct Clamp (approved range: 4.0%–8.0%)
-- [ ] `rawTotal` = 3.5 → `finalPct` = 4.0 (floor applied)
-- [ ] `rawTotal` = 4.0 → `finalPct` = 4.0 (at floor, no clamp)
-- [ ] `rawTotal` = 6.5 → `finalPct` = 6.5 (no clamp)
-- [ ] `rawTotal` = 8.0 → `finalPct` = 8.0 (at ceiling, no clamp)
-- [ ] `rawTotal` = 9.1 → `finalPct` = 8.0 (ceiling applied)
+### finalPct Clamp (floor 4.0%, ceiling 6.95% globally; per-bucket max applies first)
+- [ ] `rawTotal` = 3.5 → `finalPct` = 4.0 (global floor applied)
+- [ ] `rawTotal` = 4.0 → `finalPct` = 4.0 (at floor)
+- [ ] `rawTotal` = 6.5 → `finalPct` = 6.5 (within range)
+- [ ] `rawTotal` = 6.95 → `finalPct` = 6.95 (at global ceiling)
+- [ ] `rawTotal` = 9.1 → `finalPct` = 6.95 (global ceiling applied)
+- [ ] `$1M–$3M` bucket max is 6.95% — raw 7.5 → bucketClamped 6.95 → finalPct 6.95
 
 ### dollarEstimate Calculation
-- [ ] $1M–$3M bucket, `finalPct` 5.5% → `round(0.055 × 2,000,000)` = `$110,000`
-- [ ] $500K–$800K bucket, `finalPct` 4.0% → `round(0.04 × 650,000)` = `$26,000`
-- [ ] $7M+ bucket, `finalPct` 8.0% → `round(0.08 × 8,500,000)` = `$680,000`
+- [ ] $1M–$3M bucket, `finalPct` 4.95% → `round(0.0495 × 2,000,000)` = `$99,000`
+- [ ] $600K–$800K bucket, `finalPct` 4.0% → `round(0.04 × 700,000)` = `$28,000`
+- [ ] $7M+ bucket, `finalPct` 5.66% → `round(0.0566 × 8,500,000)` = `$481,100`
 
 ### Case Study Selection
-- [ ] `$500K–$800K` + single → Black's BBQ
-- [ ] `$500K–$800K` + 2–4 locations → MaryAnn's Diner
+- [ ] `$600K–$800K` + single → Black's BBQ
+- [ ] `$600K–$800K` + 2–4 locations → MaryAnn's Diner
 - [ ] `$1M–$3M` + single → Spirits
 - [ ] `$3M–$7M` + single → The Oasis
 - [ ] `$3M–$7M` + 2–4 locations → Dish Society

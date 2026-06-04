@@ -62,7 +62,7 @@ interface AiResearchInput {
   qualified: boolean;
   spendBucket: string | null;    // e.g. "$1M–$3M"
   dollarEstimate: number | null; // whole dollars, e.g. 110000
-  finalPct: number | null;       // 4.0–8.0
+  finalPct: number | null;       // 4.0–6.95 (global ceiling; per-bucket max applies first)
   year1: number | null;
   year5: number | null;
   caseStudy: string | null;

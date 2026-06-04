@@ -182,6 +182,18 @@ vercel --prod
 
 ---
 
+## Website Validation & Confidence Scoring
+
+As of commit `1a749e7`, the validator includes:
+
+- **Domain keyword detection** — `centurionrestaurantgroup.com` detects "restaurant" in the domain label, boosting confidence without bypassing 404 checks.
+- **Confidence scoring (0–100)** — determines whether `plausible_unverified` results show an encouraging or cautious message.
+- **Dynamic user messages** — `plausible_unverified` results with confidence ≥ 50 show "We're still working on verifying your website, you can continue." Results < 50 show "We weren't able to fully verify this website, but you can still continue. Our team may follow up."
+
+See `docs/website-validation-spec.md` section G2 for full scoring rules.
+
+---
+
 ## See Also
 
 - `docs/environment.md` — full env var reference table

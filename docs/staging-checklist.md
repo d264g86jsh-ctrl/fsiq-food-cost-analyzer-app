@@ -225,6 +225,21 @@ These degrade gracefully when absent. Set based on your environment.
 
 ---
 
+## 7b. Website Validation & Confidence Messaging
+
+Test confidence-driven messaging before running full scenarios.
+
+- [ ] `centurionrestaurantgroup.com` → restaurant in domain + exists → confidence ≥ 50 → UI shows: "We're still working on verifying your website, you can continue."
+- [ ] `example.com` → generic domain, no signals → confidence < 50 → UI shows: "We weren't able to fully verify this website, but you can still continue. Our team may follow up."
+- [ ] `https://mcdonalds.com` → national chain → submit blocked, chain message shown
+- [ ] URL returning 404 → "We couldn't reach that website. Please check the URL and try again." → submit blocked
+- [ ] `confidence` object present in API response (check Network tab): `score`, `reasoning`, `hasLogoHint` fields populated
+- [ ] `messageOverride` from server appears in UI — not the hardcoded STATE_CONFIG fallback
+- [ ] Plausible unverified sites (confidence < 50) still allow form submission (not blocked)
+- [ ] No console errors on website blur event
+
+---
+
 ## 8. Test Submission Scenarios
 
 Run all 8 scenarios against your staging environment. Use a real email address you control so you can verify GHL contact creation. Use a throwaway name like "Staging Test" to distinguish from real leads.
@@ -246,7 +261,7 @@ Run all 8 scenarios against your staging environment. Use a real email address y
 - Full name, email, phone: use your own
 
 **Expected outcomes:**
-- DB: `qualified = true`, `finalPct` between 5.0%–8.0%, `pdfStatus = complete`, `pdfDownloadUrl` non-null
+- DB: `qualified = true`, `finalPct` between 4.0%–6.95%, `pdfStatus = complete`, `pdfDownloadUrl` non-null
 - PDF: Full personalized PDF (6 pages), real restaurant logo on cover, real business summary in P3 narratives
 - GHL: Contact created with `fsiq_lead_status = qualified_full_pdf_ready`, `fsiq_communication_route = send_full_report`, tags: `FSIQ Analyzer Submitted`, `FSIQ Qualified`, `FSIQ Full PDF Ready`
 - Email: Full report email received with working PDF link and Calendly button
