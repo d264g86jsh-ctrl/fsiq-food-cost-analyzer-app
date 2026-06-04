@@ -28,9 +28,7 @@ Mode is determined by `determinePdfMode()` in `src/lib/pdf/pdf-mode.ts` based on
 
 **Template ID:** Set via `PDFMONKEY_TEMPLATE_ID` environment variable. Never hardcoded.
 
-**Template safety patch:** Before creating any document, `patchPdfMonkeyTemplateHtml()` (`src/lib/pdf/pdfmonkey-template.ts`) applies three idempotent patches: logo safety styles, Calendly `target="_blank"` enforcement, and the P6 directional disclaimer. Cached per template ID + patch version. Re-runs on `PATCH_VERSION` bump in `pdfmonkey.ts` (currently `v3-directional-disclaimer`).
-
-**Page 6 disclaimer:** A static directional disclaimer is injected into the P6 footer area via `injectDirectionalDisclaimer()`. It reads: *"Your estimate is directional and may vary based on distributor mix, specialty purchasing, local vendor usage, and category concentration."* This is not a payload variable — it is hardcoded in the template patch and does not affect the 29-variable payload count. Injection is idempotent (guarded by the `fsiq-directional-disclaimer` HTML comment marker).
+**Template safety patch:** Before creating any document, `patchPdfMonkeyTemplateHtml()` (`src/lib/pdf/pdfmonkey-template.ts`) ensures all Calendly CTA links in the template have `target="_blank"`. This is idempotent and cached per template ID + patch version. Re-runs on version bump (`PATCH_VERSION` constant in `pdfmonkey.ts`).
 
 ---
 

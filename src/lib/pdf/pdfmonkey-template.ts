@@ -9,7 +9,6 @@ export interface PdfMonkeyTemplatePatchResult {
 
 const OLD_CALENDLY_URL = 'https://calendly.com/neil-foodserviceiq/15-minute-meeting-clone-1';
 const SAFETY_STYLE_MARKER = 'fsiq-app-logo-safety';
-const DISCLAIMER_MARKER = 'fsiq-directional-disclaimer';
 
 const SAFE_COVER_LOGO_BLOCK = `<div class="cover-logos">
       {% if hasLogo and logoUrl != blank %}
@@ -30,7 +29,6 @@ export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatch
   next = injectLogoSafetyStyle(next);
   next = next.replaceAll(`href="${OLD_CALENDLY_URL}"`, 'href="{{ calendlyUrl }}"');
   next = ensureCtaTargetBlank(next);
-  next = injectDirectionalDisclaimer(next);
 
   next = next.replace(
     /<div class="cover-logos">\s*<div class="cover-operator-logo">[\s\S]*?{%\s*endif\s*%}\s*<\/div>\s*<div class="fsiq-cover-logo">/m,
@@ -51,30 +49,6 @@ function ensureCtaTargetBlank(html: string): string {
     /href="{{ calendlyUrl }}"(?![^>]*target=)/g,
     'href="{{ calendlyUrl }}" target="_blank"',
   );
-}
-
-// Injects a static directional-estimate disclaimer into the P6 footer area.
-// Idempotent: the DISCLAIMER_MARKER string guards against double-injection.
-// Not a payload variable — hardcoded text, does not affect the 29-variable count.
-function injectDirectionalDisclaimer(html: string): string {
-  if (html.includes(DISCLAIMER_MARKER)) return html;
-
-  const disclaimerHtml = `<!-- ${DISCLAIMER_MARKER} --><p style="font-size:7.5pt;color:#64748b;line-height:1.4;text-align:left;margin-top:0.08in;margin-bottom:0;">Your estimate is directional and may vary based on distributor mix, specialty purchasing, local vendor usage, and category concentration.</p>`;
-
-  // Locate the P6 footer / disclaimer area by the CONFIDENTIAL footer string.
-  // Insert the disclaimer paragraph immediately before it so it sits in the
-  // same footer region, left-aligned and styled consistently with the footer tone.
-  const footerMarker = 'FoodServiceIQ — CONFIDENTIAL';
-  if (html.includes(footerMarker)) {
-    return html.replace(footerMarker, `${disclaimerHtml}${footerMarker}`);
-  }
-
-  // Fallback: append before </body> if the footer string isn't found.
-  if (html.includes('</body>')) {
-    return html.replace('</body>', `${disclaimerHtml}</body>`);
-  }
-
-  return html + disclaimerHtml;
 }
 
 function injectLogoSafetyStyle(html: string): string {
