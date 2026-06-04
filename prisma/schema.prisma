@@ -123,9 +123,9 @@ model Submission {
   // All computed deterministically by the qualification engine. AI must not influence these.
   qualified    Boolean?
   dqReason     DqReason?
-  spendBucket  String?   // "$1M–$3M", "$500K–$800K", etc.
+  spendBucket  String?   // "$1M–$3M", "$600K–$800K", etc.
   bucketMidpoint Int?    // in whole dollars, e.g. 2000000
-  finalPct     Float?    // 4.0–8.0 (approved clamp)
+  finalPct     Float?    // 4.0–6.95 (approved clamp)
   dollarEstimate Int?    // round(finalPct / 100 × bucketMidpoint)
   caseStudy    String?   // "Black's BBQ", "MaryAnn's Diner", etc.
 

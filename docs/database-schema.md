@@ -48,7 +48,7 @@ The app has a single primary model: `Submission`. Every form submission creates 
 | `website` | `String` | Raw URL as entered |
 | `conceptType` | `String` | Dropdown: "Full Service Restaurant", "Fast Casual", etc. |
 | `locations` | `String` | Dropdown: "1 location", "2 locations", "3–5 locations", etc. |
-| `annualFoodSpend` | `String` | Dropdown: "$250K–$500K", "$500K–$800K", "$800K–$1M", "$1M–$3M", "$3M+" |
+| `annualFoodSpend` | `String` | Dropdown: "Under $600K", "$600K–$800K", "$800K–$1M", "$1M–$3M", "$3M–$7M", "$7M+" |
 | `distributorType` | `String` | Dropdown: "Broadline (e.g. Sysco, US Foods)", etc. |
 | `procurementStrategy` | `String` | Dropdown: procurement approach |
 | `topSkus` | `String` | Free text; parsed for protein/commodity keywords |
@@ -83,7 +83,7 @@ The app has a single primary model: `Submission`. Every form submission creates 
 | `dqReason` | `DqReason?` | Only set when `qualified = false` |
 | `spendBucket` | `String?` | e.g. `"$1M–$3M"` |
 | `bucketMidpoint` | `Int?` | In whole dollars, e.g. `2000000` |
-| `finalPct` | `Float?` | 4.0–8.0 (approved clamp) |
+| `finalPct` | `Float?` | 4.0–6.95 (approved clamp, per-bucket max applied first) |
 | `dollarEstimate` | `Int?` | `round(finalPct / 100 × bucketMidpoint)` |
 | `caseStudy` | `String?` | e.g. `"Black's BBQ"` |
 | `year1`…`year5` | `Int?` | Cumulative 5-year projections (3.9% USDA inflation) |

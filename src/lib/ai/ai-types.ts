@@ -58,7 +58,7 @@ export interface AiResearchInput {
   qualified: boolean;
   spendBucket: string | null;
   dollarEstimate: number | null;  // whole dollars, e.g. 110000
-  finalPct: number | null;        // percentage, e.g. 5.75
+  finalPct: number | null;        // percentage, e.g. 4.95
   year1: number | null;
   year5: number | null;
   caseStudy: string | null;
