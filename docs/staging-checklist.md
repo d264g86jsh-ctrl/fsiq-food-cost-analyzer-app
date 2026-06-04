@@ -310,7 +310,7 @@ Run all 8 scenarios against your staging environment. Use a real email address y
 
 ### Scenario E — DQ: Below Threshold
 
-**Input:** Annual food spend: `$200,000` (below $500K floor).
+**Input:** Annual food spend: `$200,000` (below $600K floor).
 
 **Expected outcomes:**
 - DB: `qualified = false`, `dqReason = below_threshold`

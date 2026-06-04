@@ -146,7 +146,7 @@ Detected by keyword match against `topSkus` free-text field.
 
 | Locations | Modifier |
 |---|---|
-| 5+ locations | +0.30% |
+| 5-10 locations or 10+ locations (`5+` category) | +0.30% |
 | 2–4 locations | +0.15% |
 | Single location | +0.00% |
 
@@ -200,7 +200,7 @@ Do not change the inflation rate without approval.
 
 File: `src/lib/qualification/savings-formula.ts` (or inline in `qualify-lead.ts`)
 
-| Bucket | Single location | 2–4 locations | 5+ locations |
+| Bucket | Single location | 2–4 locations | 5+ locations (incl. 5-10 and 10+) |
 |---|---|---|---|
 | `$600K–$800K` | Black's BBQ | MaryAnn's Diner | MaryAnn's Diner |
 | `$800K–$1M` | Black's BBQ | MaryAnn's Diner | MaryAnn's Diner |

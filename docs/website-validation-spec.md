@@ -35,7 +35,7 @@ The analyzer is for **U.S.-based restaurants only** in v1. International operato
 | `clear_non_fit` | Clearly not a restaurant (SaaS, supplier, agency) **or** non-U.S. (`internalFlag: non_us_ineligible`) | None | Polite DQ email (vendor) or polite ineligible message (non-U.S.) |
 | `national_chain` | Matched national chain list | None | National chain DQ email |
 | `invalid_website` | Confirmed 404, DNS NXDOMAIN, or malformed URL only | None | Invalid website DQ email |
-| `below_threshold` | Spend < $500K (post-qualification) | None | Below threshold DQ email |
+| `below_threshold` | Spend < $600K (post-qualification) | None | Below threshold DQ email |
 
 **PDF eligibility rules:**
 - Full personalized PDF: `verified_restaurant` + `countryEligibility` is `us_verified` or `likely_us` + not national chain + spend qualifies

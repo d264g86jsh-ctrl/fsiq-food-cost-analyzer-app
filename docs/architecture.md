@@ -146,7 +146,7 @@ Source of truth: `docs/savings-formula.md`. Implemented in `src/lib/qualificatio
 
 ### Modifiers (additive)
 - Distributor: national broadliner +0.70%, combo/regional +0.35%
-- Procurement: market price single +0.70%, market price multi +0.35%, GPO +0.20%
+- Procurement: market price single +0.70%, market price multi +0.35%, negotiated_cost_plus +0.00% (GPO +0.20% for legacy DB records — no longer a form option)
 - SKU mix: protein + commodity +0.30%, either alone +0.15%
 - Locations: 5+ +0.30%, 2–4 +0.15%
 

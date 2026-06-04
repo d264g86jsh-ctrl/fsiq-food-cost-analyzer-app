@@ -21,6 +21,6 @@ Focused project specs override the historical SOP when they document approved pr
 
 ## Override Examples
 
-- SOP says `finalPct` 5.0%–8.0% → `savings-formula.md` says 4.0%–8.0% → **savings-formula.md wins**
+- SOP says `finalPct` 5.0%–8.0% → `savings-formula.md` says 4.0%–6.95% → **savings-formula.md wins**
 - SOP references Zapier → `architecture.md` says app backend owns the workflow → **architecture.md wins**
 - SOP collects contact fields upfront → `analyzer-ux-flow.md` says contact fields come last → **analyzer-ux-flow.md wins**

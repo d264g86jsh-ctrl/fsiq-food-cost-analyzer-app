@@ -92,7 +92,7 @@ For each: confirm no Claude steps fire, no PDF generated, correct `fsiq_communic
 
 - [ ] Submit with `https://spiritscenla.com` as website (Cloudflare-protected)
 - [ ] `websiteStatus` = 200 or 403 — **not** 0 or 404
-- [ ] Lead proceeds to Qualified path (if spend > $500K)
+- [ ] Lead proceeds to Qualified path (if spend > $600K)
 
 ---
 

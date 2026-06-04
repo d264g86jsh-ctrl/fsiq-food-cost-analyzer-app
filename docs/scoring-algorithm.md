@@ -236,8 +236,7 @@ Word scores: `restaurant`, `bistro`, `brasserie`, `trattoria`, `taqueria`, `pizz
 
 ## See Also
 
-- `docs/website-validation-updates.md` — delta summary of this session's changes
-- `docs/website-validation-spec.md` — original full spec (now partially stale; this file overrides it on thresholds)
+- `docs/website-validation-spec.md` — full validation spec, including section G2 for domain detection and confidence scoring (this file overrides the spec on signal weights and thresholds)
 - `docs/database-schema.md` — `restaurantSignalScore`, `negativeSignalScore` fields
 - `src/lib/relevance/classify-restaurant.ts` — full scoring implementation
 - `src/lib/website/extract-signals.ts` — signal extraction from raw HTML
