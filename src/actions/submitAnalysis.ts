@@ -29,6 +29,7 @@ import { generateAiNarrative } from '@/lib/ai/ai-narrative';
 import { buildFallbackResearch, buildFallbackNarrative } from '@/lib/ai/fallback-narrative';
 import { determinePdfMode } from '@/lib/pdf/pdf-mode';
 import { generatePdf } from '@/lib/pdf/pdfmonkey';
+import { cachePdfToSupabase } from '@/lib/pdf/pdf-cache';
 import type { GeneratePdfResult, GeneratePdfInput } from '@/lib/pdf/pdf-types';
 import type { AiResearchResult, AiNarrativeResult } from '@/lib/ai/ai-types';
 import { assignLeadStatus, needsAiAndPdf, type AssignLeadStatusResult } from '@/lib/crm/assign-lead-status';
@@ -340,6 +341,30 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
         pdfResult = { pdfStatus: 'error', pdfMode: pdfModeDecision.mode, pdfMonkeyDocumentId: null, pdfDownloadUrl: null, pdfError: err instanceof Error ? err.message : String(err), pdfRetryCount: 0, pdfUrlType: null };
       }
     }
+    // ── Cache PDF to Supabase Storage (non-fatal fallback) ───────────────────────
+    // Fetch fresh PDF bytes while download_url is still valid and store permanently.
+    // This ensures /api/report/[id] can serve the PDF even after PDFMonkey URLs expire.
+    let pdfCachedUrl: string | null = null;
+    let pdfCachedAt: Date | null = null;
+    if (pdfResult.pdfStatus === 'complete' && pdfResult.pdfDownloadUrl) {
+      try {
+        const pdfBytes = await fetch(pdfResult.pdfDownloadUrl, {
+          signal: AbortSignal.timeout(30_000),
+        });
+        if (pdfBytes.ok) {
+          const buffer = await pdfBytes.arrayBuffer();
+          const cached = await cachePdfToSupabase(submissionId, buffer);
+          if (cached) {
+            pdfCachedUrl = cached.url;
+            pdfCachedAt  = cached.cachedAt;
+          }
+        }
+      } catch (cacheErr) {
+        // Non-fatal — PDF still accessible via PDFMonkey URL while fresh
+        console.warn(`[submitAnalysis] PDF cache failed for ${submissionId}:`, cacheErr);
+      }
+    }
+
     await patch({
       pdfMode:             pdfResult.pdfMode as PdfMode | null,
       pdfStatus:           pdfResult.pdfStatus as PdfStatus,
@@ -348,6 +373,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       pdfUrlType:          pdfResult.pdfUrlType,
       pdfError:            pdfResult.pdfError,
       pdfRetryCount:       pdfResult.pdfRetryCount,
+      ...(pdfCachedUrl ? { pdfCachedUrl, pdfCachedAt } : {}),
       workflowStage:       'pdf_generation',
     });
 

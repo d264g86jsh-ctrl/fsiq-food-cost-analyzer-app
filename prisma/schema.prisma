@@ -155,6 +155,8 @@ model Submission {
   pdfUrlType          String?   // 'download' = S3 binary (iframe-safe); 'viewer' = PDFMonkey preview page
   pdfError            String?
   pdfRetryCount       Int      @default(0)
+  pdfCachedUrl        String?   // Supabase Storage permanent URL — fallback when PDFMonkey URL expires
+  pdfCachedAt         DateTime? // When the PDF was cached to Supabase Storage
 
   // ── Email delivery ────────────────────────────────────────────────────────
   emailStatus     EmailStatus?

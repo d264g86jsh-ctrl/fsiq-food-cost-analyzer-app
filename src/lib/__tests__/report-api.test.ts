@@ -94,23 +94,27 @@ describe('GET /api/report/[id]', () => {
       expect(res.status).toBe(404);
     });
 
-    it('returns 404 when pdfDownloadUrl is null', async () => {
+    it('returns 410 when all URL strategies exhausted (no pdfMonkeyDocumentId, no cache, no stored URL)', async () => {
       vi.mocked(db.submission.findUnique).mockResolvedValue({
         qualified: true,
         pdfDownloadUrl: null,
+        pdfMonkeyDocumentId: null,
+        pdfCachedUrl: null,
       } as never);
       const res = await GET(makeRequest(), makeParams('no-pdf-id'));
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(410);
     });
 
-    it('returns 502 when upstream fetch fails', async () => {
+    it('returns 410 when all upstream fetches fail (PDFMonkey unreachable, no cache)', async () => {
       vi.mocked(db.submission.findUnique).mockResolvedValue({
         qualified: true,
         pdfDownloadUrl: 'https://cdn.example.com/report.pdf',
+        pdfMonkeyDocumentId: null,
+        pdfCachedUrl: null,
       } as never);
       vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(null, { status: 503 })));
       const res = await GET(makeRequest(), makeParams('test-id'));
-      expect(res.status).toBe(502);
+      expect(res.status).toBe(410);
     });
   });
 });

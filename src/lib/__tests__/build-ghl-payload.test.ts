@@ -78,6 +78,8 @@ function makeSubmission(overrides: Partial<Submission> = {}): Submission {
     workflowErrors: null,
     createdAt: new Date('2026-05-16T00:00:00Z'),
     updatedAt: new Date('2026-05-16T00:05:00Z'),
+    pdfCachedUrl: null,
+    pdfCachedAt: null,
     ...overrides,
   };
 }
