@@ -585,6 +585,10 @@ function knownNonRestaurantDomain(domain: string, restaurantName: string): boole
   const normalizedName = restaurantName.trim().toLowerCase();
   if (KNOWN_NON_RESTAURANT_NAMES.has(normalizedName)) return true;
   if (normalized === 'rfrnyc.com' && !/\brfr\b|realty|real estate/i.test(restaurantName)) return false;
+  // .edu domains are institutional (universities, schools) — never independent restaurants.
+  if (normalized.endsWith('.edu') || normalized.includes('.edu/')) return true;
+  // .gov domains are government agencies — never restaurants.
+  if (normalized.endsWith('.gov') || normalized.includes('.gov/')) return true;
   return KNOWN_NON_RESTAURANT_DOMAINS.has(normalized);
 }
 

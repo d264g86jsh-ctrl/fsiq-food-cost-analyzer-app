@@ -298,9 +298,18 @@ export function detectNationalChain(options: {
   return { isChain: false, matchedChain: null, score: 0, matchSource: null };
 }
 
-// Full-word match: alias must appear as a complete token (not partial substring of another word)
+// Full-word match: alias must appear as a complete token (not partial substring of another word).
+// Excludes descriptive references like "McDonald's Style Burgers" — where the chain name is
+// used as an adjective rather than a self-identification (e.g. franchise, city, store number).
+const DESCRIPTIVE_QUALIFIERS = /^[\s-]*(style|styled|styles|inspired|like|type|brand|themed|based|concept)\b/i;
+
 function isFullMatch(haystack: string, needle: string): boolean {
   if (!needle || !haystack) return false;
   const escaped = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, 'i').test(haystack);
+  const match = new RegExp(`(^|[^a-z0-9])(${escaped})([^a-z0-9]|$)`, 'i').exec(haystack);
+  if (!match) return false;
+  // If the text immediately after the matched alias is a descriptive qualifier, it's NOT the chain.
+  const afterAlias = haystack.slice(match.index + match[0].length);
+  if (DESCRIPTIVE_QUALIFIERS.test(afterAlias)) return false;
+  return true;
 }
