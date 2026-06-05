@@ -89,4 +89,47 @@ describe('normalizeUrl', () => {
     const r = normalizeUrl('https://casaroberto.com');
     expect(r.isKnownVendor).toBe(false);
   });
+
+  // ── Private / reserved host rejection (Fix: adversarial test B03, B04) ────────
+  // These must short-circuit to isValid=false without attempting any network fetch.
+
+  it('localhost → isValid=false', () => {
+    const r = normalizeUrl('http://localhost:3000');
+    expect(r.isValid).toBe(false);
+  });
+
+  it('localhost no port → isValid=false', () => {
+    const r = normalizeUrl('http://localhost');
+    expect(r.isValid).toBe(false);
+  });
+
+  it('IPv4 loopback 127.0.0.1 → isValid=false', () => {
+    const r = normalizeUrl('http://127.0.0.1');
+    expect(r.isValid).toBe(false);
+  });
+
+  it('private 192.168.x.x → isValid=false', () => {
+    const r = normalizeUrl('http://192.168.1.1');
+    expect(r.isValid).toBe(false);
+  });
+
+  it('private 10.x.x.x → isValid=false', () => {
+    const r = normalizeUrl('http://10.0.0.1');
+    expect(r.isValid).toBe(false);
+  });
+
+  it('private 172.16.x.x → isValid=false', () => {
+    const r = normalizeUrl('http://172.16.0.1');
+    expect(r.isValid).toBe(false);
+  });
+
+  it('link-local 169.254.x.x → isValid=false', () => {
+    const r = normalizeUrl('http://169.254.0.1');
+    expect(r.isValid).toBe(false);
+  });
+
+  it('public IP (e.g. 8.8.8.8) → isValid=true (not blocked)', () => {
+    const r = normalizeUrl('http://8.8.8.8');
+    expect(r.isValid).toBe(true);
+  });
 });

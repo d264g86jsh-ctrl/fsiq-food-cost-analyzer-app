@@ -73,6 +73,12 @@ export function normalizeUrl(raw: string): NormalizeResult {
     return { normalizedUrl: input, isValid: false, platform: null, isKnownVendor: false, originalInput: original };
   }
 
+  // Reject loopback, private, and non-routable addresses immediately — no fetch attempted.
+  // http://localhost, http://192.168.1.1, http://10.0.0.1, etc. are never valid restaurant URLs.
+  if (isPrivateOrReservedHost(url.hostname)) {
+    return { normalizedUrl: input, isValid: false, platform: null, isKnownVendor: false, originalInput: original };
+  }
+
   // Remove trailing slash from pathname
   if (url.pathname !== '/') {
     url.pathname = url.pathname.replace(/\/$/, '');
@@ -88,6 +94,28 @@ export function normalizeUrl(raw: string): NormalizeResult {
     isKnownVendor,
     originalInput: original,
   };
+}
+
+function isPrivateOrReservedHost(hostname: string): boolean {
+  // Loopback names
+  if (hostname === 'localhost') return true;
+  // IPv6 loopback
+  if (hostname === '::1' || hostname === '[::1]') return true;
+  // IPv4 — validate and check reserved ranges
+  const ipv4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(hostname);
+  if (ipv4) {
+    const octets = ipv4.slice(1).map(Number);
+    if (octets.some((o) => o > 255)) return false; // malformed — let it through to fail
+    const [a, b] = octets;
+    if (a === 10) return true;                          // 10.0.0.0/8 private
+    if (a === 172 && b >= 16 && b <= 31) return true;  // 172.16.0.0/12 private
+    if (a === 192 && b === 168) return true;            // 192.168.0.0/16 private
+    if (a === 127) return true;                          // 127.0.0.0/8 loopback
+    if (a === 169 && b === 254) return true;            // 169.254.0.0/16 link-local
+    if (a === 0) return true;                            // 0.0.0.0/8 this-network
+    if (a === 100 && b >= 64 && b <= 127) return true; // 100.64.0.0/10 shared address space
+  }
+  return false;
 }
 
 function detectPlatform(hostname: string): KnownPlatform | null {

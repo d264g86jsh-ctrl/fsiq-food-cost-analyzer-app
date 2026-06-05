@@ -7,6 +7,7 @@ import {
 } from './SubmissionStatusBadge';
 import { WorkflowTimeline } from './WorkflowTimeline';
 import { ManualReviewPanel } from './ManualReviewPanel';
+import { RetryGhlButton } from './RetryGhlButton';
 import {
   formatDate,
   formatDollar,
@@ -230,7 +231,11 @@ export function SubmissionDetail({ submission }: SubmissionDetailProps) {
       {/* GHL / CRM */}
       <Card
         title="GHL / CRM"
-        action={<CrmSyncBadge status={submission.crmSyncStatus} />}
+        action={
+          submission.crmSyncStatus === 'error'
+            ? <RetryGhlButton submissionId={submission.id} />
+            : <CrmSyncBadge status={submission.crmSyncStatus} />
+        }
       >
         <Row label="CRM sync status"><CrmSyncBadge status={submission.crmSyncStatus} /></Row>
         <Row label="GHL contact ID">

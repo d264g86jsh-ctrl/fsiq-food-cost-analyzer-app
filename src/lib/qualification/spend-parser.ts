@@ -177,15 +177,14 @@ function parseSingleToken(s: string, notes: string[]): number | null {
 }
 
 function applyBareHeuristic(n: number, notes: string[]): number {
+  // 1–99: shorthand for millions ("5" → $5M, "1" → $1M)
   if (n > 0 && n < 100) {
     notes.push('bare_heuristic:millions');
     return Math.round(n * 1_000_000);
   }
-  if (n >= 100 && n <= 9_999) {
-    notes.push('bare_heuristic:thousands');
-    return Math.round(n * 1_000);
-  }
-  // >= 10,000 treated as exact dollar amount
+  // ≥100 without a K/M suffix is treated as an exact dollar amount.
+  // "9999" → $9,999  "600000" → $600,000  "1000000" → $1,000,000
+  // The old 100–9999 → thousands heuristic caused "9999" to parse as $9.999M.
   notes.push('bare_heuristic:exact');
   return Math.round(n);
 }

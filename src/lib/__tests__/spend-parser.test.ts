@@ -16,19 +16,19 @@ describe('parseSpend', () => {
     expect(r.parseFallback).toBe(false);
   });
 
-  it('bare "500" → $500,000 (100–9999 = thousands)', () => {
+  it('bare "500" → $500 (exact — no thousands heuristic)', () => {
     const r = parseSpend('500');
-    expect(r.annualSpend).toBe(500_000);
+    expect(r.annualSpend).toBe(500);
     expect(r.parseFallback).toBe(false);
   });
 
-  it('bare "750" → $750,000', () => {
+  it('bare "750" → $750 (exact)', () => {
     const r = parseSpend('750');
-    expect(r.annualSpend).toBe(750_000);
+    expect(r.annualSpend).toBe(750);
     expect(r.parseFallback).toBe(false);
   });
 
-  it('bare "50000" → $50,000 (>= 10,000 = exact)', () => {
+  it('bare "50000" → $50,000 (exact dollars)', () => {
     const r = parseSpend('50000');
     expect(r.annualSpend).toBe(50_000);
     expect(r.parseFallback).toBe(false);
@@ -270,9 +270,37 @@ describe('parseSpend', () => {
     expect(r.parseFallback).toBe(false);
   });
 
-  it('"100" → $100,000 (bare 100 → thousands)', () => {
+  it('"100" → $100 (exact — no thousands heuristic)', () => {
     const r = parseSpend('100');
-    expect(r.annualSpend).toBe(100_000);
+    expect(r.annualSpend).toBe(100);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  // ── Adversarial bare-integer cases ─────────────────────────────────────────
+  // These confirm the removed 100–9999 → thousands heuristic stays gone.
+
+  it('"9999" → $9,999 (exact, below_minimum — not $9.999M)', () => {
+    const r = parseSpend('9999');
+    expect(r.annualSpend).toBe(9_999);
+    expect(r.parseFallback).toBe(false);
+    expect(r.parseNotes).toContain('bare_heuristic:exact');
+  });
+
+  it('"600000" → $600,000 (exact, qualifies at $600K–$800K bucket)', () => {
+    const r = parseSpend('600000');
+    expect(r.annualSpend).toBe(600_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"1000000" → $1,000,000 (exact, qualifies at $800K–$1M bucket)', () => {
+    const r = parseSpend('1000000');
+    expect(r.annualSpend).toBe(1_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"1500000" → $1,500,000 (exact, qualifies at $1M–$3M bucket)', () => {
+    const r = parseSpend('1500000');
+    expect(r.annualSpend).toBe(1_500_000);
     expect(r.parseFallback).toBe(false);
   });
 });
