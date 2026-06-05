@@ -674,6 +674,26 @@ const KNOWN_NON_RESTAURANT_DOMAINS = new Set([
   'urbanoutfitters.com', 'renttherunway.com', 'everlane.com', 'bombas.com',
   // Group G — home services and finance confirmed FPs
   'mrrooter.com', 'maaco.com', 'servicemaster.com', 'hotpads.com',
+  // Phase 2 stress-test domains (non-restaurants that leaked through)
+  // News / media
+  'cnn.com', 'bbc.com', 'nytimes.com', 'techcrunch.com', 'wired.com',
+  'theverge.com', 'axios.com', 'politico.com', 'washingtonpost.com',
+  'wsj.com', 'bloomberg.com', 'reuters.com', 'apnews.com',
+  // E-commerce / retail
+  'ebay.com', 'target.com', 'bestbuy.com', 'walmart.com',
+  // Finance / banking
+  'chase.com', 'robinhood.com', 'nerdwallet.com', 'bankofamerica.com',
+  'wellsfargo.com', 'schwab.com',
+  // Healthcare
+  'webmd.com', 'teladoc.com', 'cvs.com', 'walgreens.com',
+  // Government / nonprofit
+  'usa.gov', 'irs.gov', 'usda.gov', 'redcross.org', 'cdc.gov',
+  // Sports / entertainment
+  'espn.com', 'nfl.com', 'nba.com', 'mlb.com', 'ticketmaster.com',
+  // Education
+  'khanacademy.org', 'coursera.org', 'duolingo.com', 'udemy.com',
+  // Real estate / other
+  'apartments.com', 'priceline.com', 'autozone.com',
 ]);
 
 function computeProtectedRestaurantContextScore(options: {

@@ -48,6 +48,10 @@ export function needsAiAndPdf(input: {
   if (input.workflowFailed) return false;
   if (input.manualReviewRequired) return false;
   if (input.finalDecision === 'clear_non_fit') return false;
+  // Belt-and-suspenders: chains must never get PDFs even if qualified somehow slips through
+  if (input.finalDecision === 'national_chain') return false;
+  // Belt-and-suspenders: confirmed invalid websites must never get PDFs
+  if (input.finalDecision === 'invalid_website') return false;
   return input.qualified;
 }
 
