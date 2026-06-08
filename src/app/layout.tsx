@@ -8,6 +8,13 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "FSIQ Food Cost Analyzer",
   description: "FoodServiceIQ Food Cost Analyzer",
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/brand/fsiq-iq-logo.png', type: 'image/png', sizes: '320x320' },
+    ],
+    apple: '/brand/fsiq-iq-logo.png',
+  },
 };
 
 export default function RootLayout({
