@@ -416,7 +416,7 @@ export function AnalyzerForm() {
                 value={formData.annual_food_spend ?? ''}
                 onChange={(e) => update('annual_food_spend', e.target.value)}
               />
-              <p className="text-[11px] text-[#64748b] mt-1">Enter your annual distributor spend</p>
+              <p className="text-[11px] text-[#64748b] mt-1">Use K or M suffix — e.g. $800K, $1.5M, or $800,000</p>
             </FormField>
           </div>
         )}
@@ -457,6 +457,7 @@ export function AnalyzerForm() {
                 onBlur={handleSkuBlur}
                 placeholder="Chicken, beef, seafood, dairy, produce, fryer oil…"
                 rows={3}
+                maxLength={500}
                 className={textareaCls}
               />
               {skuValidation === 'validating' && (

@@ -698,6 +698,8 @@ const KNOWN_NON_RESTAURANT_DOMAINS = new Set([
   'khanacademy.org', 'coursera.org', 'duolingo.com', 'udemy.com',
   // Real estate / other
   'apartments.com', 'priceline.com', 'autozone.com',
+  // Grocery chains, food media, ghost kitchen platforms — confirmed non-restaurant false positives
+  'wholefoodsmarket.com', 'seriouseats.com', 'cloudkitchens.com',
 ]);
 
 function computeProtectedRestaurantContextScore(options: {
