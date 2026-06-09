@@ -156,6 +156,16 @@ export function qualifyLead(input: QualifyLeadInput): QualifyLeadResult {
     return dq('below_threshold', input, reasons, flags, spendParse);
   }
 
+  // ── Unresolvable spend input ───────────────────────────────────────────────
+  // parseFallback means the parser could not extract any recognizable amount
+  // (e.g. "asdfghjkl", empty, pure gibberish). Qualifying on a $2M guess from
+  // garbage input would generate PDFs for submissions that clearly did not
+  // provide valid spend data.
+  if (spendParse.parseFallback) {
+    reasons.push('spend_unresolvable:parse_fallback');
+    return dq('below_threshold', input, reasons, flags, spendParse);
+  }
+
   // ── Qualified — run savings formula ────────────────────────────────────────
   const bucketResult = assignBucket(annualSpend);
   if (!bucketResult) {

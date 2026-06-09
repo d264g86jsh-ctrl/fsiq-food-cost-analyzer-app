@@ -289,13 +289,18 @@ describe('DQ: capped spend (above $99M)', () => {
     expect(r.spendBucket).toBe('$7M+');
   });
 
-  it('"2 grazillion" → qualified (parseFallback $2M, no cap, normal $1M–$3M route)', () => {
+  it('"2 grazillion" → DQ below_threshold (parseFallback, unresolvable input)', () => {
     const r = qualifyLead(makeInput({ annualFoodSpend: '2 grazillion' }));
-    expect(r.qualified).toBe(true);
-    expect(r.dqReason).toBeNull();
-    if (!r.qualified) return;
-    expect(r.spendBucket).toBe('$1M–$3M');
-    expect(r.internalFlags).toContain('spend_parse_fallback');
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+    expect(r.reasons).toContain('spend_unresolvable:parse_fallback');
+  });
+
+  it('"asdfghjkl" → DQ below_threshold (pure gibberish)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: 'asdfghjkl' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+    expect(r.reasons).toContain('spend_unresolvable:parse_fallback');
   });
 });
 
