@@ -413,4 +413,131 @@ describe('parseSpend', () => {
     const r = parseSpend('not sure');
     expect(r.parseFallback).toBe(true);
   });
+
+  // ── Qualifier word typo variants ─────────────────────────────────────────
+  // Misspellings of "around", "roughly", "about" are stripped before parsing.
+
+  it('"arond 1 million" → $1,000,000 (around typo)', () => {
+    const r = parseSpend('arond 1 million');
+    expect(r.annualSpend).toBe(1_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"aound 2M" → $2,000,000 (around typo)', () => {
+    const r = parseSpend('aound 2M');
+    expect(r.annualSpend).toBe(2_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"arround 800k" → $800,000 (around typo)', () => {
+    const r = parseSpend('arround 800k');
+    expect(r.annualSpend).toBe(800_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"roughyl 2M" → $2,000,000 (roughly typo)', () => {
+    const r = parseSpend('roughyl 2M');
+    expect(r.annualSpend).toBe(2_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"roughy 1.5M" → $1,500,000 (roughly typo)', () => {
+    const r = parseSpend('roughy 1.5M');
+    expect(r.annualSpend).toBe(1_500_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"rougly 800k" → $800,000 (roughly typo)', () => {
+    const r = parseSpend('rougly 800k');
+    expect(r.annualSpend).toBe(800_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"abut 1 million" → $1,000,000 (about typo)', () => {
+    const r = parseSpend('abut 1 million');
+    expect(r.annualSpend).toBe(1_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"abot 2M" → $2,000,000 (about typo)', () => {
+    const r = parseSpend('abot 2M');
+    expect(r.annualSpend).toBe(2_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"abotu 800k" → $800,000 (about typo)', () => {
+    const r = parseSpend('abotu 800k');
+    expect(r.annualSpend).toBe(800_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  // ── Billion input → $99M cap + DQ ────────────────────────────────────────
+  // "N billion" produces > $99M, hits the cap, and DQs via capped_at_99m.
+
+  it('"2 billion" → capped to $99M, capped_at_99m note', () => {
+    const r = parseSpend('2 billion');
+    expect(r.annualSpend).toBe(99_000_000);
+    expect(r.parseFallback).toBe(false);
+    expect(r.parseNotes).toContain('capped_at_99m');
+  });
+
+  it('"1 billion" → capped to $99M', () => {
+    const r = parseSpend('1 billion');
+    expect(r.annualSpend).toBe(99_000_000);
+    expect(r.parseNotes).toContain('capped_at_99m');
+  });
+
+  it('"half billion" → capped to $99M (0.5B = $500M)', () => {
+    const r = parseSpend('half billion');
+    expect(r.annualSpend).toBe(99_000_000);
+    expect(r.parseNotes).toContain('capped_at_99m');
+  });
+
+  // ── Thousand typo variants ────────────────────────────────────────────────
+  // thou / thous / thousnd / thousan → normalized to "thousand" before parsing.
+
+  it('"500 thou" → $500,000', () => {
+    const r = parseSpend('500 thou');
+    expect(r.annualSpend).toBe(500_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"800 thous" → $800,000', () => {
+    const r = parseSpend('800 thous');
+    expect(r.annualSpend).toBe(800_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"1500 thousnd" → $1,500,000', () => {
+    const r = parseSpend('1500 thousnd');
+    expect(r.annualSpend).toBe(1_500_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"600 thousan" → $600,000', () => {
+    const r = parseSpend('600 thousan');
+    expect(r.annualSpend).toBe(600_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  // ── kk double-tap typo ────────────────────────────────────────────────────
+  // "800kk" → normalized to "800k" before K-suffix branch runs.
+
+  it('"800kk" → $800,000', () => {
+    const r = parseSpend('800kk');
+    expect(r.annualSpend).toBe(800_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"500kk" → $500,000', () => {
+    const r = parseSpend('500kk');
+    expect(r.annualSpend).toBe(500_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"1500kk" → $1,500,000', () => {
+    const r = parseSpend('1500kk');
+    expect(r.annualSpend).toBe(1_500_000);
+    expect(r.parseFallback).toBe(false);
+  });
 });

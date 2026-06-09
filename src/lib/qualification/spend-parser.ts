@@ -36,9 +36,22 @@ const WORD_NUMBERS: Record<string, number> = {
 // Range separators
 const RANGE_PATTERN = /^(.+?)\s*(?:[-–—]|to|thru|through)\s*(.+)$/i;
 
-// Million typo normalization: mllion, mlion, milion, millon → million
+// Text normalization for common spend-input typos.
+// Handles million, billion, thousand variants and the "kk" double-tap typo.
 function normalizeMillion(s: string): string {
-  return s.replace(/m(?:ll|l|il|ill)i?o?n/gi, 'million');
+  // million typos: mllion, mlion, milion, millon → million
+  s = s.replace(/m(?:ll|l|il|ill)i?o?n/gi, 'million');
+  // billion/billions (and typos bilion, bilions) → billion
+  // "2 billion" will parse as 2 × 1B, exceed the $99M cap, and DQ.
+  s = s.replace(/b(?:ill?|l)i?o?ns?/gi, 'billion');
+  // thousand typos: thou, thous, thousnd, thousan → thousand
+  // Enumerated longest-first to prevent partial replacement (thousnd before thous before thou).
+  s = s.replace(/\b(?:thousnd|thousan|thous|thou)\b/gi, 'thousand');
+  // kk double-tap: "800kk" → "800k"
+  // \bkk\b won't match "800kk" (no word boundary between digit and k),
+  // so match kk at a word boundary on the right only.
+  s = s.replace(/kk\b/gi, 'k');
+  return s;
 }
 
 const MAX_SPEND = 99_000_000;
@@ -64,7 +77,10 @@ function _parseSpend(rawInput: string): SpendParseResult {
 
   // Strip leading qualifier/hedging words — "around 1 million" → "1 million"
   // Only stripped from the start of the string to avoid corrupting mid-string values.
-  const stripped = trimmed.replace(/^(?:around|roughly|about|approximately|approx|~)\s+/i, '');
+  const stripped = trimmed.replace(
+    /^(?:around|arond|aound|arround|roughly|roughyl|roughy|rougly|about|abut|abot|abotu|approximately|aproximately|aproximatly|approx|~)\s+/i,
+    '',
+  );
 
   // Normalize million typos first
   let s = normalizeMillion(stripped);
@@ -127,6 +143,11 @@ function parseSingleToken(s: string, notes: string[]): number | null {
     const wordRegex = new RegExp(`(?:^|\\s)${escapeRegex(word)}(?:\\s|$)`);
     if (!wordRegex.test(s) && s !== word) continue;
 
+    // "X billion" — produces a value > $99M, will be capped and DQ'd
+    if (/\bbillions?\b/.test(s)) {
+      notes.push(`word_number:${word}×billion`);
+      return Math.round(num * 1_000_000_000);
+    }
     // "X million"
     if (/\bmillion\b/.test(s)) {
       notes.push(`word_number:${word}×million`);
@@ -141,6 +162,16 @@ function parseSingleToken(s: string, notes: string[]): number | null {
     if (s === word || s.trim() === word) {
       notes.push(`word_number:${word}`);
       return applyBareHeuristic(num, notes);
+    }
+  }
+
+  // "X.Y billion" / "X billion" — numeric form; will exceed $99M cap and DQ
+  const billionMatch = s.match(/^([\d.]+)\s*billions?$/);
+  if (billionMatch) {
+    const n = parseFloat(billionMatch[1]);
+    if (!isNaN(n)) {
+      notes.push('n_billion');
+      return Math.round(n * 1_000_000_000);
     }
   }
 
