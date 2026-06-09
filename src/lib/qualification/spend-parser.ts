@@ -62,8 +62,12 @@ function _parseSpend(rawInput: string): SpendParseResult {
     return { rawInput, annualSpend: FALLBACK_AMOUNT, parseFallback: true, parseNotes: ['empty_input'] };
   }
 
+  // Strip leading qualifier/hedging words — "around 1 million" → "1 million"
+  // Only stripped from the start of the string to avoid corrupting mid-string values.
+  const stripped = trimmed.replace(/^(?:around|roughly|about|approximately|approx|~)\s+/i, '');
+
   // Normalize million typos first
-  let s = normalizeMillion(trimmed);
+  let s = normalizeMillion(stripped);
 
   // Strip currency symbols and commas
   s = s.replace(/[$€£¥]/g, '').replace(/,/g, '').trim();

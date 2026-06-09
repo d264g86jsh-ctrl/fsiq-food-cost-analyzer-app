@@ -365,4 +365,52 @@ describe('parseSpend', () => {
     expect(r.parseFallback).toBe(false);
     expect(r.parseNotes).not.toContain('capped_at_99m');
   });
+
+  // ── Qualifier/hedging word stripping ─────────────────────────────────────
+  // Leading words like "around", "roughly", "about", "approximately", "approx", "~"
+  // are stripped before parsing so real inputs from restaurant owners resolve correctly.
+
+  it('"around 1 million" → $1,000,000, parseFallback: false', () => {
+    const r = parseSpend('around 1 million');
+    expect(r.annualSpend).toBe(1_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"roughly 2M" → $2,000,000, parseFallback: false', () => {
+    const r = parseSpend('roughly 2M');
+    expect(r.annualSpend).toBe(2_000_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"about 800k" → $800,000, parseFallback: false', () => {
+    const r = parseSpend('about 800k');
+    expect(r.annualSpend).toBe(800_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"approximately 1.5M" → $1,500,000, parseFallback: false', () => {
+    const r = parseSpend('approximately 1.5M');
+    expect(r.annualSpend).toBe(1_500_000);
+    expect(r.parseFallback).toBe(false);
+  });
+
+  it('"asdfghjkl" → parseFallback: true (pure gibberish)', () => {
+    const r = parseSpend('asdfghjkl');
+    expect(r.parseFallback).toBe(true);
+  });
+
+  it('"2 grazillion" → parseFallback: true (garbage with leading digit)', () => {
+    const r = parseSpend('2 grazillion');
+    expect(r.parseFallback).toBe(true);
+  });
+
+  it('"depends on the year" → parseFallback: true (no number present)', () => {
+    const r = parseSpend('depends on the year');
+    expect(r.parseFallback).toBe(true);
+  });
+
+  it('"not sure" → parseFallback: true', () => {
+    const r = parseSpend('not sure');
+    expect(r.parseFallback).toBe(true);
+  });
 });
