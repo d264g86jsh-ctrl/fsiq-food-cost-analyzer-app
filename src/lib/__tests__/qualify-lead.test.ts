@@ -263,6 +263,42 @@ describe('skuMod — deterministic keyword matching only', () => {
   });
 });
 
+// ── DQ: capped_at_99m ────────────────────────────────────────────────────────
+// Inputs that triggered the $99M parser cap are DQ'd as below_threshold.
+// The $2M fallback (e.g. "2 grazillion") is NOT capped, so it still qualifies.
+
+describe('DQ: capped spend (above $99M)', () => {
+  it('"200000000" → DQ below_threshold (capped_at_99m)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '200000000' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+    expect(r.reasons).toContain('spend_above_max:capped_at_99m');
+  });
+
+  it('"100000000" → DQ below_threshold (capped_at_99m)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '100000000' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+  });
+
+  it('"99000000" → qualified (exactly $99M, not capped, valid $7M+ spend)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '99000000' }));
+    expect(r.qualified).toBe(true);
+    expect(r.dqReason).toBeNull();
+    if (!r.qualified) return;
+    expect(r.spendBucket).toBe('$7M+');
+  });
+
+  it('"2 grazillion" → qualified (parseFallback $2M, no cap, normal $1M–$3M route)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '2 grazillion' }));
+    expect(r.qualified).toBe(true);
+    expect(r.dqReason).toBeNull();
+    if (!r.qualified) return;
+    expect(r.spendBucket).toBe('$1M–$3M');
+    expect(r.internalFlags).toContain('spend_parse_fallback');
+  });
+});
+
 // ── internalFlags propagation ─────────────────────────────────────────────────
 
 describe('internalFlags propagation', () => {

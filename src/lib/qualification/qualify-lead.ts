@@ -147,6 +147,15 @@ export function qualifyLead(input: QualifyLeadInput): QualifyLeadResult {
     return dq('below_threshold', input, reasons, flags, spendParse);
   }
 
+  // ── Capped spend: input exceeded $99M and was clamped ─────────────────────
+  // Any spend that triggered the parser cap (e.g. "200000000") is unrealistic
+  // for an independent restaurant and is treated as an invalid entry.
+  // Routed identically to below_threshold so it uses the existing DQ email path.
+  if (spendParse.parseNotes.includes('capped_at_99m')) {
+    reasons.push('spend_above_max:capped_at_99m');
+    return dq('below_threshold', input, reasons, flags, spendParse);
+  }
+
   // ── Qualified — run savings formula ────────────────────────────────────────
   const bucketResult = assignBucket(annualSpend);
   if (!bucketResult) {
