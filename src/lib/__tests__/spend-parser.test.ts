@@ -200,10 +200,11 @@ describe('parseSpend', () => {
     expect(r.parseFallback).toBe(false);
   });
 
-  it('"99.9" → $99,900,000 (decimal just under 100 → millions)', () => {
+  it('"99.9" → $99,000,000 (99.9 × 1M = $99.9M, capped to $99M)', () => {
     const r = parseSpend('99.9');
-    expect(r.annualSpend).toBe(99_900_000);
+    expect(r.annualSpend).toBe(99_000_000);
     expect(r.parseFallback).toBe(false);
+    expect(r.parseNotes).toContain('capped_at_99m');
   });
 
   // ── "N hundred thousand" ────────────────────────────────────────────────────
@@ -302,5 +303,66 @@ describe('parseSpend', () => {
     const r = parseSpend('1500000');
     expect(r.annualSpend).toBe(1_500_000);
     expect(r.parseFallback).toBe(false);
+  });
+
+  // ── Garbage input guard ────────────────────────────────────────────────────
+  // Inputs with alphabetic characters that don't match any known suffix/unit
+  // must not be promoted to millions via parseFloat's leading-digit extraction.
+
+  it('"2 grazillion" → parseFallback: true, $2M fallback', () => {
+    const r = parseSpend('2 grazillion');
+    expect(r.parseFallback).toBe(true);
+    expect(r.annualSpend).toBe(2_000_000);
+    expect(r.parseNotes).toContain('unresolvable_input');
+  });
+
+  it('"5 bazillion" → parseFallback: true', () => {
+    const r = parseSpend('5 bazillion');
+    expect(r.parseFallback).toBe(true);
+    expect(r.parseNotes).toContain('unresolvable_input');
+  });
+
+  // ── $99M cap ───────────────────────────────────────────────────────────────
+  // Any parsed result strictly above $99M is capped. Exactly $99M is not capped.
+
+  it('"200000000" → capped to $99M', () => {
+    const r = parseSpend('200000000');
+    expect(r.annualSpend).toBe(99_000_000);
+    expect(r.parseFallback).toBe(false);
+    expect(r.parseNotes).toContain('capped_at_99m');
+  });
+
+  it('"100000000" → capped to $99M', () => {
+    const r = parseSpend('100000000');
+    expect(r.annualSpend).toBe(99_000_000);
+    expect(r.parseNotes).toContain('capped_at_99m');
+  });
+
+  it('"99000000" → $99M exact, NOT capped (boundary)', () => {
+    const r = parseSpend('99000000');
+    expect(r.annualSpend).toBe(99_000_000);
+    expect(r.parseFallback).toBe(false);
+    expect(r.parseNotes).not.toContain('capped_at_99m');
+  });
+
+  it('"99" → $99M via millions heuristic, NOT capped (at boundary)', () => {
+    const r = parseSpend('99');
+    expect(r.annualSpend).toBe(99_000_000);
+    expect(r.parseNotes).toContain('bare_heuristic:millions');
+    expect(r.parseNotes).not.toContain('capped_at_99m');
+  });
+
+  it('"100" → $100 exact, unchanged by cap', () => {
+    const r = parseSpend('100');
+    expect(r.annualSpend).toBe(100);
+    expect(r.parseFallback).toBe(false);
+    expect(r.parseNotes).not.toContain('capped_at_99m');
+  });
+
+  it('"600000" → $600,000 exact, unchanged by cap', () => {
+    const r = parseSpend('600000');
+    expect(r.annualSpend).toBe(600_000);
+    expect(r.parseFallback).toBe(false);
+    expect(r.parseNotes).not.toContain('capped_at_99m');
   });
 });

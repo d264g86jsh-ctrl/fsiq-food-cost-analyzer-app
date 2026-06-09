@@ -41,7 +41,20 @@ function normalizeMillion(s: string): string {
   return s.replace(/m(?:ll|l|il|ill)i?o?n/gi, 'million');
 }
 
+const MAX_SPEND = 99_000_000;
+
+// Public export — thin wrapper that applies the $99M cap after all parsing.
+// Any branch producing > $99M (e.g. bare "200000000", bare "99" × 1M = $99M boundary)
+// is silently capped. Exactly $99M is not capped (condition is strictly greater-than).
 export function parseSpend(rawInput: string): SpendParseResult {
+  const r = _parseSpend(rawInput);
+  if (r.annualSpend > MAX_SPEND) {
+    return { ...r, annualSpend: MAX_SPEND, parseNotes: [...r.parseNotes, 'capped_at_99m'] };
+  }
+  return r;
+}
+
+function _parseSpend(rawInput: string): SpendParseResult {
   const notes: string[] = [];
   const trimmed = rawInput.trim();
 
@@ -167,7 +180,11 @@ function parseSingleToken(s: string, notes: string[]): number | null {
     }
   }
 
-  // Bare number
+  // Bare number — guard against garbage like "2 grazillion" where parseFloat
+  // would extract the leading digit and applyBareHeuristic would promote it to millions.
+  // If the string still contains any letter at this point, none of the earlier
+  // suffix/word branches matched it, so it is not a recognizable format — return null.
+  if (/[a-z]/.test(s)) return null;
   const bareNum = parseFloat(s);
   if (!isNaN(bareNum) && isFinite(bareNum)) {
     return applyBareHeuristic(bareNum, notes);
