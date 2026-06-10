@@ -21,6 +21,7 @@ const tracking: TrackingContext = {
   eventId:         'evt-uuid-001',
   clientUserAgent: 'Mozilla/5.0',
   clientIpAddress: '1.2.3.4',
+  landingPageUrl:  null,
 };
 
 // ── buildLeadEvent ────────────────────────────────────────────────────────────
@@ -88,6 +89,17 @@ describe('buildLeadEvent', () => {
     const evStr = JSON.stringify(ev);
     expect(evStr).not.toContain('top_skus');
     expect(evStr).not.toContain('pdfDownloadUrl');
+  });
+
+  it('sets event_source_url when landingPageUrl is provided', () => {
+    const url = 'https://app.foodserviceiq.com/?utm_source=facebook&fbclid=abc';
+    const ev = buildLeadEvent(baseSubmission, { ...tracking, landingPageUrl: url });
+    expect(ev.event_source_url).toBe(url);
+  });
+
+  it('omits event_source_url when landingPageUrl is null', () => {
+    const ev = buildLeadEvent(baseSubmission, { ...tracking, landingPageUrl: null });
+    expect(ev.event_source_url).toBeUndefined();
   });
 });
 

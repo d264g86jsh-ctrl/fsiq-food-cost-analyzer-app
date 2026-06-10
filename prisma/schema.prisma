@@ -103,12 +103,20 @@ model Submission {
 
   // ── Traffic attribution ───────────────────────────────────────────────────
   // Captured at submission time for Meta CAPI matching and campaign ROAS.
-  utmSource   String?
-  utmMedium   String?
-  utmCampaign String?
-  utmContent  String?
-  utmTerm     String?
-  ipAddress   String? // Meta CAPI matching, GHL dedup, spam detection
+  utmSource      String?
+  utmMedium      String?
+  utmCampaign    String?
+  utmContent     String?
+  utmTerm        String?
+  ipAddress      String?  // Meta CAPI matching, GHL dedup, spam detection
+  fbclid         String?  // Facebook click ID — present on any Meta-ad click-through
+  leadSource     String?  // Derived: 'meta' | 'google' | 'organic' | 'direct'
+  fbp            String?  // Meta _fbp browser ID cookie — CAPI match signal
+  fbc            String?  // Meta _fbc click ID cookie (or derived from fbclid)
+  landingPageUrl String?  // First URL the user landed on (first-touch)
+  utmId          String?  // utm_id — GA4/Meta campaign numeric ID
+  fbadid         String?  // fbadid — Meta ad creative ID
+  referrer       String?  // First-touch document.referrer (may be empty for in-app browsers)
 
   // ── Website validation ────────────────────────────────────────────────────
   // Full validator response stored as JSON for debugging and Phase 8 QA.

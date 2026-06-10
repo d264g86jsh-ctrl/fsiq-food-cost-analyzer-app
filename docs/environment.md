@@ -1,5 +1,6 @@
 # Environment Variables
 
+**Related:** `docs/deployment.md` (deployment setup) · `docs/launch-blockers.md` (pre-launch env var checklist)  
 **Source of truth:** `.env.example`
 
 Copy `.env.example` to `.env.local` for local development and fill in values. For Vercel, set variables via **Project → Settings → Environment Variables**.
@@ -23,9 +24,11 @@ Copy `.env.example` to `.env.local` for local development and fill in values. Fo
 | `NEXT_PUBLIC_META_PIXEL_ID` | **Required** | Both | Meta Pixel ID — embedded at build time, sent to browser. Pixel IDs are non-secret by design. |
 | `META_PIXEL_ID` | **Required** | Both | Same value as `NEXT_PUBLIC_META_PIXEL_ID`. Used server-side for CAPI. |
 | `META_CONVERSIONS_API_TOKEN` | **Required** | Both | Meta Conversions API token. Missing → CAPI skipped; `metaStatus="skipped"`. |
-| `META_TEST_EVENT_CODE` | Staging only | Preview | Enables Meta test event mode. **Must be blank in production.** |
-| `HEADLESS_ENABLED` | Optional | Local | `"true"` to enable local Playwright headless browser. Only works in environments with Chromium installed (not Vercel). Default: disabled. |
-| `BROWSERLESS_API_KEY` | Future | Prod | Browserless.io API key for production headless browser. Not yet implemented. |
+| `META_TEST_EVENT_CODE` | Staging only | Preview | Enables Meta test event mode. **Must be blank in production.** The app logs a console.error if this is set in a production environment. |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Required** | Both | Supabase service role key for PDF caching to Storage. Missing → PDF cache skipped (non-fatal; original PDFMonkey URL used). |
+| `SUPABASE_URL` | **Required** | Both | Supabase project URL (e.g. `https://ektnxacqarlzbscaaxsz.supabase.co`). Same project as DATABASE_URL. |
+| `HEADLESS_ENABLED` | Optional | Local | `"true"` enables local Playwright headless browser. Only works in environments with Chromium installed (not Vercel). Use for local dev only; `BROWSERLESS_API_KEY` is the production path. |
+| `BROWSERLESS_API_KEY` | Optional | Prod | Browserless.io API key. **Fully implemented** — `headless-fetch.ts` calls `https://production-sfo.browserless.io/content` when this is set. When absent, headless fallback is disabled and blocked/thin sites get lower validation confidence (fall through to `plausible_unverified`). |
 | `OUTLOOK_CLIENT_ID` | Unused | — | Reserved — email delivery is GHL-owned in v1. No function. |
 | `OUTLOOK_CLIENT_SECRET` | Unused | — | Reserved — unused in v1. |
 | `OUTLOOK_TENANT_ID` | Unused | — | Reserved — unused in v1. |

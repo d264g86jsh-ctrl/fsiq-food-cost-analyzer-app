@@ -1,6 +1,7 @@
 # Architecture — FSIQ Food Cost Analyzer
 
-SOP reference: `docs/FSIQ_SOP_v3.3.md` (primary) / `docs/FSIQ_SOP_v3.3.pdf` (archive)
+**Related:** `docs/database-schema.md` · `docs/ghl-email-handoff.md` · `docs/meta-tracking.md` · `docs/savings-formula.md`  
+SOP reference: `docs/FSIQ_SOP_v3.3.md` (archive baseline) / focused specs below override it
 
 ---
 
@@ -32,7 +33,7 @@ Form submit
               → Confirm pdfDownloadUrl is non-null and usable
               → Assign fsiq_lead_status (qualified_*_pdf_ready) + PDF-ready tags
               → Final GHL handoff — PDF URL included
-          → Meta Conversions API: server-side event (qualified leads)
+          → Meta Conversions API: server-side Lead event (ALL routes — DQ + qualified) + QualifiedLead event (qualified only)
 ```
 
 **The app is the workflow brain. GHL/Zapier owns customer-facing emails.**
@@ -73,8 +74,8 @@ src/
     relevance/
       classify-restaurant.ts
       website-relationship.ts
-      google-places.ts               # Google Places Text Search + Place Details
-      location-eligibility.ts        # ZIP validation, countryEligibility
+      google-places.ts               # Google Places — FILE EXISTS but not called; hardcoded to score=0 since Places removed
+      location-eligibility.ts        # countryEligibility (always us_verified via checkbox; ZIP/Places logic inactive)
       claude-classifier.ts           # AI tiebreaker (ambiguous only)
     qualification/
       national-chains.ts
@@ -110,7 +111,7 @@ docs/
 
 ## U.S.-Only Eligibility
 
-The analyzer is for U.S.-based restaurants only in v1. `zip_code` accepts U.S. 5-digit ZIP and ZIP+4. Non-U.S. postal formats are rejected at the form level with a friendly message. `countryEligibility` must be `us_verified` or `likely_us` for a full personalized PDF. See `docs/website-validation-spec.md` for full decision rules.
+The analyzer is for U.S.-based restaurants only in v1. A `us_business_confirmed` checkbox on Step 1 is the country gate — the user must explicitly confirm their restaurant is U.S.-based. No ZIP or postal code is collected. `countryEligibility` always returns `us_verified` (hardcoded since the checkbox guarantees attestation). `countryEligibility` must be `us_verified` or `likely_us` for a full personalized PDF. See `docs/website-validation-spec.md` for full decision rules.
 
 ## Website Validation (Main Guardrail)
 
@@ -221,21 +222,31 @@ Full contract: `docs/ghl-email-handoff.md`
 UX flow spec: `docs/analyzer-ux-flow.md` (overrides SOP field order — contact fields collected last).  
 Field definitions and dropdown values: `docs/FSIQ_SOP_v3.3.md` §5.
 
-**Step 1 — Qualification fields (shown first):**
+**Step 1 — Business qualification (shown first):**
 
 | Field name | Required | Input type |
 |---|---|---|
 | `restaurant_name` | Yes | Text |
 | `website` | Yes | Text + real-time validation |
-| `us_business_confirmed` | Yes | Checkbox — "I confirm this is a U.S.-based restaurant or foodservice operation" |
+| `us_business_confirmed` | Yes | Checkbox — U.S. attestation; required before submit |
+
+**Step 2 — Profile:**
+
+| Field name | Required | Input type |
+|---|---|---|
 | `concept_type` | Yes | Dropdown |
 | `locations` | Yes | Dropdown |
 | `annual_food_spend` | Yes | Dropdown |
+
+**Step 3 — Purchasing profile:**
+
+| Field name | Required | Input type |
+|---|---|---|
 | `distributor_type` | Yes | Dropdown |
 | `procurement_strategy` | Yes | Dropdown |
-| `top_skus` | Yes | Free text — label: "What are your biggest food spend categories or key items?" Parsed for protein/commodity keywords by qualification engine. |
+| `top_skus` | Yes | Free text — parsed for protein/commodity keywords by qualification engine |
 
-**Step 2 — Contact fields (shown last):**
+**Step 4 — Contact info ("Where do we send your report?"):**
 
 | Field name | Required | Input type |
 |---|---|---|
@@ -251,7 +262,7 @@ Single `Submission` model in `prisma/schema.prisma`. Source of truth for all sub
 
 Key field groups:
 - **Form inputs** — all 12 fields including `zipCode`, `topSkus` (free text)
-- **Traffic attribution** — `utmSource`, `utmMedium`, `utmCampaign`, `utmContent`, `utmTerm`, `ipAddress` (Meta CAPI matching + campaign ROAS)
+- **Traffic attribution** — `utmSource`, `utmMedium`, `utmCampaign`, `utmContent`, `utmTerm`, `utmId`, `fbclid`, `fbadid`, `leadSource` (derived), `fbp`, `fbc`, `landingPageUrl`, `referrer`, `ipAddress` — see `docs/meta-tracking.md` for the full attribution flow
 - **Validation** — `finalDecision`, `countryEligibility`, `locationConfidenceScore`, `internalFlags` (JSON), `websiteValidationResult` (JSON)
 - **Qualification** — `qualified`, `dqReason`, `spendBucket`, `bucketMidpoint`, `finalPct`, `dollarEstimate`, `caseStudy`, `year1`–`year5`, `projectionHeights`
 - **AI** — `logoUrl`, `businessSummary`, `conceptSignals`, `narrativeDistributor`, `narrativeProcurement`, `narrativeSku`
@@ -280,5 +291,5 @@ those values. See `docs/ghl-email-handoff.md` for the full contract.
 
 Implementation: `src/lib/crm/ghl.ts` (Phase 8)  
 Types/constants: `src/lib/crm/lead-status.ts`, `src/lib/crm/ghl-tags.ts`, `src/lib/crm/ghl-types.ts`  
-Env vars: `GHL_API_KEY`, `GHL_LOCATION_ID`, `GHL_PIPELINE_ID`  
-Persists: `crmSyncStatus`, `crmSyncError`, `crmContactId`
+Env vars: `GHL_ACCESS_TOKEN` (preferred) or `GHL_API_KEY`, `GHL_LOCATION_ID`  
+Persists: `crmSyncStatus`, `crmSyncError`, `ghlContactId`, `crmTags`

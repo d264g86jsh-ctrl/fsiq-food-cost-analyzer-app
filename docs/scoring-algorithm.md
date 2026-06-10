@@ -1,10 +1,9 @@
 # Restaurant Signal Scoring Algorithm
 
+**Related:** `docs/website-validation-spec.md` (decision logic spec — this file wins where they conflict) · `docs/CURRENT_STATUS.md` (known open gaps) · `docs/test-results-report.md` (adversarial test results)  
 **Source of truth for:** `src/lib/relevance/classify-restaurant.ts`, `src/lib/website/extract-signals.ts`, `src/lib/website/run-validation.ts`
 
-**Last updated:** 2026-06-03 (reflects all 5 validation accuracy fixes from this session)
-
-> **Note:** `docs/website-validation-spec.md` predates these changes. Where this file and that spec conflict, **this file wins**. The spec will be updated separately.
+**Last updated:** 2026-06-03 (reflects adversarial test fixes)
 
 ---
 

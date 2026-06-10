@@ -50,9 +50,13 @@ Last updated: Phase 11 (QA & Hardening)
 
 ## Supabase / Database Readiness
 
-- [x] Prisma schema matches production DB (migration `20260516082213_init_submission_schema` applied)
+- [x] Base schema migration applied (`20260516082213_init_submission_schema`)
+- [ ] Apply pending attribution migrations before first deploy:
+  - `20260610_add_attribution_fields` (fbclid, leadSource, fbp, fbc, landingPageUrl)
+  - `20260610_add_full_attribution` (utmId, fbadid, referrer)
+  - Run: `pnpm prisma migrate deploy`
 - [ ] Confirm `DATABASE_URL` points to production Supabase instance (not local dev DB)
-- [ ] Run `pnpm prisma migrate deploy` against production DB before first deploy
+- [ ] Confirm `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_URL` are set (required for PDF caching to Supabase Storage)
 - [ ] Verify Supabase connection pooler URL is used (port 6543) — not the direct connection (port 5432) — for serverless Next.js
 
 ---
@@ -71,10 +75,11 @@ Last updated: Phase 11 (QA & Hardening)
 
 - [ ] `GHL_LOCATION_ID` matches the target sub-account
 - [ ] `GHL_ACCESS_TOKEN` is a valid, non-expired token for the sub-account
-- [ ] All 28 `fsiq_*` custom fields exist in GHL before first submission (field IDs must match `build-ghl-payload.ts`)
+- [ ] All `fsiq_*` custom fields exist in GHL — run `npx tsx scripts/ghl-create-attribution-fields.ts` with live credentials to create/verify the 11 attribution fields; confirm GHL-assigned keys match bare keys in `buildCustomFields` (GHL sometimes prefixes with `contact.`)
 - [ ] Zapier automations are mapped to `fsiq_communication_route` values before launch
-- [ ] Test each communication route end-to-end in staging: `send_full_report`, `send_conservative_report`, all `send_dq_*` routes
+- [ ] Test each communication route end-to-end in staging: `send_full_report`, `send_conservative_report`, all `send_dq_*` routes — **`send_dq_below_threshold` is unverified (reported as not firing)**
 - [ ] Confirm `FSIQ Full PDF Ready` and `FSIQ Conservative PDF Ready` tags trigger the correct Zapier zap
+- [ ] Confirm `FSIQ Meta Lead` tag triggers correct attribution tracking in GHL (new tag — added 2026-06-10)
 
 ---
 
@@ -86,6 +91,8 @@ Last updated: Phase 11 (QA & Hardening)
 - [ ] Verify browser Lead event fires in Meta Events Manager on a staging submission
 - [ ] Verify server CAPI Lead event appears with matching `event_id` (deduplication working)
 - [ ] Verify `QualifiedLead` CAPI event appears only for qualified leads
+- [ ] Verify browser `QualifiedLead` and server CAPI `QualifiedLead` share `ql-{eventId}` and deduplicate to 1 event in Meta Events Manager
+- [ ] Verify attribution custom fields (`fsiq_utm_source`, `fsiq_lead_source`, etc.) appear on GHL contacts from a Meta-ad URL test submission
 
 ---
 
@@ -107,7 +114,7 @@ Last updated: Phase 11 (QA & Hardening)
 - [x] Admin cookie is HttpOnly; token is never rendered to the browser
 - [x] `sanitizeErrorString` redacts tokens/keys in admin error display
 - [x] AI prompts and raw provider responses are not exposed in admin UI
-- [x] All PII (email, phone, zip) is SHA-256 hashed before sending to Meta CAPI
+- [x] All PII (email, phone) is SHA-256 hashed before sending to Meta CAPI
 - [ ] Confirm no `console.log` of real user PII in production logs (Next.js server logs)
 - [ ] Confirm Supabase RLS policies are set (if direct client access is used anywhere — v1 uses Prisma server-side only, so this is low priority but worth confirming)
 

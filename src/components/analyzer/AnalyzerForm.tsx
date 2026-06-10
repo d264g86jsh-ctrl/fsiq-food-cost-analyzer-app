@@ -34,7 +34,7 @@ import {
 import { persistTrackingParams, getTrackingParams, readMetaCookies } from '@/lib/meta/tracking-params';
 import { generateEventId } from '@/lib/meta/event-id';
 import { isKnownFoodItem, validateFoodItemsWithAI, type SkuValidationState } from '@/lib/qualification/sku-validation';
-import { fireAnalyzerStarted, fireBrowserLead } from '@/lib/meta/browser-events';
+import { fireAnalyzerStarted, fireBrowserLead, fireQualifiedLead } from '@/lib/meta/browser-events';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -123,9 +123,10 @@ export function AnalyzerForm() {
       fbc:           cookies.fbc,
     };
 
-    // Remove undefined keys to keep formData clean
+    // Strip any key where the value is undefined, null, or empty string so the
+    // hydration effect never overwrites a field the user has already filled in.
     const clean = Object.fromEntries(
-      Object.entries(tracking).filter(([, v]) => v !== undefined),
+      Object.entries(tracking).filter(([, v]) => v !== undefined && v !== null && v !== ''),
     ) as Partial<FormData>;
 
     setFormData((prev) => ({ ...prev, ...clean }));
@@ -254,7 +255,15 @@ export function AnalyzerForm() {
 
     // Generate event_id here so browser and server share the same value for Meta deduplication.
     const eventId = generateEventId();
-    fireBrowserLead(eventId);
+
+    // Lead event — fires at submit time, includes PII for pixel matching.
+    // fbq.js hashes em/ph/fn client-side before transmitting.
+    const firstName = (formData.full_name ?? '').trim().split(/\s+/)[0];
+    fireBrowserLead(eventId, {
+      email:     formData.email,
+      phone:     formData.phone,
+      firstName,
+    });
 
     try {
       const payload: AnalyzerFormPayload = {
@@ -264,6 +273,17 @@ export function AnalyzerForm() {
       };
       const result = await submitAnalysis(payload);
       if (result.success) {
+        // QualifiedLead fires only when the submission qualifies (spend ≥ $600K).
+        // eventId is prefixed 'ql-' to match the server CAPI event_id exactly,
+        // enabling Meta to deduplicate the browser and server events to one.
+        if (result.qualified === true) {
+          fireQualifiedLead({
+            spendInput:       formData.annual_food_spend,
+            estimatedSavings: result.dollarEstimateDisplay ?? undefined,
+            value:            result.dollarEstimate ?? undefined,
+            eventId:          `ql-${eventId}`,
+          });
+        }
         setIsSubmitted(true);
       } else {
         setSubmitError('Something went wrong. Please try again.');

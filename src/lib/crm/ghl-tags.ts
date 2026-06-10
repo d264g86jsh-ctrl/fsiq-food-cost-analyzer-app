@@ -30,6 +30,9 @@ export const GHL_TAG = {
   PDF_FAILED:                'FSIQ PDF Failed',
   WORKFLOW_FAILED:           'FSIQ Workflow Failed',
 
+  // Traffic attribution
+  META_LEAD:                 'FSIQ Meta Lead',
+
   // Heuristic flags (applied by Phase 8 heuristics)
   POSSIBLE_TEST_SUBMISSION:  'FSIQ Possible Test Submission',
   POSSIBLE_SPAM_SUBMISSION:  'FSIQ Possible Spam Submission',

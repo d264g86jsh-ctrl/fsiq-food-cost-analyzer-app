@@ -1,5 +1,6 @@
 # Database Schema
 
+**Related:** `docs/architecture.md` · `docs/meta-tracking.md` (attribution columns) · `docs/ghl-email-handoff.md` (CRM sync fields)  
 **Source of truth:** `prisma/schema.prisma`
 
 ---
@@ -61,18 +62,32 @@ The app has a single primary model: `Submission`. Every form submission creates 
 | `phone` | `String?` | Optional |
 
 ### Traffic attribution
+All fields captured at submission time from sessionStorage (first-touch, never overwritten). Used for Meta CAPI matching, campaign ROAS attribution, and GHL contact enrichment. The `landingPageUrl` contains the full query string — it is the raw catch-all for all URL params. See `docs/meta-tracking.md` for the full attribution flow.
+
 | Field | Type | Notes |
 |---|---|---|
-| `utmSource`, `utmMedium`, `utmCampaign`, `utmContent`, `utmTerm` | `String?` | Captured at submission, never updated |
-| `ipAddress` | `String?` | Used for Meta CAPI matching and GHL dedup |
+| `utmSource` | `String?` | `utm_source` param — e.g. `facebook`, `google` |
+| `utmMedium` | `String?` | `utm_medium` param — e.g. `FSIQ | ABO_Prospecting | Leads` (decoded) |
+| `utmCampaign` | `String?` | `utm_campaign` param |
+| `utmContent` | `String?` | `utm_content` param |
+| `utmTerm` | `String?` | `utm_term` param (Meta ad term ID) |
+| `utmId` | `String?` | `utm_id` param — Meta/GA4 campaign numeric ID |
+| `fbclid` | `String?` | Facebook click ID — present on any Meta-ad click-through |
+| `fbadid` | `String?` | `fbadid` param — Meta ad creative ID |
+| `leadSource` | `String?` | Derived: `'meta' | 'google' | 'organic' | 'direct'` — computed from fbclid + utmSource |
+| `fbp` | `String?` | Meta `_fbp` browser ID cookie — CAPI match signal |
+| `fbc` | `String?` | Meta `_fbc` click ID cookie, or derived from fbclid |
+| `landingPageUrl` | `String?` | Full first-touch URL including query string — catch-all for all params |
+| `referrer` | `String?` | First-touch `document.referrer` (may be empty for Meta in-app browser) |
+| `ipAddress` | `String?` | Server-captured IP — for Meta CAPI matching and GHL dedup |
 
 ### Website validation output
 | Field | Type | Notes |
 |---|---|---|
 | `websiteValidationResult` | `Json?` | Full `ValidationResult` object for debugging |
 | `finalDecision` | `FinalDecision?` | See enum above |
-| `countryEligibility` | `CountryEligibility?` | Currently always `us_verified` (user attestation) |
-| `locationConfidenceScore` | `Float?` | 0–100; currently always 99 |
+| `countryEligibility` | `CountryEligibility?` | Currently always `us_verified` — user attestation checkbox is the country gate in v1 |
+| `locationConfidenceScore` | `Float?` | 0–100; currently always 99 — Google Places removed; checkbox guarantees US |
 | `internalFlags` | `Json?` | `string[]` of diagnostic flags (e.g. `["request_timeout", "headless_attempted"]`) |
 | `manualReviewRequired` | `Boolean` | `true` → pushed to admin queue |
 
@@ -109,10 +124,12 @@ If `aiFallbackUsed: true` was returned, these fields contain static fallback tex
 | `pdfMode` | `PdfMode?` | `full` or `conservative`; null if skipped |
 | `pdfStatus` | `PdfStatus?` | Lifecycle state |
 | `pdfMonkeyDocumentId` | `String?` | PDFMonkey's document ID for re-fetch |
-| `pdfDownloadUrl` | `String?` | Proxied via `/api/report/[id]` — never raw PDFMonkey URL |
+| `pdfDownloadUrl` | `String?` | Raw PDFMonkey download URL — served via `/api/report/[id]` proxy; see `hard-rules.md` |
 | `pdfUrlType` | `String?` | `"download"` = S3 binary (iframe-safe); `"viewer"` = PDFMonkey preview page |
 | `pdfError` | `String?` | Error message if `pdfStatus = "error"` |
-| `pdfRetryCount` | `Int` | Always 0 in v1 (no retry logic implemented) |
+| `pdfRetryCount` | `Int` | Default 0; no retry worker implemented in v1 |
+| `pdfCachedUrl` | `String?` | Supabase Storage permanent URL — fallback when PDFMonkey URL expires |
+| `pdfCachedAt` | `DateTime?` | Timestamp when the PDF was cached to Supabase Storage |
 
 **Hard rule:** `pdfDownloadUrl` must always point to `/api/report/[id]`, never to a raw PDFMonkey URL. See `docs/hard-rules.md`.
 

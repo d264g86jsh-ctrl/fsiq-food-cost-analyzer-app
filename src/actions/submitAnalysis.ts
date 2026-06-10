@@ -38,6 +38,8 @@ import { syncToGhl } from '@/lib/crm/ghl';
 import { buildLeadEvent, buildQualifiedLeadEvent } from '@/lib/meta/meta-events';
 import { sendToMetaCapi } from '@/lib/meta/meta-capi';
 import { LEAD_STATUS } from '@/lib/crm/lead-status';
+import { GHL_TAG } from '@/lib/crm/ghl-tags';
+import { deriveLeadSource } from '@/lib/meta/lead-source';
 import type { TrackingContext } from '@/lib/meta/meta-types';
 import type { AnalyzerFormPayload } from '@/lib/analyzer/form-types';
 
@@ -51,6 +53,7 @@ export interface SubmitAnalysisResult {
   dqReason: string | null;
   leadStatus: string | null;
   dollarEstimateDisplay: string | null;
+  dollarEstimate: number | null;  // numeric value for browser QualifiedLead pixel dedup
   pdfDownloadUrl: string | null;
 }
 
@@ -71,12 +74,15 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       null;
   } catch { /* best effort — not required */ }
 
+  const leadSource = deriveLeadSource(payload.utm_source, payload.fbclid);
+
   const trackingContext: TrackingContext = {
-    fbp:             payload.fbp             ?? null,
-    fbc:             payload.fbc             ?? null,
-    eventId:         payload.event_id        ?? null,
+    fbp:            payload.fbp              ?? null,
+    fbc:            payload.fbc              ?? null,
+    eventId:        payload.event_id         ?? null,
     clientUserAgent: payload.client_user_agent ?? null,
     clientIpAddress: ipAddress,
+    landingPageUrl: payload.landing_page_url ?? null,
   };
 
   // ── Step 2: Initial DB save ──────────────────────────────────────────────────
@@ -95,12 +101,20 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
         fullName:            payload.full_name,
         email:               payload.email,
         phone:               payload.phone ?? null,
-        utmSource:           payload.utm_source ?? null,
-        utmMedium:           payload.utm_medium ?? null,
-        utmCampaign:         payload.utm_campaign ?? null,
-        utmContent:          payload.utm_content ?? null,
-        utmTerm:             payload.utm_term ?? null,
+        utmSource:      payload.utm_source      ?? null,
+        utmMedium:      payload.utm_medium      ?? null,
+        utmCampaign:    payload.utm_campaign    ?? null,
+        utmContent:     payload.utm_content     ?? null,
+        utmTerm:        payload.utm_term        ?? null,
         ipAddress,
+        fbclid:         payload.fbclid          ?? null,
+        fbp:            payload.fbp             ?? null,
+        fbc:            payload.fbc             ?? null,
+        leadSource,
+        landingPageUrl: payload.landing_page_url ?? null,
+        utmId:          payload.utm_id          ?? null,
+        fbadid:         payload.fbadid          ?? null,
+        referrer:       payload.referrer        ?? null,
         workflowStage:       'submitted',
         workflowStatus:      'in_progress' as WorkflowStatus,
       },
@@ -219,6 +233,9 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       manualReviewRequired: validationResult.manualReviewRequired,
       workflowFailed:       false,
     });
+    if (leadSource === 'meta') {
+      status.tags = [...status.tags, GHL_TAG.META_LEAD];
+    }
     return syncAndReturn({
       submissionId,
       status,
@@ -389,6 +406,9 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       manualReviewRequired: false,
       workflowFailed:       false,
     });
+    if (leadSource === 'meta') {
+      finalStatus.tags = [...finalStatus.tags, GHL_TAG.META_LEAD];
+    }
 
     // Re-fetch fresh record for GHL payload builder and CAPI user data
     const fresh = await db.submission.findUnique({ where: { id: submissionId } }).catch(() => null);
@@ -465,6 +485,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     dqReason:              null,
     leadStatus:            prelimStatus.leadStatus,
     dollarEstimateDisplay: qualResult.dollarEstimateDisplay,
+    dollarEstimate:        qualResult.dollarEstimate ?? null,
     pdfDownloadUrl:        null,
   };
 }
@@ -556,10 +577,11 @@ async function syncAndReturn({
     dqReason:              responseDqReason,
     leadStatus:            status.leadStatus,
     dollarEstimateDisplay: responseDollarEstimate,
+    dollarEstimate:        null,  // DQ path — no savings estimate
     pdfDownloadUrl:        null,
   };
 }
 
 function fail(submissionId: string | null, error: string): SubmitAnalysisResult {
-  return { success: false, submissionId, error, qualified: null, dqReason: null, leadStatus: null, dollarEstimateDisplay: null, pdfDownloadUrl: null };
+  return { success: false, submissionId, error, qualified: null, dqReason: null, leadStatus: null, dollarEstimateDisplay: null, dollarEstimate: null, pdfDownloadUrl: null };
 }

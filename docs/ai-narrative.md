@@ -1,5 +1,6 @@
 # AI Narrative Pipeline
 
+**Related:** `docs/architecture.md` (AI pipeline position in request flow) · `docs/pdf-generation.md` (how narrative flows into PDF) · `docs/savings-formula.md` (AI boundary — AI never touches math)  
 **Source of truth for:** `src/lib/ai/ai-narrative.ts`, `src/lib/ai/ai-researcher.ts`, `src/lib/ai/prompts.ts`
 
 ## Overview

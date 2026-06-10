@@ -25,6 +25,14 @@ function makeSubmission(overrides: Partial<Submission> = {}): Submission {
     utmContent: null,
     utmTerm: null,
     ipAddress: '1.2.3.4',
+    fbclid: null,
+    leadSource: 'google',
+    fbp: null,
+    fbc: null,
+    landingPageUrl: null,
+    utmId: null,
+    fbadid: null,
+    referrer: null,
     websiteValidationResult: null,
     finalDecision: 'verified_restaurant' as Submission['finalDecision'],
     countryEligibility: 'us_verified' as Submission['countryEligibility'],
@@ -131,6 +139,54 @@ describe('buildGhlPayload — PDF fields', () => {
     const p = buildGhlPayload(s, LEAD_STATUS.PDF_FAILED, COMMUNICATION_ROUTE.PDF_FAILURE_HOLD, []);
     expect(p.fsiq_pdf_url).toBeNull();
     expect(p.fsiq_pdf_ready_at).toBeNull();
+  });
+});
+
+describe('buildGhlPayload — attribution fields', () => {
+  it('includes lead_source and utm_source', () => {
+    const p = buildGhlPayload(makeSubmission(), LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT, []);
+    expect(p.fsiq_lead_source).toBe('google');
+    expect(p.fsiq_utm_source).toBe('google');
+  });
+
+  it('lead_source null when not set on submission', () => {
+    const s = makeSubmission({ leadSource: null, utmSource: null });
+    const p = buildGhlPayload(s, LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT, []);
+    expect(p.fsiq_lead_source).toBeNull();
+    expect(p.fsiq_utm_source).toBeNull();
+  });
+
+  it('passes meta lead_source through', () => {
+    const s = makeSubmission({ leadSource: 'meta', utmSource: 'facebook', fbclid: 'abc123' });
+    const p = buildGhlPayload(s, LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT, []);
+    expect(p.fsiq_lead_source).toBe('meta');
+    expect(p.fsiq_utm_source).toBe('facebook');
+  });
+
+  it('maps all extended attribution fields', () => {
+    const s = makeSubmission({
+      leadSource:    'meta',
+      utmSource:     'facebook',
+      utmMedium:     'FSIQ | ABO_Prospecting | Leads',
+      utmCampaign:   'FSIQ-VIDEO-AD-35 | A Dollar Saved is a Dollar Earned | iPhone | Broad | LP2-EB',
+      utmContent:    'FSIQ-VIDEO-AD-28 | 117 | Podcast Ad Blurred Book | No Book | Direct Offer / Gift | Solution Aware | LP2-EB | COPY-02 | 60s+',
+      utmTerm:       '120246189234780546',
+      utmId:         '120229729801330546',
+      fbadid:        '120246189234770546',
+      fbclid:        'IwY2xjawSWmELxyztest',
+      referrer:      'https://facebook.com/',
+      landingPageUrl: 'https://go.getfoodserviceiq.com/5provenways?utm_source=facebook&fbclid=IwY2xjawSWmELxyztest',
+    });
+    const p = buildGhlPayload(s, LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT, []);
+    expect(p.fsiq_utm_medium).toBe('FSIQ | ABO_Prospecting | Leads');
+    expect(p.fsiq_utm_campaign).toContain('A Dollar Saved');
+    expect(p.fsiq_utm_content).toContain('60s+');
+    expect(p.fsiq_utm_term).toBe('120246189234780546');
+    expect(p.fsiq_utm_id).toBe('120229729801330546');
+    expect(p.fsiq_fbadid).toBe('120246189234770546');
+    expect(p.fsiq_fbclid).toBe('IwY2xjawSWmELxyztest');
+    expect(p.fsiq_referrer).toBe('https://facebook.com/');
+    expect(p.fsiq_landing_page_url).toContain('5provenways');
   });
 });
 

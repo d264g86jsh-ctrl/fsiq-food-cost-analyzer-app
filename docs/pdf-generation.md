@@ -1,8 +1,7 @@
 # PDF Generation
 
+**Related:** `docs/hard-rules.md` (browser constraints) · `docs/ai-narrative.md` (narrative content) · `docs/database-schema.md` (pdfCachedUrl, pdfCachedAt fields)  
 **Source of truth for:** `src/lib/pdf/pdfmonkey.ts`, `src/lib/pdf/build-pdf-payload.ts`, `src/lib/pdf/pdf-mode.ts`, `src/app/api/report/[id]/route.ts`
-
-**See also:** `docs/hard-rules.md` — browser compatibility constraints that apply to the report page and proxy route.
 
 ---
 
@@ -177,6 +176,29 @@ Example: A restaurant buying from Sysco at market price receives the **Captive B
 distributor leverage and the first-win opportunity without switching vendors.
 
 See `docs/ai-narrative.md` for full angle definitions, prompt structure, and fallback chain.
+
+---
+
+---
+
+## Supabase PDF Cache
+
+After PDFMonkey confirms a completed document, the pipeline fetches the raw PDF bytes from the PDFMonkey S3 URL and uploads them to **Supabase Storage** (`pdf-cache` bucket) as a permanent copy. This is a non-fatal background step — if it fails, the original PDFMonkey URL is used as fallback.
+
+| Field | Purpose |
+|-------|---------|
+| `pdfCachedUrl` | Supabase Storage permanent URL — never expires |
+| `pdfCachedAt` | Timestamp of when the cache write completed |
+
+The `/api/report/[id]` proxy route tries `pdfCachedUrl` first, then falls back to `pdfDownloadUrl` (PDFMonkey). This ensures PDFs remain accessible after PDFMonkey's signed URLs expire (typically 30–90 days depending on PDFMonkey plan).
+
+---
+
+## Mobile Delivery
+
+On mobile User-Agents, the `/report/[id]` page server-redirects directly to `/api/report/[id]` (the proxy route) instead of rendering an iframe. This is because mobile browsers can't reliably display PDFs in iframes. Chrome on iOS opens the PDF in its native viewer; Safari on iOS downloads or displays it inline.
+
+UA detection runs server-side in `src/app/report/[id]/page.tsx` using `isMobileUserAgent()`.
 
 ---
 

@@ -1,8 +1,14 @@
 # Website Validation Spec — FSIQ Food Cost Analyzer
 
-SOP reference: `docs/FSIQ_SOP_v3.3.md` (primary) / `docs/FSIQ_SOP_v3.3.pdf` (archive)  
-Status: Spec only — no implementation yet.  
-UX context: Validation runs during the quiz flow (see `docs/analyzer-ux-flow.md`). The `website` and `zip_code` fields appear in Step 1 (qualification fields) so validation fires before the user reaches contact fields.
+**Related:** `docs/scoring-algorithm.md` (signal weights — more current) · `docs/architecture.md` · `docs/CURRENT_STATUS.md` (known open gaps)  
+**Implementation status:** Fully implemented. Where this spec and `scoring-algorithm.md` conflict, the code and scoring-algorithm.md win.  
+**Open gaps** (confirmed by adversarial tests — see `docs/test-results-report.md`):
+- NXDOMAIN misclassifies as `plausible_unverified` (Vercel DNS error message doesn't match expected patterns)
+- Known-domain blocklist checked after network fetch — `.gov` / hotel domains time out before the check fires
+- Headless navigation changes `finalUrl`, breaking the blocklist for some domains (`seriouseats.com`, `wholefoodsmarket.com`)
+- BBB.org listing URLs classified as `plausible_unverified` — not in `KNOWN_NON_RESTAURANT_DOMAINS`
+
+UX context: Validation fires on `website` field blur (client-side) and again on form submit (server action). The `website` and `us_business_confirmed` fields appear in Step 1.
 
 ---
 
@@ -10,9 +16,8 @@ UX context: Validation runs during the quiz flow (see `docs/analyzer-ux-flow.md`
 
 The analyzer is for **U.S.-based restaurants only** in v1. International operators are not eligible for automated reports.
 
-- ZIP/postal code field accepts U.S. 5-digit ZIP and ZIP+4 only. Canadian and international postal codes are not supported in v1.
-- Google Places searches are biased/restricted to U.S. results. A non-U.S. Place result does not count as `verified_restaurant`.
-- If country cannot be confirmed as U.S., classify as `plausible_unverified` (if plausibly U.S.) or route to manual review. Never auto-generate a full personalized PDF for a non-U.S. lead.
+- The `us_business_confirmed` checkbox on Step 1 is the country gate. The user must confirm their restaurant is U.S.-based before submitting. No ZIP code or postal code is collected.
+- Google Places is **not called** in the current implementation. `googlePlacesQueried` is always `false`; `googlePlacesScore` is always 0. `countryEligibility` always returns `us_verified` (the checkbox attestation serves as the guarantee in v1).
 - Do not use harsh language ("we don't serve your country"). Use soft, neutral messaging.
 
 ### countryEligibility Values

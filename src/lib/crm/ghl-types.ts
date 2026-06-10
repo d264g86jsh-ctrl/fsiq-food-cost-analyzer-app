@@ -44,6 +44,20 @@ export interface GhlHandoffPayload {
   fsiq_pdf_url:               string | null; // non-null only when pdfStatus = "complete"
   fsiq_pdf_ready_at:          string | null; // ISO timestamp when pdfDownloadUrl confirmed
 
+  // Traffic attribution — full UTM + Meta ad params
+  // fsiq_ prefix keeps our fields separate from any native GHL UTM fields on the account.
+  fsiq_lead_source:            string | null;  // 'meta' | 'google' | 'organic' | 'direct'
+  fsiq_utm_source:             string | null;
+  fsiq_utm_medium:             string | null;
+  fsiq_utm_campaign:           string | null;
+  fsiq_utm_content:            string | null;
+  fsiq_utm_term:               string | null;
+  fsiq_utm_id:                 string | null;  // Meta/GA4 campaign numeric ID
+  fsiq_fbadid:                 string | null;  // Meta ad creative ID
+  fsiq_fbclid:                 string | null;  // Facebook click ID
+  fsiq_referrer:               string | null;  // First-touch document.referrer
+  fsiq_landing_page_url:       string | null;  // Full first-touch URL (catch-all for all params)
+
   // Workflow
   fsiq_manual_review_required: boolean;
   fsiq_workflow_status:        string;

@@ -1,5 +1,6 @@
 # GHL / Zapier Email Handoff Contract — FSIQ Food Cost Analyzer
 
+**Related:** `docs/meta-tracking.md` (attribution flow) · `docs/architecture.md` · `docs/environment.md`  
 **Status:** Authoritative reference for v1 app → GHL integration.
 
 The app is the workflow brain. GHL/Zapier owns customer-facing emails and funnel automation.
@@ -132,7 +133,6 @@ All fields prefixed `fsiq_` to avoid collisions with other GHL integrations.
 |---|---|
 | `fsiq_restaurant_name` | Form `restaurantName` |
 | `fsiq_website` | Form `website` |
-| `fsiq_us_business_confirmed` | Form `usBusinessConfirmed` — boolean |
 | `fsiq_concept_type` | Form `conceptType` |
 | `fsiq_locations` | Form `locations` |
 | `fsiq_annual_food_spend` | Form `annualFoodSpend` (raw dropdown value) |
@@ -167,6 +167,23 @@ All fields prefixed `fsiq_` to avoid collisions with other GHL integrations.
 | `fsiq_pdf_status` | `pdfStatus` — `complete` / `error` / `skipped` / `pending` |
 | `fsiq_pdf_url` | `pdfDownloadUrl` — only present when `pdfStatus = complete` |
 | `fsiq_pdf_ready_at` | ISO timestamp when `pdfDownloadUrl` was confirmed |
+
+### Traffic attribution
+Decoded UTM/Meta params from the user's landing URL. All `fsiq_utm_*` fields are optional (omitted if null). The `fsiq_lead_source` value is always set (derived). The full set is also sent as `attributionSource` in the GHL contact create body to populate the native "Source of Traffic" attribution panel.
+
+| Field | Value source |
+|---|---|
+| `fsiq_lead_source` | Derived: `meta` / `google` / `organic` / `direct` |
+| `fsiq_utm_source` | `utm_source` param |
+| `fsiq_utm_medium` | `utm_medium` param (decoded — `+` → space) |
+| `fsiq_utm_campaign` | `utm_campaign` param (decoded) |
+| `fsiq_utm_content` | `utm_content` param (decoded) |
+| `fsiq_utm_term` | `utm_term` param |
+| `fsiq_utm_id` | `utm_id` param (Meta campaign numeric ID) |
+| `fsiq_fbadid` | `fbadid` param (Meta ad creative ID) |
+| `fsiq_fbclid` | `fbclid` param (Facebook click ID) |
+| `fsiq_referrer` | First-touch `document.referrer` |
+| `fsiq_landing_page_url` | Full first-touch URL including all query params |
 
 ### Workflow
 
@@ -213,6 +230,12 @@ Applied by the app at sync time. GHL/Zapier automation is triggered by these tag
 | `FSIQ Manual Review` | `manualReviewRequired = true` |
 | `FSIQ PDF Failed` | `pdfStatus = error` on a qualified lead |
 | `FSIQ Workflow Failed` | `workflowStatus = failed` before route was determined |
+
+### Attribution tag
+
+| Tag | Condition |
+|---|---|
+| `FSIQ Meta Lead` | `leadSource === 'meta'` (fbclid present OR utm_source is facebook/instagram/fb/ig/meta) — applied on BOTH qualified and DQ paths |
 
 ### Heuristic tags (applied by Phase 8 heuristics)
 

@@ -65,6 +65,10 @@ export async function syncToGhl(payload: GhlHandoffPayload): Promise<GhlSyncResu
         email: payload.fsiq_email,
         ...(payload.fsiq_phone ? { phone: payload.fsiq_phone } : {}),
         customFields: buildCustomFields(payload),
+        // GHL native attribution panel ("Source of Traffic" in contact Activity view).
+        // Populated when any UTM data is present. Fields use camelCase per GHL v2 API.
+        // Ignored silently by GHL if the account's API version doesn't support it.
+        ...buildAttributionSource(payload),
       }),
       signal: AbortSignal.timeout(10_000),
     });
@@ -155,6 +159,17 @@ function buildCustomFields(payload: GhlHandoffPayload): Array<{ key: string; fie
     { key: 'fsiq_workflow_stage',         field_value: payload.fsiq_workflow_stage },
   ];
 
+  if (payload.fsiq_lead_source)      fields.push({ key: 'fsiq_lead_source',      field_value: payload.fsiq_lead_source });
+  if (payload.fsiq_utm_source)       fields.push({ key: 'fsiq_utm_source',       field_value: payload.fsiq_utm_source });
+  if (payload.fsiq_utm_medium)       fields.push({ key: 'fsiq_utm_medium',       field_value: payload.fsiq_utm_medium });
+  if (payload.fsiq_utm_campaign)     fields.push({ key: 'fsiq_utm_campaign',     field_value: payload.fsiq_utm_campaign });
+  if (payload.fsiq_utm_content)      fields.push({ key: 'fsiq_utm_content',      field_value: payload.fsiq_utm_content });
+  if (payload.fsiq_utm_term)         fields.push({ key: 'fsiq_utm_term',         field_value: payload.fsiq_utm_term });
+  if (payload.fsiq_utm_id)           fields.push({ key: 'fsiq_utm_id',           field_value: payload.fsiq_utm_id });
+  if (payload.fsiq_fbadid)           fields.push({ key: 'fsiq_fbadid',           field_value: payload.fsiq_fbadid });
+  if (payload.fsiq_fbclid)           fields.push({ key: 'fsiq_fbclid',           field_value: payload.fsiq_fbclid });
+  if (payload.fsiq_referrer)         fields.push({ key: 'fsiq_referrer',         field_value: payload.fsiq_referrer });
+  if (payload.fsiq_landing_page_url) fields.push({ key: 'fsiq_landing_page_url', field_value: payload.fsiq_landing_page_url });
   if (payload.fsiq_dq_reason) {
     fields.push({ key: 'fsiq_dq_reason', field_value: payload.fsiq_dq_reason });
   }
@@ -169,4 +184,31 @@ function buildCustomFields(payload: GhlHandoffPayload): Array<{ key: string; fie
   }
 
   return fields;
+}
+
+// Builds the GHL native attributionSource object for the contact create body.
+// Populates the "Source of Traffic" panel in the GHL contact Activity view —
+// the same panel GHL funnels populate automatically. Field names are camelCase
+// per GHL's Contact API v2021-07-28. Returns {} when no attribution data is present.
+function buildAttributionSource(payload: GhlHandoffPayload): Record<string, unknown> {
+  const hasUtm =
+    payload.fsiq_utm_source   ||
+    payload.fsiq_utm_medium   ||
+    payload.fsiq_utm_campaign ||
+    payload.fsiq_utm_content  ||
+    payload.fsiq_utm_term     ||
+    payload.fsiq_fbclid;
+
+  if (!hasUtm && !payload.fsiq_landing_page_url) return {};
+
+  const source: Record<string, string> = {};
+  if (payload.fsiq_utm_source)      source.utmSource   = payload.fsiq_utm_source;
+  if (payload.fsiq_utm_medium)      source.utmMedium   = payload.fsiq_utm_medium;
+  if (payload.fsiq_utm_campaign)    source.utmCampaign = payload.fsiq_utm_campaign;
+  if (payload.fsiq_utm_content)     source.utmContent  = payload.fsiq_utm_content;
+  if (payload.fsiq_utm_term)        source.utmTerm     = payload.fsiq_utm_term;
+  if (payload.fsiq_fbclid)          source.clickId     = payload.fsiq_fbclid;
+  if (payload.fsiq_landing_page_url) source.url        = payload.fsiq_landing_page_url;
+
+  return { attributionSource: source };
 }

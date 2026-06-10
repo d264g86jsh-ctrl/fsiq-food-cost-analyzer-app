@@ -60,6 +60,19 @@ export function buildGhlPayload(
                                   ? submission.updatedAt.toISOString()
                                   : null,
 
+    // Traffic attribution — full UTM + Meta ad params
+    fsiq_lead_source:            submission.leadSource      ?? null,
+    fsiq_utm_source:             submission.utmSource       ?? null,
+    fsiq_utm_medium:             submission.utmMedium       ?? null,
+    fsiq_utm_campaign:           submission.utmCampaign     ?? null,
+    fsiq_utm_content:            submission.utmContent      ?? null,
+    fsiq_utm_term:               submission.utmTerm         ?? null,
+    fsiq_utm_id:                 submission.utmId           ?? null,
+    fsiq_fbadid:                 submission.fbadid          ?? null,
+    fsiq_fbclid:                 submission.fbclid          ?? null,
+    fsiq_referrer:               submission.referrer        ?? null,
+    fsiq_landing_page_url:       submission.landingPageUrl  ?? null,
+
     // Workflow
     fsiq_manual_review_required: submission.manualReviewRequired,
     fsiq_workflow_status:        submission.workflowStatus ?? 'pending',

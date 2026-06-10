@@ -42,4 +42,5 @@ export interface TrackingContext {
   eventId: string | null;
   clientUserAgent: string | null;
   clientIpAddress: string | null;
+  landingPageUrl: string | null;
 }

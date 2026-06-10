@@ -1,5 +1,6 @@
 # Deployment Guide
 
+**Related:** `docs/environment.md` (full env var reference) · `docs/launch-blockers.md` (pre-launch checklist)  
 **Covers:** Vercel setup, environment variables, function timeout budget, headless browser integration, secrets management.
 
 ---

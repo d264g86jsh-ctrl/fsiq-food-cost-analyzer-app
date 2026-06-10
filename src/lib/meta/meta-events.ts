@@ -27,6 +27,7 @@ export function buildLeadEvent(
     event_time:    Math.floor(Date.now() / 1000),
     event_id:      tracking.eventId ?? generateEventId(),
     action_source: 'website',
+    ...(tracking.landingPageUrl ? { event_source_url: tracking.landingPageUrl } : {}),
     user_data:     userData,
     custom_data: {
       content_name: 'food_cost_analyzer',

@@ -1,5 +1,6 @@
 # Savings Formula — FSIQ Food Cost Analyzer
 
+**Related:** `docs/database-schema.md` (qualified/dollarEstimate fields) · `docs/scoring-algorithm.md` (restaurant signal scoring) · `docs/ai-narrative.md` (narrative angles that use savings context)  
 **This document is the source of truth for how estimated food cost savings are calculated.**
 
 SOP reference: `docs/FSIQ_SOP_v3.3.md` §10 (primary) / `docs/FSIQ_SOP_v3.3.pdf` (archive) — clamp updated per approved product decision.  
@@ -46,12 +47,15 @@ These are computed deterministically by the qualification engine.
 
 ## 2. DQ Priority Order
 
-Check in this exact order. First match wins.
+Check in this exact order. First match wins. Implemented in `qualify-lead.ts`.
 
-1. `national_chain` — restaurant name matches NATIONAL_CHAINS list
-2. `invalid_website` — `websiteStatus === 404` (only HTTP 404; not 403, 503, 0, or timeout)
-3. `below_threshold` — `annualSpend < $600,000`
-4. `below_minimum` — `annualSpend < $50,000` (sub-case of below_threshold)
+1. `national_chain` — restaurant name or domain matches `NATIONAL_CHAINS` list (checked twice: by validator and by `qualifyLead` for defense-in-depth)
+2. `invalid_website` — validator returned `finalDecision === 'invalid_website'` (confirmed 404 / malformed URL only; 403/503/timeout → `plausible_unverified`, not DQ)
+3. `below_minimum` — `annualSpend < $50,000` (sub-case; checked before below_threshold)
+4. `below_threshold` — `annualSpend < $600,000`
+5. `capped_at_99m` — spend parser applied $99M cap → routed as `below_threshold` DQ
+6. `parseFallback` — spend parser could not extract any recognizable amount (garbage input like "asdfghjkl") → routed as `below_threshold` DQ
+7. `clear_non_fit` — `finalDecision === 'clear_non_fit'` (non-restaurant, non-US); treated as DQ regardless of spend qualification
 
 If none match → `qualified = true`, proceed to scoring.
 

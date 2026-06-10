@@ -1,5 +1,6 @@
 # Hard Rules
 
+**Related:** `docs/pdf-generation.md` (PDF delivery section) · `docs/architecture.md`  
 Non-negotiable constraints derived from production incidents. Never override without explicit approval.
 
 ---
