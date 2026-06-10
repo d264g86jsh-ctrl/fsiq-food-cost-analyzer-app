@@ -7,11 +7,38 @@ Copy `.env.example` to `.env.local` for local development and fill in values. Fo
 
 ---
 
+## ⚠️ `vercel env pull` Overwrites `.env.local`
+
+Running `npx vercel env pull` **replaces the entire contents of `.env.local`** with a snapshot of the Vercel environment. Encrypted secrets come back as empty strings (`""`). Any values you had manually set — including credentials not stored in Vercel (GHL token, local Supabase overrides) — are silently deleted.
+
+**Workflow to avoid losing local credentials:**
+
+```bash
+# 1. Back up your credentials before pulling
+cp .env.local .env.local.bak
+
+# 2. Pull (this overwrites .env.local with Vercel's snapshot)
+npx vercel env pull --environment=production
+
+# 3. Strip the Vercel infra noise (VERCEL_*, TURBO_*, NX_DAEMON)
+# — these are injected by the Vercel runtime and are useless locally
+
+# 4. Re-add your real local values from the backup
+# (GHL_ACCESS_TOKEN, DATABASE_URL, ADMIN_ACCESS_TOKEN, etc.)
+```
+
+**Never commit `.env.local` or `.env.local.bak`** — both are in `.gitignore`. `.env.example` is the only tracked env file and must contain only empty-string placeholders.
+
+**Standalone scripts (scripts/*.ts):** All scripts load `.env.local` explicitly via a `loadEnv` helper — `npx tsx` does NOT auto-load env files the way Next.js does. If a script says "credentials not found," check that `.env.local` has the required vars with real (non-empty) values.
+
+---
+
 ## Reference Table
 
 | Variable | Required? | Env | Description |
 |---|---|---|---|
-| `DATABASE_URL` | **Required** | Both | Supabase PostgreSQL connection string. Use the **pooler URL** (port 6543) — never the direct connection (port 5432) on Vercel. |
+| `DATABASE_URL` | **Required** | Both | Supabase PostgreSQL **pooler URL** (port 6543, `?pgbouncer=true`). Used by Prisma at runtime for all queries. Never use the direct (port 5432) URL here — PgBouncer is required on Vercel serverless. |
+| `DIRECT_URL` | **Required** | Both | Supabase **direct URL** (port 5432, no pgbouncer param). Used by `prisma migrate` / `prisma db push` / `prisma introspect` only. Prisma automatically routes migrations through this URL while runtime queries use `DATABASE_URL`. Set in both Production and Preview so deploys can run `migrate deploy` without hanging on the pooler. Format: `postgresql://postgres:PASSWORD@db.PROJECT_REF.supabase.co:5432/postgres` |
 | `ANTHROPIC_API_KEY` | **Required** | Both | Claude API key. Missing → AI fallback narratives used; PDF personalization reduced. Non-fatal. |
 | `PDFMONKEY_API_KEY` | **Required** | Both | PDFMonkey API key. Missing → `pdfStatus="skipped"` for all qualified leads. |
 | `PDFMONKEY_TEMPLATE_ID` | **Required** | Both | PDFMonkey template ID. Missing → `pdfStatus="skipped"`. |

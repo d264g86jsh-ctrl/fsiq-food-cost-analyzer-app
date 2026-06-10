@@ -166,8 +166,12 @@ function buildCustomFields(payload: GhlHandoffPayload): Array<{ key: string; fie
   if (payload.fsiq_utm_content)      fields.push({ key: 'fsiq_utm_content',      field_value: payload.fsiq_utm_content });
   if (payload.fsiq_utm_term)         fields.push({ key: 'fsiq_utm_term',         field_value: payload.fsiq_utm_term });
   if (payload.fsiq_utm_id)           fields.push({ key: 'fsiq_utm_id',           field_value: payload.fsiq_utm_id });
-  if (payload.fsiq_fbadid)           fields.push({ key: 'fsiq_fbadid',           field_value: payload.fsiq_fbadid });
-  if (payload.fsiq_fbclid)           fields.push({ key: 'fsiq_fbclid',           field_value: payload.fsiq_fbclid });
+  // GHL slugifies custom field display names to derive fieldKey. These two diverged:
+  //   display "FSIQ FB Ad ID"    → GHL assigned key 'fsiq_fb_ad_id'   (not 'fsiq_fbadid')
+  //   display "FSIQ FB Click ID" → GHL assigned key 'fsiq_fb_click_id' (not 'fsiq_fbclid')
+  // All other fsiq_* keys match their display names and bare-key resolution works.
+  if (payload.fsiq_fbadid)           fields.push({ key: 'fsiq_fb_ad_id',         field_value: payload.fsiq_fbadid });
+  if (payload.fsiq_fbclid)           fields.push({ key: 'fsiq_fb_click_id',       field_value: payload.fsiq_fbclid });
   if (payload.fsiq_referrer)         fields.push({ key: 'fsiq_referrer',         field_value: payload.fsiq_referrer });
   if (payload.fsiq_landing_page_url) fields.push({ key: 'fsiq_landing_page_url', field_value: payload.fsiq_landing_page_url });
   if (payload.fsiq_dq_reason) {

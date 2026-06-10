@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-06-10  
 **HEAD commit:** `5989067` (fix: mobile PDF — server-side UA redirect instead of CTA page)  
-**Production URL:** `https://fsiq-food-cost-analyzer-app.vercel.app`
+**Production URL:** `https://app.foodserviceiq.com` (canonical) — underlying Vercel deployment: `https://fsiq-food-cost-analyzer-app.vercel.app`
 
 ---
 
@@ -122,7 +122,7 @@ Selection is deterministic (`src/lib/ai/angle-selector.ts`). See `docs/ai-narrat
 
 | Item | Value |
 |------|-------|
-| URL | `https://fsiq-food-cost-analyzer-app.vercel.app` |
+| URL | `https://app.foodserviceiq.com` (custom domain) — `https://fsiq-food-cost-analyzer-app.vercel.app` (Vercel alias) |
 | Framework | Next.js 15.5.18 |
 | Node | 24.x |
 | Vercel region | `sfo1` (San Francisco) — pinned in `vercel.json` for DB co-location with Supabase |
@@ -140,6 +140,7 @@ The following are **not yet confirmed done**. See `docs/launch-blockers.md` for 
 
 1. **DQ email not verified end-to-end** — GHL automation for `send_dq_below_threshold` has not been confirmed to fire in a live test
 2. **NXDOMAIN bug** — `invalid_website` not returned for truly non-existent domains in Vercel serverless
-3. **GHL attribution custom fields** — `scripts/ghl-create-attribution-fields.ts` needs to be run with live credentials
-4. **Migration not applied to production** — `20260610_add_attribution_fields` and `20260610_add_full_attribution` pending `pnpm prisma migrate deploy`
+3. ~~**GHL attribution custom fields**~~ — ✅ Script run 2026-06-10; all 11 fields created/verified. Two slug corrections applied (`fsiq_fb_ad_id`, `fsiq_fb_click_id`). Bare-key resolution confirmed in production.
+4. ~~**DB migrations pending**~~ — ✅ All 6 local migrations applied and tracked in `_prisma_migrations` (applied 2026-06-10 via Supabase SQL + manual registration). `prisma migrate status` will show clean.
 5. **3 pre-existing test failures** — `report-page.test.ts` (`headers()` outside request scope); not a runtime bug but makes CI red
+6. **Two slug-mismatch fields** — `fsiq_fbadid` → GHL key `fsiq_fb_ad_id`, `fsiq_fbclid` → GHL key `fsiq_fb_click_id`. Code patched in `ghl.ts`; these values start flowing on next deploy.

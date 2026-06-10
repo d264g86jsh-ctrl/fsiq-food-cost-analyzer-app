@@ -6,6 +6,7 @@
 import { readFileSync } from 'node:fs';
 try {
   const envLocal = readFileSync(new URL('../.env.local', import.meta.url), 'utf8');
+  const fileVars: Record<string, string> = {};
   for (const line of envLocal.split('\n')) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith('#')) continue;
@@ -13,7 +14,10 @@ try {
     if (eqIdx === -1) continue;
     const key = trimmed.slice(0, eqIdx).trim();
     const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
-    if (key && !(key in process.env)) process.env[key] = val;
+    if (key) fileVars[key] = val;
+  }
+  for (const [key, val] of Object.entries(fileVars)) {
+    if (!process.env[key]) process.env[key] = val;
   }
 } catch { /* .env.local is optional */ }
 

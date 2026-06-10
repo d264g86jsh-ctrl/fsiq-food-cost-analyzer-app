@@ -21,6 +21,9 @@ import fs from 'node:fs';
 
 function loadEnv(p: string) {
   if (!fs.existsSync(p)) return;
+  // Two-pass: collect all vars from file (last-write-wins for duplicate keys),
+  // then apply only where process.env has no real value (shell vars still win).
+  const fileVars: Record<string, string> = {};
   for (const line of fs.readFileSync(p, 'utf8').split('\n')) {
     const t = line.trim();
     if (!t || t.startsWith('#')) continue;
@@ -28,7 +31,10 @@ function loadEnv(p: string) {
     if (eq < 0) continue;
     const k = t.slice(0, eq).trim();
     const v = t.slice(eq + 1).trim().replace(/^["']|["']$/g, '');
-    if (k && !(k in process.env)) process.env[k] = v;
+    if (k) fileVars[k] = v;
+  }
+  for (const [k, v] of Object.entries(fileVars)) {
+    if (!process.env[k]) process.env[k] = v;
   }
 }
 loadEnv(path.join(process.cwd(), '.env.local'));

@@ -75,7 +75,7 @@ Last updated: Phase 11 (QA & Hardening)
 
 - [ ] `GHL_LOCATION_ID` matches the target sub-account
 - [ ] `GHL_ACCESS_TOKEN` is a valid, non-expired token for the sub-account
-- [ ] All `fsiq_*` custom fields exist in GHL — run `npx tsx scripts/ghl-create-attribution-fields.ts` with live credentials to create/verify the 11 attribution fields; confirm GHL-assigned keys match bare keys in `buildCustomFields` (GHL sometimes prefixes with `contact.`)
+- [x] All `fsiq_*` custom fields exist in GHL — script run 2026-06-10; 9 created, 2 already existed. GHL bare-key resolution confirmed in production. Two slug-mismatched fields patched in code (`fsiq_fb_ad_id`, `fsiq_fb_click_id`).
 - [ ] Zapier automations are mapped to `fsiq_communication_route` values before launch
 - [ ] Test each communication route end-to-end in staging: `send_full_report`, `send_conservative_report`, all `send_dq_*` routes — **`send_dq_below_threshold` is unverified (reported as not firing)**
 - [ ] Confirm `FSIQ Full PDF Ready` and `FSIQ Conservative PDF Ready` tags trigger the correct Zapier zap
@@ -88,6 +88,8 @@ Last updated: Phase 11 (QA & Hardening)
 - [ ] `META_PIXEL_ID` and `NEXT_PUBLIC_META_PIXEL_ID` both set to the same production pixel ID
 - [ ] `META_CONVERSIONS_API_TOKEN` is a valid Conversions API token for that pixel
 - [ ] `META_TEST_EVENT_CODE` is **not set** in production (leave blank — removes test mode)
+- [ ] **Verify Meta Business domain verification for `foodserviceiq.com`** — the pixel is under `1679245649839076`; confirm `foodserviceiq.com` is a verified domain in Meta Business Manager → Brand Safety → Domains. The custom domain `app.foodserviceiq.com` resolves under `foodserviceiq.com` so subdomain verification applies.
+- [ ] **Use `https://app.foodserviceiq.com` (not the `.vercel.app` URL) in all ad UTM links and manual test submissions** so `landing_page_url` captures the canonical domain, `event_source_url` in CAPI matches the verified domain, and GHL's `fsiq_landing_page_url` field is consistent.
 - [ ] Verify browser Lead event fires in Meta Events Manager on a staging submission
 - [ ] Verify server CAPI Lead event appears with matching `event_id` (deduplication working)
 - [ ] Verify `QualifiedLead` CAPI event appears only for qualified leads

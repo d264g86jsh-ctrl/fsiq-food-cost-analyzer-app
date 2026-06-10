@@ -61,6 +61,8 @@ The app runs on Vercel (Next.js App Router). The core submission pipeline uses `
 
 See `docs/environment.md` for the full reference table. The minimal set to make the app functional:
 
+> **⚠️ Env vars are injected at build time.** Changing a variable in the Vercel dashboard does NOT affect the currently running deployment. The new value is only available after the next deploy (either a push to `main` or a manual Redeploy from the dashboard). **If you rotate a credential, trigger a Redeploy immediately** — production will continue using the old value until then.
+
 **Required for core flow:**
 ```
 DATABASE_URL          Supabase PostgreSQL (use pooler port 6543)

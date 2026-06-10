@@ -118,6 +118,8 @@ GHL/Zapier uses this field as the primary automation trigger.
 
 All fields prefixed `fsiq_` to avoid collisions with other GHL integrations.
 
+**GHL key resolution:** GHL's Contact API v2021-07-28 accepts custom field values by bare key (e.g. `fsiq_lead_source`) even though GHL internally stores the field with a `contact.` prefix (`contact.fsiq_lead_source`). The `contact.` prefix is cosmetic in the field listing — bare keys resolve correctly on write. Confirmed in production. **Exception:** two fields whose display names were slugified differently by GHL — the app uses `fsiq_fb_ad_id` and `fsiq_fb_click_id` as the write keys for the `fbadid` and `fbclid` payloads (see `ghl.ts:buildCustomFields`).
+
 ### Identity / contact
 
 | Field | Value source |
@@ -165,7 +167,7 @@ All fields prefixed `fsiq_` to avoid collisions with other GHL integrations.
 |---|---|
 | `fsiq_pdf_mode` | `pdfMode` — `full` / `conservative` / null |
 | `fsiq_pdf_status` | `pdfStatus` — `complete` / `error` / `skipped` / `pending` |
-| `fsiq_pdf_url` | `pdfDownloadUrl` — only present when `pdfStatus = complete` |
+| `fsiq_pdf_url` | `buildReportUrl(submissionId)` = `https://app.foodserviceiq.com/report/{id}` — the **proxy route**, not the raw PDFMonkey URL. Only set when `pdfDownloadUrl` is confirmed non-null. Verified working in production (email links resolve and display PDF inline). |
 | `fsiq_pdf_ready_at` | ISO timestamp when `pdfDownloadUrl` was confirmed |
 
 ### Traffic attribution
