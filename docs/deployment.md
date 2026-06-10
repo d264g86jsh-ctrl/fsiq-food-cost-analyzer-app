@@ -11,6 +11,38 @@ The app runs on Vercel (Next.js App Router). The core submission pipeline uses `
 
 ---
 
+## Function Region
+
+**Pinned to `sfo1` (San Francisco)** via `vercel.json` at the repo root.
+
+**Why:** The Supabase database is in AWS `us-west-1` (N. California). A qualified submission makes ~10 sequential Prisma round trips, and Browserless.io's production endpoint (`production-sfo.browserless.io`) is also in San Francisco. Before pinning, functions ran in Vercel's default `iad1` (Washington D.C.) — every DB query crossed the country.
+
+| Hop | Before (`iad1`) | After (`sfo1`) | Saving |
+|-----|-----------------|-----------------|--------|
+| Vercel → Supabase | ~65–70 ms/query | ~3–8 ms/query | ~60–65 ms/query |
+| Vercel → Browserless | ~65 ms | ~2–5 ms | ~60 ms |
+
+**Estimated latency improvement:** 10 DB round trips × ~62 ms = **~620 ms** shaved off a qualified submission's total pipeline. The 4 synchronous calls (before response is sent) save ~250 ms from user-visible latency; the remaining 6 background calls speed up PDF delivery.
+
+**Impact on other services:**
+
+| Service | Endpoint | Impact of move |
+|---------|----------|----------------|
+| Supabase | AWS us-west-1 (N. California) | ✅ Same region — major improvement |
+| Browserless.io | `production-sfo.browserless.io` | ✅ Co-located in SFO — major improvement |
+| Anthropic API | Cloudflare CDN (region-agnostic) | Neutral to slightly better for west-coast users |
+| PDFMonkey | European-hosted | Negligible — both US regions are equal distance |
+| GoHighLevel | US-based, region unknown | Negligible — likely marginal improvement or neutral |
+| Meta CAPI | `graph.facebook.com` (Cloudflare CDN) | Negligible — CDN handles routing |
+
+**Reasons this is safe to do:**
+- No IP allowlists on Supabase (auth-based access only; PgBouncer pooler is region-agnostic)
+- No hardcoded region-sensitive URLs in the codebase
+- No GHL or Meta CAPI IP restrictions
+- Vercel Pro plan has access to all regions
+
+---
+
 ## Prerequisites
 
 | Service | Used for | Plan needed |
@@ -21,7 +53,7 @@ The app runs on Vercel (Next.js App Router). The core submission pipeline uses `
 | PDFMonkey | PDF generation | Starter or above |
 | GoHighLevel | CRM sync | Any active account |
 | Meta | Conversions API (CAPI) | Business account |
-| Browserless.io | Headless browser fallback (planned) | Free tier for dev |
+| Browserless.io | Headless browser fallback | Free tier for dev; key required for production |
 
 ---
 

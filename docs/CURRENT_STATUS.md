@@ -125,8 +125,8 @@ Selection is deterministic (`src/lib/ai/angle-selector.ts`). See `docs/ai-narrat
 | URL | `https://fsiq-food-cost-analyzer-app.vercel.app` |
 | Framework | Next.js 15.5.18 |
 | Node | 24.x |
-| Vercel region | Not configured in repo (no `vercel.json`) — Vercel default applies |
-| Supabase region | `us-west-1` (verified from Supabase project API) |
+| Vercel region | `sfo1` (San Francisco) — pinned in `vercel.json` for DB co-location with Supabase |
+| Supabase region | `us-west-1` N. California (verified from Supabase project API) — same metro as `sfo1` |
 | Headless | Browserless.io via `BROWSERLESS_API_KEY` — **fully implemented** (`browserless-client.ts`); when key is absent headless is disabled and `plausible_unverified` is the fallback for blocked/thin sites |
 | Deploys | Automatic on push to `main` |
 | DB | Supabase PostgreSQL (project `ektnxacqarlzbscaaxsz`) |
