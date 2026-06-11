@@ -4,7 +4,7 @@
 //   3. Lazy cache: if #2 missing, fetch via #1 and cache now for next request
 //   4. Friendly 410 if both unavailable (document deleted from PDFMonkey)
 //
-// Hard rules (docs/hard-rules.md):
+// Hard rules (docs/hard-rules.md) — see also: docs/pdf-generation.md:
 //   - Never trigger a download. Content-Disposition must be "inline".
 //   - No sandbox attribute on the iframe that embeds this route.
 //   - No Content-Security-Policy: sandbox header on this response.
