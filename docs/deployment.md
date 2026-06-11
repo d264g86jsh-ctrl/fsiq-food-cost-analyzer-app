@@ -109,13 +109,25 @@ Set each variable for the correct environments:
 - `ADMIN_ACCESS_TOKEN` — Production + Preview (can use same value)
 
 ### 3. Database connection (critical)
-Use the **connection pooler** URL from Supabase, not the direct connection:
-- Pooler port: **6543** (PgBouncer in transaction mode)
-- Direct port: 5432 (do not use on Vercel — serverless functions exhaust direct connections)
+
+Use the **connection pooler** URL from Supabase, not the direct connection.
+
+| Setting | Value | Why |
+|---------|-------|-----|
+| Port | **6543** (PgBouncer session mode) | Serverless-safe; direct port 5432 is unreachable from Vercel |
+| Query params | **`?pgbouncer=true&connection_limit=1`** | See below |
 
 ```
-DATABASE_URL=postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres
+DATABASE_URL=postgresql://postgres.[ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1
 ```
+
+**`?pgbouncer=true` is non-negotiable.** Without it, Prisma uses named prepared statements (`PREPARE s0`). In PgBouncer session mode, prepared statements survive the client disconnect and are registered on the backend connection. When the same backend connection is reassigned to the next serverless invocation, Prisma tries to `PREPARE s0` again → PostgreSQL error `42P05: prepared statement "s0" already exists` → `PrismaClientUnknownRequestError` → every request to that route returns 500 until the session expires.
+
+**`&connection_limit=1`** prevents a single function instance from opening multiple pooler connections and competing with itself.
+
+**Credential rotations MUST preserve these query params.** The 2026-06-11 production incident was caused by a credential rotation that supplied a bare pooler URL without `?pgbouncer=true`. The app's `src/lib/db.ts` normalises the URL at runtime as a safeguard, but the env var itself should always carry both params so the source of truth is unambiguous.
+
+**`DIRECT_URL` is for migrations only, not runtime.** `DIRECT_URL` (port 5432) is used by `prisma migrate` locally but **cannot be reached from Vercel's serverless functions** (Supabase blocks direct connections from external IPs). Never use `DIRECT_URL` as a fallback in application code.
 
 ### 4. Run database migrations
 ```bash

@@ -10,30 +10,8 @@
 //   - No Content-Security-Policy: sandbox header on this response.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { db } from '@/lib/db';
 import { cachePdfToSupabase, verifyCachedPdfUrl, fetchAndCache } from '@/lib/pdf/pdf-cache';
-
-// This route uses a dedicated Prisma client with ?pgbouncer=true appended
-// unconditionally. PgBouncer session mode (port 6543) may not have this flag
-// in DATABASE_URL if the credential was rotated without it. Without pgbouncer=true,
-// Prisma uses named prepared statements (s0, s1, …); if a previous request left
-// an orphaned statement on a reused session, all subsequent requests fail with
-// PrismaClientUnknownRequestError (42P05: prepared statement "s0" already exists).
-// Appending pgbouncer=true forces unnamed statements, making each query idempotent.
-function buildReportDbUrl(): string {
-  const base = process.env.DATABASE_URL ?? '';
-  if (!base) return base;
-  const sep = base.includes('?') ? '&' : '?';
-  // Ensure exactly one pgbouncer=true and connection_limit=1 for serverless
-  const cleaned = base
-    .replace(/[?&]pgbouncer=[^&]*/g, '')
-    .replace(/[?&]connection_limit=[^&]*/g, '');
-  return `${cleaned}${sep}pgbouncer=true&connection_limit=1`;
-}
-
-const reportDb = new PrismaClient({
-  datasources: { db: { url: buildReportDbUrl() } },
-});
 
 const PDFMONKEY_API_KEY  = process.env.PDFMONKEY_API_KEY;
 const PDFMONKEY_API_BASE = 'https://api.pdfmonkey.io/api/v1';
@@ -89,7 +67,7 @@ export async function GET(
 ): Promise<NextResponse> {
   const { id } = await params;
 
-  const submission = await reportDb.submission.findUnique({
+  const submission = await db.submission.findUnique({
     where: { id },
     select: {
       qualified:           true,
@@ -117,7 +95,7 @@ export async function GET(
             if (buffer) {
               const cached = await cachePdfToSupabase(id, buffer);
               if (cached) {
-                await reportDb.submission.update({
+                await db.submission.update({
                   where: { id },
                   data: { pdfCachedUrl: cached.url, pdfCachedAt: cached.cachedAt },
                 }).catch(() => {});
