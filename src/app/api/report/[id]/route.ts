@@ -1,8 +1,8 @@
 // GET /api/report/[id] — PDF proxy with hybrid delivery strategy:
 //   1. Fresh download_url from PDFMonkey API (always current, expires in hours)
-//   2. Cached copy in Supabase Storage (permanent, written at generation time or after first visit)
-//   3. Stored download_url from DB (may be expired, last resort)
-//   4. Friendly 410 if all sources unavailable
+//   2. Cached copy in Supabase Storage (permanent, set at generation time)
+//   3. Lazy cache: if #2 missing, fetch via #1 and cache now for next request
+//   4. Friendly 410 if both unavailable (document deleted from PDFMonkey)
 //
 // Hard rules (docs/hard-rules.md):
 //   - Never trigger a download. Content-Disposition must be "inline".
@@ -10,27 +10,21 @@
 //   - No Content-Security-Policy: sandbox header on this response.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { waitUntil } from '@vercel/functions';
 import { db } from '@/lib/db';
-import { cachePdfToSupabase, verifyCachedPdfUrl } from '@/lib/pdf/pdf-cache';
+import { cachePdfToSupabase, verifyCachedPdfUrl, fetchAndCache } from '@/lib/pdf/pdf-cache';
 
-// Explicit maxDuration for this API route — separate from the page route's segment config.
-// First-visit path: PDFMonkey API call + S3 fetch ≈ 3–6s. 30s gives substantial headroom.
-export const maxDuration = 30;
-
+const PDFMONKEY_API_KEY  = process.env.PDFMONKEY_API_KEY;
 const PDFMONKEY_API_BASE = 'https://api.pdfmonkey.io/api/v1';
 
 /**
  * Fetch a fresh download_url from PDFMonkey using the stored document ID.
- * PDFMonkey always returns a current pre-signed S3 URL regardless of document age.
+ * PDFMonkey always returns a current pre-signed S3 URL regardless of age.
  */
 async function getFreshDownloadUrl(documentId: string): Promise<string | null> {
-  // Read at call time so vi.stubEnv works in tests and env changes take effect.
-  const apiKey = process.env.PDFMONKEY_API_KEY;
-  if (!documentId || !apiKey) return null;
+  if (!documentId || !PDFMONKEY_API_KEY) return null;
   try {
     const res = await fetch(`${PDFMONKEY_API_BASE}/documents/${documentId}`, {
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: { Authorization: `Bearer ${PDFMONKEY_API_KEY}` },
       signal: AbortSignal.timeout(8_000),
     });
     if (!res.ok) {
@@ -46,27 +40,22 @@ async function getFreshDownloadUrl(documentId: string): Promise<string | null> {
 }
 
 /**
- * Build the PDF NextResponse from a raw ArrayBuffer.
+ * Stream PDF bytes from any URL back to the client.
+ * Returns null if the upstream URL is unreachable or returns an error.
  */
-function pdfResponse(buffer: ArrayBuffer): NextResponse {
-  return new NextResponse(buffer, {
-    status: 200,
-    headers: {
-      'Content-Type':        'application/pdf',
-      'Content-Disposition': 'inline; filename="Food-Cost-Analyzer.pdf"',
-      'Cache-Control':       'private, max-age=3600',
-    },
-  });
-}
-
-/**
- * Fetch PDF bytes from any URL. Returns null if unreachable or non-OK.
- */
-async function fetchPdfBuffer(sourceUrl: string, timeoutMs = 20_000): Promise<ArrayBuffer | null> {
+async function streamPdf(sourceUrl: string): Promise<NextResponse | null> {
   try {
-    const res = await fetch(sourceUrl, { signal: AbortSignal.timeout(timeoutMs) });
-    if (!res.ok) return null;
-    return res.arrayBuffer();
+    const upstream = await fetch(sourceUrl, { signal: AbortSignal.timeout(20_000) });
+    if (!upstream.ok) return null;
+    const pdf = await upstream.arrayBuffer();
+    return new NextResponse(pdf, {
+      status: 200,
+      headers: {
+        'Content-Type':        'application/pdf',
+        'Content-Disposition': 'inline; filename="Food-Cost-Analyzer.pdf"',
+        'Cache-Control':       'private, max-age=3600',
+      },
+    });
   } catch {
     return null;
   }
@@ -93,31 +82,28 @@ export async function GET(
   }
 
   // ── Strategy 1: fresh URL from PDFMonkey API ─────────────────────────────
-  // Fetch the PDF buffer ONCE, return the response immediately, then cache
-  // in the background via waitUntil. This eliminates the prior double-fetch
-  // pattern that was blocking the response and risking the 15s default timeout.
   if (submission.pdfMonkeyDocumentId) {
     const freshUrl = await getFreshDownloadUrl(submission.pdfMonkeyDocumentId);
     if (freshUrl) {
-      const buffer = await fetchPdfBuffer(freshUrl);
-      if (buffer) {
-        // Lazy cache: if no Supabase copy yet, write it in the background after
-        // the response is sent — never block the client on the cache write.
+      const res = await streamPdf(freshUrl);
+      if (res) {
+        // Lazy cache: if no cached copy yet, store it now for future requests
         if (!submission.pdfCachedUrl) {
-          waitUntil(
-            cachePdfToSupabase(id, buffer)
-              .then((cached) => {
-                if (cached) {
-                  return db.submission.update({
-                    where: { id },
-                    data: { pdfCachedUrl: cached.url, pdfCachedAt: cached.cachedAt },
-                  });
-                }
-              })
-              .catch(() => {}),
-          );
+          const newFresh = await fetch(freshUrl, { signal: AbortSignal.timeout(20_000) }).catch(() => null);
+          if (newFresh?.ok) {
+            const buffer = await newFresh.arrayBuffer().catch(() => null);
+            if (buffer) {
+              const cached = await cachePdfToSupabase(id, buffer);
+              if (cached) {
+                await db.submission.update({
+                  where: { id },
+                  data: { pdfCachedUrl: cached.url, pdfCachedAt: cached.cachedAt },
+                }).catch(() => {});
+              }
+            }
+          }
         }
-        return pdfResponse(buffer);
+        return res;
       }
     }
   }
@@ -126,20 +112,20 @@ export async function GET(
   if (submission.pdfCachedUrl) {
     const validCachedUrl = await verifyCachedPdfUrl(submission.pdfCachedUrl);
     if (validCachedUrl) {
-      const buffer = await fetchPdfBuffer(validCachedUrl);
-      if (buffer) {
+      const res = await streamPdf(validCachedUrl);
+      if (res) {
         console.log(`[PDF Proxy] Served from cache for ${id}`);
-        return pdfResponse(buffer);
+        return res;
       }
     }
   }
 
   // ── Strategy 3: stored download_url (may be expired, worth trying) ────────
   if (submission.pdfDownloadUrl) {
-    const buffer = await fetchPdfBuffer(submission.pdfDownloadUrl);
-    if (buffer) {
+    const res = await streamPdf(submission.pdfDownloadUrl);
+    if (res) {
       console.log(`[PDF Proxy] Served from stored URL for ${id}`);
-      return pdfResponse(buffer);
+      return res;
     }
   }
 
