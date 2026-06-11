@@ -12,6 +12,31 @@ export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
 }
 
+// Phone validation — light format check that accepts all common international formats.
+// Strips formatting characters ( ) - . and spaces, then requires an optional leading +
+// followed by 7–15 digits (ITU-T E.164 range; Mexico +52 numbers are 12 digits).
+// Returns true when the stripped value looks like a real phone number.
+// Returns false for plain text, SQL strings, empty-after-strip, or extreme lengths.
+export function isValidPhone(phone: string): boolean {
+  const stripped = phone.trim().replace(/[\s()\-.]/g, '');
+  if (!/^\+?\d+$/.test(stripped)) return false;          // non-digit/non-+ chars remain
+  const digitCount = stripped.replace(/^\+/, '').length;
+  return digitCount >= 7 && digitCount <= 15;
+}
+
+// Server-side normalization — produce a GHL-safe phone string or null.
+// Exported so submitAnalysis can import it without duplicating the logic.
+// When normalization returns null, callers must OMIT phone from the GHL payload
+// (never send an unnormalized string to GHL).
+export function normalizePhone(raw: string | null | undefined): string | null {
+  if (!raw?.trim()) return null;
+  const stripped = raw.trim().replace(/[\s()\-.]/g, '');
+  if (!/^\+?\d+$/.test(stripped)) return null;
+  const digitCount = stripped.replace(/^\+/, '').length;
+  if (digitCount < 7 || digitCount > 15) return null;
+  return stripped;
+}
+
 // ── Step advancement gates ────────────────────────────────────────────────────
 
 export function canAdvanceFromStep1(
@@ -42,7 +67,8 @@ export function canAdvanceFromStep3(formData: Partial<AnalyzerFormPayload>): boo
 export function canSubmitStep4(formData: Partial<AnalyzerFormPayload>): boolean {
   if (!formData.full_name?.trim()) return false;
   if (!formData.email?.trim() || !isValidEmail(formData.email)) return false;
-  if (!formData.phone?.trim()) return false;
+  if (!formData.phone?.trim()) return false;                        // required
+  if (!isValidPhone(formData.phone)) return false;                  // format check
   return true;
 }
 
@@ -79,6 +105,8 @@ export function getStep4Errors(formData: Partial<AnalyzerFormPayload>): Record<s
   }
   if (!formData.phone?.trim()) {
     errors.phone = 'Phone number is required.';
+  } else if (!isValidPhone(formData.phone)) {
+    errors.phone = 'Please enter a valid phone number (e.g. +1 555 123 4567).';
   }
   return errors;
 }

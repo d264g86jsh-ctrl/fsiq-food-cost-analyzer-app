@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import {
   isValidEmail,
+  isValidPhone,
+  normalizePhone,
   canAdvanceFromStep1,
   canAdvanceFromStep2,
   canAdvanceFromStep3,
@@ -143,31 +145,112 @@ describe('canAdvanceFromStep3', () => {
   });
 });
 
+// ── isValidPhone ──────────────────────────────────────────────────────────────
+
+describe('isValidPhone', () => {
+  // Valid formats — should all pass
+  it('plain 10-digit US number passes', () => expect(isValidPhone('5125550100')).toBe(true));
+  it('E.164 US +15125550100 passes', () => expect(isValidPhone('+15125550100')).toBe(true));
+  it('Mexican E.164 +527775343254 passes (founder number, confirmed production)', () => expect(isValidPhone('+527775343254')).toBe(true));
+  it('+52 777 534 3254 (spaces) passes', () => expect(isValidPhone('+52 777 534 3254')).toBe(true));
+  it('(555) 123-4567 US formatted passes', () => expect(isValidPhone('(555) 123-4567')).toBe(true));
+  it('+1.555.123.4567 dot-separated passes', () => expect(isValidPhone('+1.555.123.4567')).toBe(true));
+  it('7-digit minimum passes', () => expect(isValidPhone('5550100')).toBe(true));
+  it('15-digit maximum (E.164 ceiling) passes', () => expect(isValidPhone('+123456789012345')).toBe(true));
+
+  // Production failure values — all three must be rejected client-side
+  it('"not a phone number" → rejected (production failure)', () => expect(isValidPhone('not a phone number')).toBe(false));
+  it('SQL injection string → rejected (production failure)', () => expect(isValidPhone("'; DROP TABLE Submission; --")).toBe(false));
+  it('500-char digit string → rejected (too long, production failure)', () => expect(isValidPhone('1'.repeat(500))).toBe(false));
+
+  // Edge cases
+  it('empty string → rejected', () => expect(isValidPhone('')).toBe(false));
+  it('whitespace-only → rejected', () => expect(isValidPhone('   ')).toBe(false));
+  it('6 digits → rejected (too short)', () => expect(isValidPhone('123456')).toBe(false));
+  it('16 digits → rejected (too long)', () => expect(isValidPhone('1234567890123456')).toBe(false));
+  it('letters mixed with digits → rejected', () => expect(isValidPhone('555abc1234')).toBe(false));
+});
+
+// ── normalizePhone ────────────────────────────────────────────────────────────
+
+describe('normalizePhone', () => {
+  // Valid inputs → canonical string
+  it('10-digit US number → stored as-is', () => expect(normalizePhone('5125550100')).toBe('5125550100'));
+  it('E.164 +15125550100 → stored as-is', () => expect(normalizePhone('+15125550100')).toBe('+15125550100'));
+  it('+52 777 534 3254 → +527775343254 (spaces stripped)', () => expect(normalizePhone('+52 777 534 3254')).toBe('+527775343254'));
+  it('(555) 123-4567 → 5551234567 (formatting stripped)', () => expect(normalizePhone('(555) 123-4567')).toBe('5551234567'));
+  it('+1.555.123.4567 → +15551234567 (dots stripped)', () => expect(normalizePhone('+1.555.123.4567')).toBe('+15551234567'));
+  it('leading/trailing whitespace stripped', () => expect(normalizePhone('  +15551234567  ')).toBe('+15551234567'));
+
+  // Production failure values → null (phone omitted from GHL, contact still created)
+  it('"not a phone number" → null (GHL payload omits phone)', () => expect(normalizePhone('not a phone number')).toBeNull());
+  it('SQL injection string → null', () => expect(normalizePhone("'; DROP TABLE Submission; --")).toBeNull());
+  it('500-char digit string → null (too long)', () => expect(normalizePhone('1'.repeat(500))).toBeNull());
+
+  // Null/empty inputs
+  it('null → null', () => expect(normalizePhone(null)).toBeNull());
+  it('undefined → null', () => expect(normalizePhone(undefined)).toBeNull());
+  it('empty string → null', () => expect(normalizePhone('')).toBeNull());
+  it('whitespace-only → null', () => expect(normalizePhone('   ')).toBeNull());
+});
+
 // ── canSubmitStep4 ────────────────────────────────────────────────────────────
 
 describe('canSubmitStep4', () => {
-  it('full_name + valid email + phone → can submit', () => {
+  it('full_name + valid email + valid phone → can submit', () => {
     expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '5125550100' })).toBe(true);
   });
 
-  it('phone is required — absent blocks submit', () => {
+  it('phone required — absent blocks submit', () => {
     expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com' })).toBe(false);
   });
 
-  it('phone present — does not block', () => {
-    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '5125550100' })).toBe(true);
+  it('phone required — whitespace-only blocks submit', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '   ' })).toBe(false);
+  });
+
+  it('phone required — empty string blocks submit', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '' })).toBe(false);
+  });
+
+  it('"not a phone number" → blocks (production failure value)', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: 'not a phone number' })).toBe(false);
+  });
+
+  it('SQL injection string → blocks (production failure value)', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: "'; DROP TABLE Submission; --" })).toBe(false);
+  });
+
+  it('500-char digit string → blocks (production failure value)', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '1'.repeat(500) })).toBe(false);
+  });
+
+  it('+52 777 534 3254 (Mexican number with spaces) → passes', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '+52 777 534 3254' })).toBe(true);
+  });
+
+  it('(555) 123-4567 US formatted → passes', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '(555) 123-4567' })).toBe(true);
+  });
+
+  it('+15551234567 with surrounding spaces → passes (spaces stripped before format check)', () => {
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '  +15551234567  ' })).toBe(true);
   });
 
   it('missing full_name → blocks', () => {
-    expect(canSubmitStep4({ full_name: '', email: 'maria@restaurant.com' })).toBe(false);
+    expect(canSubmitStep4({ full_name: '', email: 'maria@restaurant.com', phone: '5125550100' })).toBe(false);
+  });
+
+  it('whitespace-only full_name → blocks (required field)', () => {
+    expect(canSubmitStep4({ full_name: '   ', email: 'maria@restaurant.com', phone: '5125550100' })).toBe(false);
   });
 
   it('missing email → blocks', () => {
-    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: '' })).toBe(false);
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: '', phone: '5125550100' })).toBe(false);
   });
 
   it('invalid email format → blocks', () => {
-    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'notanemail' })).toBe(false);
+    expect(canSubmitStep4({ full_name: 'Maria Garcia', email: 'notanemail', phone: '5125550100' })).toBe(false);
   });
 });
 
@@ -198,23 +281,48 @@ describe('getStep1Errors', () => {
 // ── getStep4Errors ────────────────────────────────────────────────────────────
 
 describe('getStep4Errors', () => {
-  it('valid full_name + email + phone → no errors', () => {
+  it('valid full_name + email + valid phone → no errors', () => {
     const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '5125550100' });
     expect(Object.keys(errors)).toHaveLength(0);
   });
 
-  it('missing phone → error', () => {
+  it('phone absent → "required" error', () => {
     const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com' });
-    expect(errors.phone).toBeTruthy();
+    expect(errors.phone).toBe('Phone number is required.');
+  });
+
+  it('whitespace-only phone → "required" error', () => {
+    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '   ' });
+    expect(errors.phone).toBe('Phone number is required.');
+  });
+
+  it('"not a phone number" → format error (production failure value)', () => {
+    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: 'not a phone number' });
+    expect(errors.phone).toMatch(/valid phone number/i);
+  });
+
+  it('500-char digit string → format error (production failure value)', () => {
+    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '1'.repeat(500) });
+    expect(errors.phone).toMatch(/valid phone number/i);
+  });
+
+  it('+15551234567 with spaces → no error (valid E.164 with surrounding spaces)', () => {
+    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '  +15551234567  ' });
+    expect(errors.phone).toBeUndefined();
+  });
+
+  it('+52 777 534 3254 → no error (Mexican number, founder format)', () => {
+    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'maria@restaurant.com', phone: '+52 777 534 3254' });
+    expect(errors.phone).toBeUndefined();
   });
 
   it('invalid email → error', () => {
-    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'bad' });
+    const errors = getStep4Errors({ full_name: 'Maria Garcia', email: 'bad', phone: '5125550100' });
     expect(errors.email).toBeTruthy();
   });
 
   it('missing full_name → error', () => {
-    const errors = getStep4Errors({ full_name: '', email: 'maria@restaurant.com' });
+    const errors = getStep4Errors({ full_name: '', email: 'maria@restaurant.com', phone: '5125550100' });
     expect(errors.full_name).toBeTruthy();
   });
 });
@@ -313,5 +421,10 @@ describe('lead payload is never erased by eligibility decisions', () => {
   it('tracking fields are optional and absence does not block submission', () => {
     const payloadWithoutTracking = { ...fullPayload };
     expect(canSubmitStep4(payloadWithoutTracking)).toBe(true);
+  });
+
+  it('phone absent from full payload blocks submission (phone is required)', () => {
+    const { phone: _p, ...withoutPhone } = fullPayload;
+    expect(canSubmitStep4(withoutPhone)).toBe(false);
   });
 });

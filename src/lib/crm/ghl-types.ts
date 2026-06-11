@@ -44,6 +44,9 @@ export interface GhlHandoffPayload {
   fsiq_pdf_url:               string | null; // non-null only when pdfStatus = "complete"
   fsiq_pdf_ready_at:          string | null; // ISO timestamp when pdfDownloadUrl confirmed
 
+  // Phone — raw user input preserved for sales visibility even when native field is omitted
+  fsiq_phone_raw:              string | null;  // trimmed but unformatted; stored when native phone is omitted
+
   // Traffic attribution — full UTM + Meta ad params
   // fsiq_ prefix keeps our fields separate from any native GHL UTM fields on the account.
   fsiq_lead_source:            string | null;  // 'meta' | 'google' | 'organic' | 'direct'

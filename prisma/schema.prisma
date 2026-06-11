@@ -98,9 +98,10 @@ model Submission {
   topSkus             String  // free text; parsed for protein/commodity keywords
 
   // ── Form inputs (Step 2 — contact fields) ────────────────────────────────
-  fullName String
-  email    String
-  phone    String?
+  fullName  String
+  email     String
+  phone     String?   // normalized: digits + optional leading +, null when input fails format check
+  phoneRaw  String?   // raw user-entered value (trimmed only); preserved for GHL fsiq_phone_raw
 
   // ── Traffic attribution ───────────────────────────────────────────────────
   // Captured at submission time for Meta CAPI matching and campaign ROAS.

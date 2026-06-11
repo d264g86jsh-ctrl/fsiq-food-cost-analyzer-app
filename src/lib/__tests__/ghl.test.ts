@@ -32,6 +32,7 @@ const basePayload: GhlHandoffPayload = {
   fsiq_pdf_status:            'complete',
   fsiq_pdf_url:               'https://cdn.pdfmonkey.io/report.pdf',
   fsiq_pdf_ready_at:          '2026-05-16T00:05:00.000Z',
+  fsiq_phone_raw:              null,
   fsiq_lead_source:            'direct',
   fsiq_utm_source:             null,
   fsiq_utm_medium:             null,

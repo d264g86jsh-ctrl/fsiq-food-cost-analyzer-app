@@ -134,6 +134,12 @@ describe('DQ: below_minimum', () => {
     expect(r.dqReason).toBe('below_minimum');
   });
 
+  it('"10000" bare number → $10,000 → DQ below_minimum (June 9 regression)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '10000' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_minimum');
+  });
+
   it('$50,000 → NOT below_minimum (becomes below_threshold)', () => {
     const r = qualifyLead(makeInput({ annualFoodSpend: '50000' }));
     expect(r.dqReason).toBe('below_threshold');
@@ -289,8 +295,43 @@ describe('DQ: capped spend (above $99M)', () => {
     expect(r.spendBucket).toBe('$7M+');
   });
 
+  it('"200m" → $200M → capped to $99M → DQ below_threshold (June 9 regression)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '200m' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+    expect(r.reasons).toContain('spend_above_max:capped_at_99m');
+  });
+
+  it('"$200,000,000" → capped to $99M → DQ below_threshold (June 9 regression)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '$200,000,000' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+    expect(r.reasons).toContain('spend_above_max:capped_at_99m');
+  });
+
   it('"2 grazillion" → DQ below_threshold (parseFallback, unresolvable input)', () => {
     const r = qualifyLead(makeInput({ annualFoodSpend: '2 grazillion' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+    expect(r.reasons).toContain('spend_unresolvable:parse_fallback');
+  });
+
+  it('"a lot" → DQ below_threshold (parseFallback, June 9 regression)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: 'a lot' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+    expect(r.reasons).toContain('spend_unresolvable:parse_fallback');
+  });
+
+  it('"idk" → DQ below_threshold (parseFallback, June 9 regression)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: 'idk' }));
+    expect(r.qualified).toBe(false);
+    expect(r.dqReason).toBe('below_threshold');
+    expect(r.reasons).toContain('spend_unresolvable:parse_fallback');
+  });
+
+  it('"it varies" → DQ below_threshold (parseFallback, June 9 regression)', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: 'it varies' }));
     expect(r.qualified).toBe(false);
     expect(r.dqReason).toBe('below_threshold');
     expect(r.reasons).toContain('spend_unresolvable:parse_fallback');
@@ -301,6 +342,32 @@ describe('DQ: capped spend (above $99M)', () => {
     expect(r.qualified).toBe(false);
     expect(r.dqReason).toBe('below_threshold');
     expect(r.reasons).toContain('spend_unresolvable:parse_fallback');
+  });
+});
+
+// ── Sanity: common real-world inputs qualify in correct buckets ────────────────
+// Regression guard for June 9 parser fixes — these must continue to qualify.
+
+describe('sanity: common formats qualify in correct buckets', () => {
+  it('"1.5m" → $1.5M → qualifies in $1M–$3M bucket', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '1.5m' }));
+    expect(r.qualified).toBe(true);
+    if (!r.qualified) return;
+    expect(r.spendBucket).toBe('$1M–$3M');
+  });
+
+  it('"$2,500,000" → $2.5M → qualifies in $1M–$3M bucket', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '$2,500,000' }));
+    expect(r.qualified).toBe(true);
+    if (!r.qualified) return;
+    expect(r.spendBucket).toBe('$1M–$3M');
+  });
+
+  it('"750k" → $750K → qualifies in $600K–$800K bucket', () => {
+    const r = qualifyLead(makeInput({ annualFoodSpend: '750k' }));
+    expect(r.qualified).toBe(true);
+    if (!r.qualified) return;
+    expect(r.spendBucket).toBe('$600K–$800K');
   });
 });
 

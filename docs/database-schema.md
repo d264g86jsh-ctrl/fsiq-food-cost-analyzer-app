@@ -59,7 +59,8 @@ The app has a single primary model: `Submission`. Every form submission creates 
 |---|---|---|
 | `fullName` | `String` | |
 | `email` | `String` | Indexed |
-| `phone` | `String?` | Optional |
+| `phone` | `String?` | Normalized: digits + optional leading `+`, max 15 digits. `null` when user input fails format check. Sent to GHL as native contact phone field when non-null. |
+| `phoneRaw` | `String?` | Raw user-entered phone (outer whitespace trimmed, no other stripping). Persisted so admin retries and future resyncs can populate `fsiq_phone_raw` in GHL even when `phone` is `null`. |
 
 ### Traffic attribution
 All fields captured at submission time from sessionStorage (first-touch, never overwritten). Used for Meta CAPI matching, campaign ROAS attribution, and GHL contact enrichment. The `landingPageUrl` contains the full query string — it is the raw catch-all for all URL params. See `docs/meta-tracking.md` for the full attribution flow.

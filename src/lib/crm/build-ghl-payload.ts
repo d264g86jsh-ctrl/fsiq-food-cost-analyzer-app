@@ -13,8 +13,14 @@ export function buildGhlPayload(
   leadStatus: LeadStatus,
   communicationRoute: CommunicationRoute,
   tags: GhlTag[],
+  rawPhone: string | null = null,
 ): GhlHandoffPayload {
   const qualified = submission.qualified === true;
+
+  // rawPhone param wins when provided in-memory (submitAnalysis path).
+  // Fall back to submission.phoneRaw for DB-rebuild paths (admin retry, future resyncs)
+  // so fsiq_phone_raw is always populated regardless of how the payload is assembled.
+  const resolvedRawPhone = rawPhone ?? submission.phoneRaw ?? null;
 
   return {
     // Identity / contact
@@ -22,6 +28,7 @@ export function buildGhlPayload(
     fsiq_full_name:             submission.fullName,
     fsiq_email:                 submission.email,
     fsiq_phone:                 submission.phone ?? null,
+    fsiq_phone_raw:             resolvedRawPhone,
 
     // Restaurant profile
     fsiq_restaurant_name:       submission.restaurantName,

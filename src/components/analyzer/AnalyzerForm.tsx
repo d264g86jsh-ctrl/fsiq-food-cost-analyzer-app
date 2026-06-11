@@ -30,6 +30,7 @@ import {
   canSubmitStep4,
   getStep1Errors,
   getStep4Errors,
+  isValidPhone,
 } from '@/lib/analyzer/form-validation';
 import { persistTrackingParams, getTrackingParams, readMetaCookies } from '@/lib/meta/tracking-params';
 import { generateEventId } from '@/lib/meta/event-id';
@@ -525,6 +526,18 @@ export function AnalyzerForm() {
                 type="tel"
                 value={formData.phone ?? ''}
                 onChange={(e) => update('phone', e.target.value)}
+                onBlur={() => {
+                  // Validate on blur so the user sees the error even when the submit
+                  // button is disabled (a disabled button fires no click events).
+                  const val = formData.phone ?? '';
+                  if (!val.trim()) {
+                    setFieldErrors((prev) => ({ ...prev, phone: 'Phone number is required.' }));
+                  } else if (!isValidPhone(val)) {
+                    setFieldErrors((prev) => ({ ...prev, phone: 'Please enter a valid phone number (e.g. +1 555 123 4567).' }));
+                  } else {
+                    setFieldErrors((prev) => { const n = { ...prev }; delete n.phone; return n; });
+                  }
+                }}
                 placeholder="(555) 123-4567"
                 autoComplete="tel"
                 className={inputCls(!!fieldErrors.phone)}

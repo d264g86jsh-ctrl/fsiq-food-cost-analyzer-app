@@ -42,6 +42,7 @@ import { GHL_TAG } from '@/lib/crm/ghl-tags';
 import { deriveLeadSource } from '@/lib/meta/lead-source';
 import type { TrackingContext } from '@/lib/meta/meta-types';
 import type { AnalyzerFormPayload } from '@/lib/analyzer/form-types';
+import { normalizePhone } from '@/lib/analyzer/form-validation';
 
 // ── Result type ───────────────────────────────────────────────────────────────
 
@@ -76,6 +77,11 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
 
   const leadSource = deriveLeadSource(payload.utm_source, payload.fbclid);
 
+  // Raw phone: trimmed user input, unformatted — persisted to GHL custom field
+  // so sales sees what was typed even when the native GHL phone field is omitted
+  // (which happens when the value fails normalizePhone's format check).
+  const rawPhone = payload.phone?.trim() || null;
+
   const trackingContext: TrackingContext = {
     fbp:            payload.fbp              ?? null,
     fbc:            payload.fbc              ?? null,
@@ -100,7 +106,8 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
         topSkus:             payload.top_skus,
         fullName:            payload.full_name,
         email:               payload.email,
-        phone:               payload.phone ?? null,
+        phone:               normalizePhone(payload.phone),
+        phoneRaw:            rawPhone,
         utmSource:      payload.utm_source      ?? null,
         utmMedium:      payload.utm_medium      ?? null,
         utmCampaign:    payload.utm_campaign    ?? null,
@@ -244,6 +251,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       responseDqReason:       effectiveDqReason,
       responseDollarEstimate: null,
       trackingContext,
+      rawPhone,
     });
   }
 
@@ -419,7 +427,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
 
     if (fresh) {
       console.log('[FSIQ DEBUG] Starting GHL sync for submission:', submissionId);
-      const ghlPayload = buildGhlPayload(fresh, finalStatus.leadStatus, finalStatus.communicationRoute, finalStatus.tags);
+      const ghlPayload = buildGhlPayload(fresh, finalStatus.leadStatus, finalStatus.communicationRoute, finalStatus.tags, rawPhone);
       const crmResult = await syncToGhl(ghlPayload);
       crmSyncStatus = crmResult.crmSyncStatus;
       ghlContactId  = crmResult.ghlContactId;
@@ -501,6 +509,7 @@ async function syncAndReturn({
   responseDqReason,
   responseDollarEstimate,
   trackingContext,
+  rawPhone,
 }: {
   submissionId: string;
   status: AssignLeadStatusResult;
@@ -509,6 +518,7 @@ async function syncAndReturn({
   responseDqReason: string | null;
   responseDollarEstimate: string | null;
   trackingContext: TrackingContext;
+  rawPhone: string | null;
 }): Promise<SubmitAnalysisResult> {
   // Fetch fresh record for GHL payload builder and CAPI user data
   const fresh = await db.submission.findUnique({ where: { id: submissionId } }).catch(() => null);
@@ -518,7 +528,7 @@ async function syncAndReturn({
   let crmSyncError: string | null = 'Record not found for GHL sync';
 
   if (fresh) {
-    const ghlPayload = buildGhlPayload(fresh, status.leadStatus, status.communicationRoute, status.tags);
+    const ghlPayload = buildGhlPayload(fresh, status.leadStatus, status.communicationRoute, status.tags, rawPhone);
     const crmResult = await syncToGhl(ghlPayload);
     crmSyncStatus = crmResult.crmSyncStatus;
     ghlContactId  = crmResult.ghlContactId;

@@ -33,6 +33,7 @@ function makeSubmission(overrides: Partial<Submission> = {}): Submission {
     utmId: null,
     fbadid: null,
     referrer: null,
+    phoneRaw: null,
     websiteValidationResult: null,
     finalDecision: 'verified_restaurant' as Submission['finalDecision'],
     countryEligibility: 'us_verified' as Submission['countryEligibility'],
@@ -139,6 +140,70 @@ describe('buildGhlPayload — PDF fields', () => {
     const p = buildGhlPayload(s, LEAD_STATUS.PDF_FAILED, COMMUNICATION_ROUTE.PDF_FAILURE_HOLD, []);
     expect(p.fsiq_pdf_url).toBeNull();
     expect(p.fsiq_pdf_ready_at).toBeNull();
+  });
+});
+
+describe('buildGhlPayload — phone_raw field', () => {
+  // ── in-memory path (submitAnalysis — param wins) ───────────────────────────
+
+  it('garbage phone → native null, raw carries garbage so sales can see it', () => {
+    const p = buildGhlPayload(
+      makeSubmission({ phone: null }),
+      LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT, [],
+      'not a phone number',
+    );
+    expect(p.fsiq_phone).toBeNull();
+    expect(p.fsiq_phone_raw).toBe('not a phone number');
+  });
+
+  it('valid phone → native set, raw carries original formatted value', () => {
+    const p = buildGhlPayload(
+      makeSubmission({ phone: '5551234567' }),
+      LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT, [],
+      '(555) 123-4567',
+    );
+    expect(p.fsiq_phone).toBe('5551234567');
+    expect(p.fsiq_phone_raw).toBe('(555) 123-4567');
+  });
+
+  // ── DB-rebuild path (admin retry — falls back to submission.phoneRaw) ──────
+
+  it('retry-style call (no param) → falls back to submission.phoneRaw column', () => {
+    const p = buildGhlPayload(
+      makeSubmission({ phone: '5551234567', phoneRaw: '(555) 123-4567' }),
+      LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT,
+      [],
+      // rawPhone param omitted → defaults to null → fallback reads phoneRaw column
+    );
+    expect(p.fsiq_phone_raw).toBe('(555) 123-4567');
+  });
+
+  it('param wins over column when both are provided (in-memory beats DB)', () => {
+    const p = buildGhlPayload(
+      makeSubmission({ phoneRaw: 'column-value' }),
+      LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT, [],
+      'param-value',   // explicit param
+    );
+    expect(p.fsiq_phone_raw).toBe('param-value');
+  });
+
+  it('both null → fsiq_phone_raw null', () => {
+    const p = buildGhlPayload(
+      makeSubmission({ phoneRaw: null }),
+      LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT, [],
+      null,
+    );
+    expect(p.fsiq_phone_raw).toBeNull();
+  });
+
+  it('garbage-phone retry: phone=null + phoneRaw="not a phone number" → native omitted AND raw preserved', () => {
+    const p = buildGhlPayload(
+      makeSubmission({ phone: null, phoneRaw: 'not a phone number' }),
+      LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT,
+      [],
+    );
+    expect(p.fsiq_phone).toBeNull();             // native phone omitted (normalization returned null)
+    expect(p.fsiq_phone_raw).toBe('not a phone number');  // raw preserved from column
   });
 });
 

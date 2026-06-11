@@ -159,6 +159,7 @@ function buildCustomFields(payload: GhlHandoffPayload): Array<{ key: string; fie
     { key: 'fsiq_workflow_stage',         field_value: payload.fsiq_workflow_stage },
   ];
 
+  if (payload.fsiq_phone_raw)        fields.push({ key: 'fsiq_phone_raw',        field_value: payload.fsiq_phone_raw });
   if (payload.fsiq_lead_source)      fields.push({ key: 'fsiq_lead_source',      field_value: payload.fsiq_lead_source });
   if (payload.fsiq_utm_source)       fields.push({ key: 'fsiq_utm_source',       field_value: payload.fsiq_utm_source });
   if (payload.fsiq_utm_medium)       fields.push({ key: 'fsiq_utm_medium',       field_value: payload.fsiq_utm_medium });
