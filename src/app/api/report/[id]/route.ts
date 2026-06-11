@@ -10,8 +10,18 @@
 //   - No Content-Security-Policy: sandbox header on this response.
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { PrismaClient } from '@prisma/client';
 import { cachePdfToSupabase, verifyCachedPdfUrl, fetchAndCache } from '@/lib/pdf/pdf-cache';
+
+// This route uses the direct connection (DIRECT_URL, port 5432) rather than the
+// pooler (DATABASE_URL, port 6543/PgBouncer). Reason: the PgBouncer session-mode
+// pool is shared across function instances; background DB writes via waitUntil
+// can leave orphaned prepared statements on pooler sessions, causing all subsequent
+// requests to fail with PrismaClientUnknownRequestError (42P05). The direct
+// connection bypasses PgBouncer entirely — no session sharing, no conflict.
+const reportDb = new PrismaClient({
+  datasources: { db: { url: process.env.DIRECT_URL ?? process.env.DATABASE_URL } },
+});
 
 const PDFMONKEY_API_KEY  = process.env.PDFMONKEY_API_KEY;
 const PDFMONKEY_API_BASE = 'https://api.pdfmonkey.io/api/v1';
@@ -67,7 +77,7 @@ export async function GET(
 ): Promise<NextResponse> {
   const { id } = await params;
 
-  const submission = await db.submission.findUnique({
+  const submission = await reportDb.submission.findUnique({
     where: { id },
     select: {
       qualified:           true,
@@ -95,7 +105,7 @@ export async function GET(
             if (buffer) {
               const cached = await cachePdfToSupabase(id, buffer);
               if (cached) {
-                await db.submission.update({
+                await reportDb.submission.update({
                   where: { id },
                   data: { pdfCachedUrl: cached.url, pdfCachedAt: cached.cachedAt },
                 }).catch(() => {});
