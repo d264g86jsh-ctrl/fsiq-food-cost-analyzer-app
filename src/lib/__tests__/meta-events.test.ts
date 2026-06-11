@@ -8,10 +8,11 @@ function sha256(val: string): string {
 }
 
 const baseSubmission = {
-  email:    'chef@demorestaurant.com',
-  phone:    '512-555-0100',
-  qualified: true,
-  dqReason: null as string | null,
+  id:            'sub_test_abc123',
+  email:         'chef@demorestaurant.com',
+  phone:         '512-555-0100',
+  qualified:     true,
+  dqReason:      null as string | null,
   dollarEstimate: 45000,
 };
 
@@ -91,15 +92,24 @@ describe('buildLeadEvent', () => {
     expect(evStr).not.toContain('pdfDownloadUrl');
   });
 
-  it('sets event_source_url when landingPageUrl is provided', () => {
+  it('sets event_source_url to landingPageUrl when provided (UTM/fbclid traffic)', () => {
     const url = 'https://app.foodserviceiq.com/?utm_source=facebook&fbclid=abc';
     const ev = buildLeadEvent(baseSubmission, { ...tracking, landingPageUrl: url });
     expect(ev.event_source_url).toBe(url);
   });
 
-  it('omits event_source_url when landingPageUrl is null', () => {
+  it('sets event_source_url to site root when landingPageUrl is null (93% case — direct/organic)', () => {
+    // Previously omitted the field entirely; Meta flags this as lower quality.
     const ev = buildLeadEvent(baseSubmission, { ...tracking, landingPageUrl: null });
-    expect(ev.event_source_url).toBeUndefined();
+    expect(ev.event_source_url).toBeDefined();
+    expect(ev.event_source_url).toMatch(/^https?:\/\/.+\/$/);  // ends with /
+  });
+
+  it('event_source_url is a top-level field — not inside custom_data or user_data', () => {
+    const ev = buildLeadEvent(baseSubmission, tracking);
+    expect('event_source_url' in ev).toBe(true);
+    expect(ev.custom_data).not.toHaveProperty('event_source_url');
+    expect(ev.user_data).not.toHaveProperty('event_source_url');
   });
 });
 
@@ -140,6 +150,41 @@ describe('buildQualifiedLeadEvent', () => {
     const lead = buildLeadEvent(baseSubmission, tracking);
     const ql = buildQualifiedLeadEvent(baseSubmission, tracking);
     expect(ql.event_id).not.toBe(lead.event_id);
+  });
+
+  // event_source_url assertions
+  it('sets event_source_url to the report page URL for the submission (top-level field)', () => {
+    const ev = buildQualifiedLeadEvent(baseSubmission, tracking);
+    expect(ev.event_source_url).toBeDefined();
+    expect(ev.event_source_url).toContain('/report/sub_test_abc123');
+    expect('event_source_url' in ev).toBe(true);
+    expect(ev.custom_data).not.toHaveProperty('event_source_url');
+    expect(ev.user_data).not.toHaveProperty('event_source_url');
+  });
+
+  it('event_source_url falls back to site root when submission id is empty string', () => {
+    const ev = buildQualifiedLeadEvent({ ...baseSubmission, id: '' }, tracking);
+    expect(ev.event_source_url).toBeDefined();
+    expect(ev.event_source_url).toMatch(/^https?:\/\/.+\/$/);
+    expect(ev.event_source_url).not.toContain('/report/');
+  });
+
+  it('trailing slash in NEXT_PUBLIC_APP_URL does not produce double slash in event_source_url', () => {
+    // APP_ORIGIN strips trailing slashes; the path segment adds exactly one /report/...
+    // so there should never be a // after the protocol.
+    const ev = buildQualifiedLeadEvent(baseSubmission, tracking);
+    const url = ev.event_source_url ?? '';
+    const afterProtocol = url.replace(/^https?:\/\//, '');
+    expect(afterProtocol).not.toContain('//');
+  });
+
+  it('dedup is unaffected — event_id unchanged by adding event_source_url', () => {
+    // event_source_url is NOT a Meta dedup key; dedup runs on event_id alone.
+    // Verify event_id is still the ql- prefixed UUID, no other dedup-relevant field changed.
+    const ev = buildQualifiedLeadEvent(baseSubmission, tracking);
+    expect(ev.event_id).toBe('ql-evt-uuid-001');
+    expect(ev.event_name).toBe('QualifiedLead');
+    expect(ev.action_source).toBe('website');
   });
 });
 
