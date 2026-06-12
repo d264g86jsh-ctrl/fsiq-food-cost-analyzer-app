@@ -38,7 +38,7 @@ Return exactly this JSON structure — no other text:
 }
 
 Rules:
-- businessSummary: factual, operator-focused, confident tone. Use only commas and periods — never em-dashes (—) or en-dashes (–).
+- businessSummary: factual, operator-focused, confident tone. Use only commas and periods. Never use em-dashes (—) or en-dashes (–).
 - conceptSignals: 2-6 short descriptive tags (e.g. "casual dining", "multi-unit", "family style"). No invented specifics.
 - Return JSON only. No text outside the JSON object.`;
 }

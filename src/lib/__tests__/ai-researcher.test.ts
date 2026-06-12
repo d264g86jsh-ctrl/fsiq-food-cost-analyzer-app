@@ -12,7 +12,7 @@ vi.mock('../ai/ai-client', () => ({
   isAiAvailable: vi.fn(),
 }));
 
-import { runAiResearch } from '../ai/ai-researcher';
+import { runAiResearch, sanitizeEmDashes } from '../ai/ai-researcher';
 import { getAnthropicClient } from '../ai/ai-client';
 
 const mockGetClient = vi.mocked(getAnthropicClient);
@@ -240,5 +240,78 @@ describe('runAiResearch — output shape guardrail', () => {
     expect(r).not.toHaveProperty('dollarEstimate');
     expect(r).not.toHaveProperty('spendBucket');
     expect(r).not.toHaveProperty('dqReason');
+  });
+});
+
+// ── sanitizeEmDashes ──────────────────────────────────────────────────────────
+
+describe('sanitizeEmDashes', () => {
+  it('em dash before lowercase word → comma', () => {
+    expect(sanitizeEmDashes('text—word')).toBe('text, word');
+  });
+
+  it('em dash with spaces before lowercase word → comma', () => {
+    expect(sanitizeEmDashes('text — word')).toBe('text, word');
+  });
+
+  it('em dash before capitalized word → period', () => {
+    expect(sanitizeEmDashes('text — Word')).toBe('text. Word');
+  });
+
+  it('spaced em dash before capitalized word → period', () => {
+    expect(sanitizeEmDashes('restaurant — As an independent operator')).toBe(
+      'restaurant. As an independent operator',
+    );
+  });
+
+  it('"Houston, Texas" pre-existing comma is never touched', () => {
+    expect(sanitizeEmDashes('Houston, Texas')).toBe('Houston, Texas');
+  });
+
+  it('"operator, Rays" pre-existing comma is never touched', () => {
+    expect(sanitizeEmDashes('operator, Rays')).toBe('operator, Rays');
+  });
+
+  it('pre-existing comma in sentence with a dash — only dash is replaced', () => {
+    expect(sanitizeEmDashes('Austin, Texas — Population')).toBe(
+      'Austin, Texas. Population',
+    );
+  });
+
+  it('multiple dashes in one string — each site decided independently', () => {
+    const input = 'text — Word and more—lowercase';
+    const out = sanitizeEmDashes(input);
+    expect(out).toContain('. Word');
+    expect(out).toContain(', lowercase');
+  });
+
+  it('&mdash; HTML entity → period when next word is capitalized', () => {
+    expect(sanitizeEmDashes('text&mdash;Word')).toBe('text. Word');
+  });
+
+  it('&ndash; HTML entity → comma when next word is lowercase', () => {
+    expect(sanitizeEmDashes('text&ndash;word')).toBe('text, word');
+  });
+
+  it('en dash (–) handled identically to em dash', () => {
+    expect(sanitizeEmDashes('text – Word')).toBe('text. Word');
+    expect(sanitizeEmDashes('text – word')).toBe('text, word');
+  });
+
+  it('uppercase token ($1.3M) before capitalized word → period (M is not sentence-ending)', () => {
+    const out = sanitizeEmDashes('food spend of approximately $1.3M — As a multi-unit operator');
+    expect(out).toBe('food spend of approximately $1.3M. As a multi-unit operator');
+  });
+
+  it('idempotent — running twice produces the same result as running once', () => {
+    const input = 'restaurant — As an independent operator — Serving the market';
+    const once  = sanitizeEmDashes(input);
+    const twice = sanitizeEmDashes(once);
+    expect(twice).toBe(once);
+  });
+
+  it('no-dash input is returned character-for-character identical', () => {
+    const clean = 'Casa Roberto is a casual dining restaurant in Austin, Texas.';
+    expect(sanitizeEmDashes(clean)).toBe(clean);
   });
 });

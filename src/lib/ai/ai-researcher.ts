@@ -19,19 +19,35 @@ const CONCEPT_SIGNALS_MAX = 10;
 
 // Belt-and-suspenders em/en-dash sanitizer for businessSummary.
 // The prompt already instructs "no em-dashes", but this catches any edge cases.
-// Mirrors the logic in ai-narrative.ts stripDashes(), extended with sentence-boundary
-// detection: a dash between two clauses (lowercase → Capital) becomes ". " not ", ".
-function sanitizeEmDashes(text: string): string {
-  let s = text
-    .replace(/\s*[—–―]\s*/g, ', ')   // em dash, en dash, horizontal bar → comma
-    .replace(/&mdash;|&ndash;/gi, ', ')
-    .replace(/\s,/g, ',')              // trailing space before comma
-    .replace(/,\s*,/g, ',')            // deduplicate commas
+//
+// Decision is made per dash site in a single pass — never touches existing commas:
+//   '. ' when the next word starts [A-Z][a-z] and the preceding char is not [.!?]
+//   ', ' otherwise
+//
+// Exported for unit testing.
+export function sanitizeEmDashes(text: string): string {
+  return text
+    .replace(
+      /\s*(?:[—–―]|&mdash;|&ndash;)\s*/gi,
+      (match: string, offset: number, str: string) => {
+        // \s* consumed any surrounding spaces, so str[offset - 1] is the last
+        // non-space character before the dash site.
+        const charBefore = offset > 0 ? str[offset - 1] : '';
+        // str[offset + match.length] is the first character of the word that
+        // follows (trailing \s* already consumed any spaces after the dash).
+        const nextIdx   = offset + match.length;
+        const charAfter  = nextIdx < str.length     ? str[nextIdx]     : '';
+        const charAfter2 = nextIdx + 1 < str.length ? str[nextIdx + 1] : '';
+        // Emit '. ' when next word starts [A-Z][a-z] and the preceding char is
+        // not already sentence-ending punctuation; ', ' otherwise.
+        if (/[A-Z]/.test(charAfter) && /[a-z]/.test(charAfter2) && !/[.!?]/.test(charBefore)) {
+          return '. ';
+        }
+        return ', ';
+      },
+    )
     .replace(/  +/g, ' ')
     .trim();
-  // Where replacement produced ", Capital" after a lowercase char → sentence break → ". Capital"
-  s = s.replace(/([a-z0-9]),\s+([A-Z][a-z])/g, '$1. $2');
-  return s;
 }
 
 export async function runAiResearch(input: AiResearchInput): Promise<AiResearchResult> {
