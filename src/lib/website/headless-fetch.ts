@@ -38,9 +38,10 @@ export async function headlessFetch(url: string): Promise<HeadlessFetchResult | 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let playwright: any = null;
   try {
-    // Dynamic import — if playwright is not installed this throws and we degrade gracefully
+    // Dynamic import — if playwright is not installed this throws and we degrade gracefully.
+    // webpackIgnore prevents webpack from bundling playwright's native binaries (.node files).
     // @ts-expect-error — playwright is an optional dependency; not installed by default
-    playwright = await import('playwright');
+    playwright = await import(/* webpackIgnore: true */ 'playwright');
   } catch {
     return null;
   }
