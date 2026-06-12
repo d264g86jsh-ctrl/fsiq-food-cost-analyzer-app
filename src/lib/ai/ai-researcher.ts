@@ -17,6 +17,23 @@ import type { AiResearchInput, AiResearchResult } from './ai-types';
 const BUSINESS_SUMMARY_MAX = 500;
 const CONCEPT_SIGNALS_MAX = 10;
 
+// Belt-and-suspenders em/en-dash sanitizer for businessSummary.
+// The prompt already instructs "no em-dashes", but this catches any edge cases.
+// Mirrors the logic in ai-narrative.ts stripDashes(), extended with sentence-boundary
+// detection: a dash between two clauses (lowercase → Capital) becomes ". " not ", ".
+function sanitizeEmDashes(text: string): string {
+  let s = text
+    .replace(/\s*[—–―]\s*/g, ', ')   // em dash, en dash, horizontal bar → comma
+    .replace(/&mdash;|&ndash;/gi, ', ')
+    .replace(/\s,/g, ',')              // trailing space before comma
+    .replace(/,\s*,/g, ',')            // deduplicate commas
+    .replace(/  +/g, ' ')
+    .trim();
+  // Where replacement produced ", Capital" after a lowercase char → sentence break → ". Capital"
+  s = s.replace(/([a-z0-9]),\s+([A-Z][a-z])/g, '$1. $2');
+  return s;
+}
+
 export async function runAiResearch(input: AiResearchInput): Promise<AiResearchResult> {
   const generatedAt = new Date().toISOString();
   const client = getAnthropicClient();
@@ -91,10 +108,10 @@ function parseResearchResponse(
     const parsed = JSON.parse(match[0]) as Record<string, unknown>;
     if (typeof parsed !== 'object' || parsed === null) return null;
 
-    // businessSummary: required non-empty string, truncated to max
+    // businessSummary: required non-empty string, sanitized, truncated to max
     const rawSummary = typeof parsed.businessSummary === 'string' ? parsed.businessSummary.trim() : '';
     if (!rawSummary) return null;
-    const businessSummary = rawSummary.slice(0, BUSINESS_SUMMARY_MAX);
+    const businessSummary = sanitizeEmDashes(rawSummary.slice(0, BUSINESS_SUMMARY_MAX));
 
     // conceptSignals: array of strings, limited in count, non-strings filtered out
     const rawSignals = Array.isArray(parsed.conceptSignals) ? parsed.conceptSignals : [];

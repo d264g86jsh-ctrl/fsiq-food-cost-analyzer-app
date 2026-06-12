@@ -82,5 +82,5 @@ export const DISTRIBUTOR_TYPE_OPTIONS: { value: string; label: string }[] = [
 export const PROCUREMENT_STRATEGY_OPTIONS: { value: string; label: string }[] = [
   { value: 'market_price_single',   label: 'I buy at market price through one distributor' },
   { value: 'market_price_multiple', label: 'I buy at market price across multiple distributors' },
-  { value: 'negotiated_cost_plus',  label: 'I have a negotiated cost-plus agreement' },
+  { value: 'negotiated_cost_plus',  label: 'I have a negotiated agreement' },
 ];
