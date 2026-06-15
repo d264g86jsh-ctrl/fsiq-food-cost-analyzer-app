@@ -55,6 +55,10 @@ export interface PdfPayload {
   // AI research outputs (conservative mode sets logoUrl="" and hasLogo=false)
   logoUrl: string;
   hasLogo: boolean;
+  // True when logoUrl is a white-recolored data URI (step 7.5 processed).
+  // Template uses this to suppress the white box for processed logos.
+  // False (or absent) → render logo inside the white rounded box.
+  logoProcessed: boolean;
   businessSummary: string;
 
   // AI narrative outputs
@@ -95,6 +99,9 @@ export interface GeneratePdfInput {
 
   // AI research outputs
   logoUrl: string | null;
+  // Pre-processed white-recolored data URI from step 7.5. When non-null, validateLogoForPdf
+  // short-circuits and uses this directly. When null, falls back to original logoUrl (white-box).
+  logoProcessedDataUri: string | null;
   businessSummary: string;
   narrativeDistributor: string;
   narrativeProcurement: string;

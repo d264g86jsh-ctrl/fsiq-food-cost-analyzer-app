@@ -24,6 +24,7 @@ const baseInput: GeneratePdfInput = {
   year5:                171_310,
   projectionHeights:    { year1: 18, year2: 38, year3: 58, year4: 78, year5: 100 },
   logoUrl:              'https://casaroberto.com/logo.png',
+  logoProcessedDataUri: null,
   businessSummary:      'Casa Roberto is a casual Mexican restaurant.',
   narrativeDistributor: 'Distributor copy.',
   narrativeProcurement: 'Procurement copy.',

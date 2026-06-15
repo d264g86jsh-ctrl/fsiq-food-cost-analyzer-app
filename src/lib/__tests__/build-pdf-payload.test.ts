@@ -22,6 +22,7 @@ const baseInput: GeneratePdfInput = {
   year5:                171_310,
   projectionHeights:    { year1: 18, year2: 38, year3: 58, year4: 78, year5: 100 },
   logoUrl:              'https://casaroberto.com/logo.png',
+  logoProcessedDataUri: null,
   businessSummary:      'Casa Roberto is a casual Mexican restaurant in Austin.',
   narrativeDistributor: 'Distributor narrative here.',
   narrativeProcurement: 'Procurement narrative here.',
@@ -236,9 +237,9 @@ describe('buildPdfPayload — reportDate', () => {
 // ── Payload shape — 29 variables ─────────────────────────────────────────────
 
 describe('buildPdfPayload — payload shape', () => {
-  it('result has exactly 29 keys', () => {
+  it('result has exactly 30 keys (29 SOP + logoProcessed)', () => {
     const p = buildPdfPayload(baseInput);
-    expect(Object.keys(p)).toHaveLength(29);
+    expect(Object.keys(p)).toHaveLength(30);
   });
 
   it('does not include raw savings ints (year1–year5 only as display strings)', () => {

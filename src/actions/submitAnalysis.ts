@@ -29,6 +29,7 @@ import { generateAiNarrative } from '@/lib/ai/ai-narrative';
 import { buildFallbackResearch, buildFallbackNarrative } from '@/lib/ai/fallback-narrative';
 import { determinePdfMode } from '@/lib/pdf/pdf-mode';
 import { generatePdf } from '@/lib/pdf/pdfmonkey';
+import { processTransparentLogo } from '@/lib/pdf/logo-processor';
 import { cachePdfToSupabase } from '@/lib/pdf/pdf-cache';
 import type { GeneratePdfResult, GeneratePdfInput } from '@/lib/pdf/pdf-types';
 import type { AiResearchResult, AiNarrativeResult } from '@/lib/ai/ai-types';
@@ -307,6 +308,38 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       workflowStage:   'ai_research',
     });
 
+    // ── Step 7.5: Logo processing (transparent PNG → white-recolor) ───────────
+    // Non-fatal: any failure sets logoProcessedDataUri = null (white-box fallback).
+    // Processing happens once here; PDF generation reads the cached column directly.
+    let logoProcessedDataUri: string | null = null;
+    try {
+      const isConservative = !effectiveQualified; // conservative if not fully qualified
+      if (researchResult.logoUrl && !isConservative) {
+        // Fetch the image bytes (same fetch the PDF step would do anyway)
+        const logoFetch = await fetch(researchResult.logoUrl, {
+          signal: AbortSignal.timeout(8_000),
+        }).catch(() => null);
+        if (logoFetch?.ok) {
+          const logoBuffer = Buffer.from(await logoFetch.arrayBuffer());
+          const processResult = processTransparentLogo(
+            logoBuffer,
+            isConservative,
+            researchResult.logoUrl,
+          );
+          logoProcessedDataUri = processResult?.dataUri ?? null;
+        }
+      }
+    } catch (err) {
+      // Non-fatal: log and continue with white-box fallback
+      workflowErrors.push({
+        stage: 'logo_processing',
+        error: err instanceof Error ? err.message : String(err),
+        timestamp: new Date().toISOString(),
+      });
+      console.warn('[FSIQ LOGO] step 7.5 failed — white-box fallback:', err instanceof Error ? err.message : String(err));
+    }
+    await patch({ logoProcessedDataUri, workflowStage: 'logo_processing' });
+
     // 1-second delay between Claude calls (Phase 5 spec: orchestrator's responsibility)
     await new Promise((r) => setTimeout(r, 1000));
 
@@ -355,6 +388,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
           year5:                 qualResult.year5,
           projectionHeights:     qualResult.projectionHeights as GeneratePdfInput['projectionHeights'],
           logoUrl:               researchResult.logoUrl,
+          logoProcessedDataUri:  logoProcessedDataUri,
           businessSummary:       researchResult.businessSummary,
           narrativeDistributor:  narrativeResult.narrativeDistributor,
           narrativeProcurement:  narrativeResult.narrativeProcurement,

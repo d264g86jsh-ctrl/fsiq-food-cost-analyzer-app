@@ -149,8 +149,12 @@ model Submission {
 
   // ── AI outputs ────────────────────────────────────────────────────────────
   // AI Researcher and Narrative Builder outputs. Logo URL must be verbatim from websiteLogoHints.
-  logoUrl              String?
-  businessSummary      String?
+  logoUrl                  String?
+  // White-recolored logo data URI (data:image/png;base64,...). Produced once in step 7.5
+  // of the background pipeline. Null means not processed (opaque logo, blob-guard reject,
+  // SVG, conservative, or any processing failure). PDF path uses this if non-null.
+  logoProcessedDataUri     String?  @db.Text
+  businessSummary          String?
   conceptSignals       Json?   // string[]
   narrativeDistributor String?
   narrativeProcurement String?

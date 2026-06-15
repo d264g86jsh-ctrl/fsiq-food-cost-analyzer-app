@@ -54,6 +54,7 @@ function makeSubmission(overrides: Partial<Submission> = {}): Submission {
     year5: 171_307,
     projectionHeights: null,
     logoUrl: 'https://maryannsdiner.com/logo.png',
+    logoProcessedDataUri: null,
     businessSummary: 'A classic diner.',
     conceptSignals: null,
     narrativeDistributor: 'Narrative about distributors.',

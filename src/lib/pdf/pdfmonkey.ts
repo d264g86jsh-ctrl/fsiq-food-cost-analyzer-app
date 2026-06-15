@@ -19,7 +19,7 @@ const PRIVATE_IP_PATTERNS = ['127.0.0.1', 'localhost', '192.168.', '10.0.', '172
 // Version token changes whenever the patch logic changes, invalidating warm-instance caches.
 // Bump this string whenever patchPdfMonkeyTemplateHtml is updated so ensureTemplateSafe
 // re-fetches and re-PUTs even if the Vercel instance was not cold-started.
-const PATCH_VERSION = 'v5-strip-disclaimer';
+const PATCH_VERSION = 'v8-conditional-logo-box';
 const patchedTemplateIds = new Set<string>();
 function patchCacheKey(templateId: string) { return `${PATCH_VERSION}:${templateId}`; }
 
@@ -31,10 +31,20 @@ function patchCacheKey(templateId: string) { return `${PATCH_VERSION}:${template
  * second network fetch from PDFMonkey during render, which is where broken
  * image boxes can appear even after app-side URL validation succeeds.
  * Conservative PDFs never show a restaurant logo — always return null.
+ *
+ * Short-circuit: if the input is already a data: URI (pre-processed by the
+ * background pipeline's step 7.5), return it directly — skip all validation.
+ * Only our own logo-processor.ts ever produces these values.
  */
 async function validateLogoForPdf(url: string | null, isConservative: boolean): Promise<string | null> {
   // Rule 1: Conservative PDF never shows restaurant logo
   if (isConservative) return null;
+
+  // Short-circuit: pre-baked data URI from step 7.5 — no validation needed
+  if (url?.startsWith('data:image/')) {
+    console.log('[FSIQ PDF LOGO] using pre-processed data URI');
+    return url;
+  }
 
   // Rule 2: Null or non-http URL
   if (!url || !url.startsWith('http')) {
@@ -162,9 +172,16 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
     };
   }
 
-  // Validate logo URL before building payload
-  const validatedLogoUrl = await validateLogoForPdf(input.logoUrl, input.mode === 'conservative');
-  const validatedInput = { ...input, logoUrl: validatedLogoUrl };
+  // Determine the effective logo URL to validate/embed.
+  // Priority: pre-processed data URI (step 7.5) → original URL.
+  // validateLogoForPdf short-circuits on data: URIs — no network call.
+  const effectiveLogoUrl = input.logoProcessedDataUri ?? input.logoUrl;
+  const validatedLogoUrl = await validateLogoForPdf(effectiveLogoUrl, input.mode === 'conservative');
+  const validatedInput = {
+    ...input,
+    logoUrl:              validatedLogoUrl,
+    logoProcessedDataUri: input.logoProcessedDataUri ?? null,
+  };
 
   const payload = buildPdfPayload(validatedInput);
 

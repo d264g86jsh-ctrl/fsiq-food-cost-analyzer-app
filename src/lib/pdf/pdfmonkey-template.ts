@@ -8,13 +8,23 @@ export interface PdfMonkeyTemplatePatchResult {
 }
 
 const OLD_CALENDLY_URL = 'https://calendly.com/neil-foodserviceiq/15-minute-meeting-clone-1';
-const SAFETY_STYLE_MARKER = 'fsiq-app-logo-safety';
+const SAFETY_STYLE_MARKER    = 'fsiq-app-logo-safety';
+const COND_BOX_MARKER        = 'fsiq-conditional-box-v1';
 
+// Conditional logo block:
+//   logoProcessed = true  → white-recolored logo rendered directly on gradient (no white box)
+//   logoProcessed = false → original logo rendered inside white rounded box (fallback)
 const SAFE_COVER_LOGO_BLOCK = `<div class="cover-logos">
       {% if hasLogo and logoUrl != blank %}
-        <div class="cover-operator-logo">
-          <img src="{{ logoUrl }}" alt="{{ restaurantName }}">
-        </div>
+        {% if logoProcessed %}
+          <div class="cover-operator-logo cover-operator-logo--processed">
+            <img src="{{ logoUrl }}" alt="{{ restaurantName }}">
+          </div>
+        {% else %}
+          <div class="cover-operator-logo">
+            <img src="{{ logoUrl }}" alt="{{ restaurantName }}">
+          </div>
+        {% endif %}
       {% endif %}
       <div class="fsiq-cover-logo">`;
 
@@ -29,6 +39,7 @@ export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatch
   // Strip any previously-injected directional disclaimer before applying other patches.
   next = removeDirectionalDisclaimer(next);
   next = injectLogoSafetyStyle(next);
+  next = injectProcessedLogoStyle(next);
   next = next.replaceAll(`href="${OLD_CALENDLY_URL}"`, 'href="{{ calendlyUrl }}"');
   next = ensureCtaTargetBlank(next);
 
@@ -61,6 +72,36 @@ function ensureCtaTargetBlank(html: string): string {
     /href="{{ calendlyUrl }}"(?![^>]*target=)/g,
     'href="{{ calendlyUrl }}" target="_blank"',
   );
+}
+
+/**
+ * Injects CSS for the processed-logo variant (logoProcessed = true).
+ * The --processed modifier removes the white box background so the white logo
+ * renders directly on the dark cover gradient.
+ * Idempotent: skips if COND_BOX_MARKER is already present.
+ */
+function injectProcessedLogoStyle(html: string): string {
+  if (html.includes(COND_BOX_MARKER)) return html;
+
+  const processedStyle = `
+<style id="${COND_BOX_MARKER}">
+  /* White-recolored logo: remove the white box, render directly on gradient */
+  .cover-operator-logo--processed {
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .cover-operator-logo--processed img {
+    max-width: 90% !important;
+    max-height: 90% !important;
+  }
+</style>
+`;
+
+  if (html.includes('</head>')) {
+    return html.replace('</head>', `${processedStyle}</head>`);
+  }
+  return `${processedStyle}${html}`;
 }
 
 function injectLogoSafetyStyle(html: string): string {

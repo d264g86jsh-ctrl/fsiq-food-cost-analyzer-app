@@ -40,8 +40,14 @@ export function buildPdfPayload(input: GeneratePdfInput): PdfPayload {
   const isConservative = input.mode === 'conservative';
 
   // Conservative PDF clears all website-specific claims.
-  const logoUrl       = isConservative ? '' : (input.logoUrl ?? '');
+  // Use pre-processed white-recolored data URI when available (step 7.5 output),
+  // otherwise fall back to original URL (white-box treatment in template).
+  const processedUri  = isConservative ? null : (input.logoProcessedDataUri ?? null);
+  const logoUrl       = isConservative ? '' : (processedUri ?? input.logoUrl ?? '');
   const hasLogo       = !isConservative && logoUrl !== '';
+  // logoProcessed = true → template renders logo boxless on gradient
+  // logoProcessed = false → template renders logo inside white rounded box (fallback)
+  const logoProcessed = !isConservative && processedUri !== null && hasLogo;
   const businessSummary = isConservative ? '' : input.businessSummary;
 
   // Projection display strings (year1–year5 are always populated for qualified leads)
@@ -89,6 +95,7 @@ export function buildPdfPayload(input: GeneratePdfInput): PdfPayload {
     // AI research (conservative clears website-specific fields)
     logoUrl,
     hasLogo,
+    logoProcessed,
     businessSummary,
 
     // AI narrative
