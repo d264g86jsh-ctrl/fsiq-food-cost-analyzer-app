@@ -43,10 +43,24 @@ export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatch
   next = next.replaceAll(`href="${OLD_CALENDLY_URL}"`, 'href="{{ calendlyUrl }}"');
   next = ensureCtaTargetBlank(next);
 
-  next = next.replace(
-    /<div class="cover-logos">\s*<div class="cover-operator-logo">[\s\S]*?{%\s*endif\s*%}\s*<\/div>\s*<div class="fsiq-cover-logo">/m,
-    SAFE_COVER_LOGO_BLOCK,
-  );
+  // Two patterns to handle:
+  //   A) Old unsafe template: cover-operator-logo div BEFORE any if-hasLogo guard
+  //   B) Current safe template (post prior patch): cover-logos > {% if hasLogo %} > cover-operator-logo
+  // Both get replaced with SAFE_COVER_LOGO_BLOCK which adds the {% if logoProcessed %} inner branch.
+  // The COND_BOX_MARKER in injectProcessedLogoStyle (above) is the idempotency guard for CSS;
+  // for the Liquid block, we check for 'logoProcessed' already being present.
+  if (!next.includes('logoProcessed')) {
+    // Pattern A: old unsafe (legacy)
+    next = next.replace(
+      /<div class="cover-logos">\s*<div class="cover-operator-logo">[\s\S]*?{%\s*endif\s*%}\s*<\/div>\s*<div class="fsiq-cover-logo">/m,
+      SAFE_COVER_LOGO_BLOCK,
+    );
+    // Pattern B: safe but no logoProcessed conditional yet (template already patched by prior version)
+    next = next.replace(
+      /<div class="cover-logos">\s*{%\s*if hasLogo[^%]*%}\s*<div class="cover-operator-logo">[\s\S]*?{%\s*endif\s*%}\s*<div class="fsiq-cover-logo">/m,
+      SAFE_COVER_LOGO_BLOCK,
+    );
+  }
 
   return {
     html: next,
