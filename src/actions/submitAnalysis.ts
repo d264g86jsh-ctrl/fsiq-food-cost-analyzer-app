@@ -311,10 +311,21 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     // ── Step 7.5: Logo processing (transparent PNG → white-recolor) ───────────
     // Non-fatal: any failure sets logoProcessedDataUri = null (white-box fallback).
     // Processing happens once here; PDF generation reads the cached column directly.
+    //
+    // Use determinePdfMode (same logic as step 9) to decide whether to process:
+    //   full        → process logo (white-recolor, no white box)
+    //   conservative → skip (conservative PDF shows no logo at all)
+    //   skip        → skip (no PDF generated, no logo needed)
+    // This avoids the !effectiveQualified shortcut which misclassifies
+    // plausible_unverified leads (qualified + conservative PDF) as non-conservative.
+    const logoStepMode = determinePdfMode(
+      validationResult.finalDecision,
+      validationResult.countryEligibility,
+      effectiveQualified,
+    );
     let logoProcessedDataUri: string | null = null;
     try {
-      const isConservative = !effectiveQualified; // conservative if not fully qualified
-      if (researchResult.logoUrl && !isConservative) {
+      if (researchResult.logoUrl && logoStepMode.mode === 'full') {
         // Fetch the image bytes (same fetch the PDF step would do anyway)
         const logoFetch = await fetch(researchResult.logoUrl, {
           signal: AbortSignal.timeout(8_000),
@@ -323,7 +334,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
           const logoBuffer = Buffer.from(await logoFetch.arrayBuffer());
           const processResult = processTransparentLogo(
             logoBuffer,
-            isConservative,
+            false,  // mode === 'full' confirmed above; conservative already skipped
             researchResult.logoUrl,
           );
           logoProcessedDataUri = processResult?.dataUri ?? null;
