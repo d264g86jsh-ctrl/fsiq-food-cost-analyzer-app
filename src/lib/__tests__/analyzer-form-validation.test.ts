@@ -7,6 +7,7 @@ import {
   canAdvanceFromStep2,
   canAdvanceFromStep3,
   canSubmitStep4,
+  evaluateSubmitGate,
   getStep1Errors,
   getStep4Errors,
 } from '../analyzer/form-validation';
@@ -37,52 +38,28 @@ const baseStep1: Partial<AnalyzerFormPayload> = {
 };
 
 describe('canAdvanceFromStep1', () => {
-  it('valid fields + idle → can advance', () => {
-    expect(canAdvanceFromStep1(baseStep1, 'idle')).toBe(true);
+  it('valid required fields → can advance', () => {
+    expect(canAdvanceFromStep1(baseStep1)).toBe(true);
   });
 
-  it('valid fields + verified → can advance', () => {
-    expect(canAdvanceFromStep1(baseStep1, 'verified')).toBe(true);
+  it('invalid_website → can advance (gate moved to submit)', () => {
+    expect(canAdvanceFromStep1(baseStep1)).toBe(true);
   });
 
-  it('valid fields + unable_to_verify_but_can_continue → can advance', () => {
-    expect(canAdvanceFromStep1(baseStep1, 'unable_to_verify_but_can_continue')).toBe(true);
-  });
-
-  it('valid fields + likely_not_fit (clear_non_fit) → can advance', () => {
-    expect(canAdvanceFromStep1(baseStep1, 'likely_not_fit')).toBe(true);
-  });
-
-  it('valid fields + national_chain → can advance (eligibility, not a block)', () => {
-    expect(canAdvanceFromStep1(baseStep1, 'national_chain')).toBe(true);
-  });
-
-  it('valid fields + non_us → can advance (eligibility, not a block)', () => {
-    expect(canAdvanceFromStep1(baseStep1, 'non_us')).toBe(true);
-  });
-
-  it('valid fields + error → can advance', () => {
-    expect(canAdvanceFromStep1(baseStep1, 'error')).toBe(true);
-  });
-
-  it('invalid_website → blocks advancement', () => {
-    expect(canAdvanceFromStep1(baseStep1, 'invalid_website')).toBe(false);
-  });
-
-  it('checking → temporarily blocks advancement (race condition guard)', () => {
-    expect(canAdvanceFromStep1(baseStep1, 'checking')).toBe(false);
+  it('checking → can advance (gate moved to submit)', () => {
+    expect(canAdvanceFromStep1(baseStep1)).toBe(true);
   });
 
   it('missing restaurant_name → blocks', () => {
-    expect(canAdvanceFromStep1({ ...baseStep1, restaurant_name: '' }, 'idle')).toBe(false);
+    expect(canAdvanceFromStep1({ ...baseStep1, restaurant_name: '' })).toBe(false);
   });
 
   it('missing website → blocks', () => {
-    expect(canAdvanceFromStep1({ ...baseStep1, website: '' }, 'idle')).toBe(false);
+    expect(canAdvanceFromStep1({ ...baseStep1, website: '' })).toBe(false);
   });
 
   it('us_business_confirmed false → blocks', () => {
-    expect(canAdvanceFromStep1({ ...baseStep1, us_business_confirmed: false }, 'idle')).toBe(false);
+    expect(canAdvanceFromStep1({ ...baseStep1, us_business_confirmed: false })).toBe(false);
   });
 });
 
@@ -257,23 +234,30 @@ describe('canSubmitStep4', () => {
 // ── getStep1Errors ────────────────────────────────────────────────────────────
 
 describe('getStep1Errors', () => {
-  it('all valid → no errors', () => {
-    const errors = getStep1Errors(baseStep1, 'idle');
+  it('all valid required fields → no errors', () => {
+    const errors = getStep1Errors(baseStep1);
     expect(Object.keys(errors)).toHaveLength(0);
   });
 
   it('missing restaurant_name → error', () => {
-    const errors = getStep1Errors({ ...baseStep1, restaurant_name: '' }, 'idle');
+    const errors = getStep1Errors({ ...baseStep1, restaurant_name: '' });
     expect(errors.restaurant_name).toBeTruthy();
   });
 
   it('us_business_confirmed false → error', () => {
-    const errors = getStep1Errors({ ...baseStep1, us_business_confirmed: false }, 'idle');
+    const errors = getStep1Errors({ ...baseStep1, us_business_confirmed: false });
     expect(errors.us_business_confirmed).toBeTruthy();
   });
 
-  it('invalid_website state → website error', () => {
-    const errors = getStep1Errors(baseStep1, 'invalid_website');
+  it('invalid_website state → no website error (gate moved to submit)', () => {
+    // invalid_website is no longer surfaced as a step-1 field error;
+    // it is handled by the submit gate (evaluateSubmitGate).
+    const errors = getStep1Errors(baseStep1);
+    expect(errors.website).toBeUndefined();
+  });
+
+  it('empty website → website required error', () => {
+    const errors = getStep1Errors({ ...baseStep1, website: '' });
     expect(errors.website).toBeTruthy();
   });
 });
@@ -389,6 +373,57 @@ describe('isSubmitBlocked', () => {
   for (const state of nonBlockingStates) {
     it(`${state} → not blocked`, () => expect(isSubmitBlocked(state)).toBe(false));
   }
+});
+
+// ── evaluateSubmitGate ────────────────────────────────────────────────────────
+
+describe('evaluateSubmitGate', () => {
+  const URL = 'casaroberto.com';
+
+  it('matching URL + verified → proceed', () => {
+    expect(evaluateSubmitGate({ currentWebsite: URL, validatedUrl: URL, validatedState: 'verified' })).toBe('proceed');
+  });
+
+  it('matching URL + plausible_unverified → proceed', () => {
+    expect(evaluateSubmitGate({ currentWebsite: URL, validatedUrl: URL, validatedState: 'unable_to_verify_but_can_continue' })).toBe('proceed');
+  });
+
+  it('matching URL + national_chain → proceed (#4 decides eligibility)', () => {
+    expect(evaluateSubmitGate({ currentWebsite: URL, validatedUrl: URL, validatedState: 'national_chain' })).toBe('proceed');
+  });
+
+  it('matching URL + error → proceed (#4 is authoritative on transient failures)', () => {
+    expect(evaluateSubmitGate({ currentWebsite: URL, validatedUrl: URL, validatedState: 'error' })).toBe('proceed');
+  });
+
+  it('matching URL + invalid_website → block-invalid', () => {
+    expect(evaluateSubmitGate({ currentWebsite: URL, validatedUrl: URL, validatedState: 'invalid_website' })).toBe('block-invalid');
+  });
+
+  it('matching URL + checking → needs-fresh (still in-flight)', () => {
+    expect(evaluateSubmitGate({ currentWebsite: URL, validatedUrl: URL, validatedState: 'checking' })).toBe('needs-fresh');
+  });
+
+  it('no validated URL (null) → needs-fresh', () => {
+    expect(evaluateSubmitGate({ currentWebsite: URL, validatedUrl: null, validatedState: null })).toBe('needs-fresh');
+  });
+
+  it('stale-URL guard: validated URL-A, current URL-B → needs-fresh', () => {
+    expect(evaluateSubmitGate({
+      currentWebsite:  'url-b.com',
+      validatedUrl:    'url-a.com',
+      validatedState:  'verified',
+    })).toBe('needs-fresh');
+  });
+
+  it('stale-URL guard: URL-A invalid, current URL-B → needs-fresh (not block-invalid)', () => {
+    // URL-A was invalid, but the user changed to URL-B — we must not block based on URL-A.
+    expect(evaluateSubmitGate({
+      currentWebsite:  'url-b.com',
+      validatedUrl:    'url-a.com',
+      validatedState:  'invalid_website',
+    })).toBe('needs-fresh');
+  });
 });
 
 // ── Lead payload preservation ─────────────────────────────────────────────────

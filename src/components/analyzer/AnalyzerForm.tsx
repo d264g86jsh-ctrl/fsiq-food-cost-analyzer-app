@@ -28,6 +28,7 @@ import {
   canAdvanceFromStep2,
   canAdvanceFromStep3,
   canSubmitStep4,
+  evaluateSubmitGate,
   getStep1Errors,
   getStep4Errors,
   isValidPhone,
@@ -93,11 +94,15 @@ export function AnalyzerForm() {
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isValidatingForSubmit, setIsValidatingForSubmit] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [skuValidation, setSkuValidation] = useState<SkuValidationState>('idle');
   const analyzerStartedFired = useRef(false);
+  // Stale-URL guard: records { url, state } for the last completed #1 validation.
+  // The submit gate compares this to formData.website to detect stale results.
+  const validatedUrlRef = useRef<{ url: string; state: ValidationUIState } | null>(null);
 
   // Persist tracking params on mount (first-touch sessionStorage), then read them back.
   useEffect(() => {
@@ -172,6 +177,7 @@ export function AnalyzerForm() {
         if (!action.success || !action.result) {
           setValidationState('error');
           setValidationResult(null);
+          validatedUrlRef.current = { url: website, state: 'error' };
           return;
         }
 
@@ -182,8 +188,10 @@ export function AnalyzerForm() {
           result.internalFlags,
         );
         setValidationState(uiState);
+        // Record the validated URL and its outcome for the submit gate's stale-URL guard.
+        validatedUrlRef.current = { url: website, state: uiState };
 
-        // Clear invalid_website field error if the new result resolves it
+        // Clear any stale website field error if the new result resolves it
         if (uiState !== 'invalid_website' && fieldErrors.website) {
           setFieldErrors((prev) => {
             const next = { ...prev };
@@ -194,6 +202,7 @@ export function AnalyzerForm() {
       } catch {
         setValidationState('error');
         setValidationResult(null);
+        validatedUrlRef.current = { url: website, state: 'error' };
       } finally {
         setIsValidating(false);
       }
@@ -225,7 +234,7 @@ export function AnalyzerForm() {
 
   function handleNext() {
     if (step === 1) {
-      const errors = getStep1Errors(formData, validationState);
+      const errors = getStep1Errors(formData);
       if (Object.keys(errors).length > 0) {
         setFieldErrors(errors);
         return;
@@ -251,14 +260,66 @@ export function AnalyzerForm() {
       return;
     }
 
+    // ── Submit gate: verify the website before firing the Lead pixel ─────────
+    // The gate ensures submitAnalysis only runs on a URL that has passed validation,
+    // so no DB record is created and no pixel fires for a confirmed-invalid URL.
+    const currentWebsite = (formData.website ?? '').trim();
+    let gateOutcome = evaluateSubmitGate({
+      currentWebsite,
+      validatedUrl:   validatedUrlRef.current?.url ?? null,
+      validatedState: validatedUrlRef.current?.state ?? null,
+    });
+
+    if (gateOutcome === 'needs-fresh') {
+      // No current result, stale URL, or in-flight — trigger a blocking #1 call now.
+      setIsValidatingForSubmit(true);
+      try {
+        const action = await validateWebsite({
+          website:        currentWebsite,
+          restaurantName: formData.restaurant_name ?? '',
+        });
+        let freshState: ValidationUIState = 'error';
+        if (action.success && action.result) {
+          freshState = decisionToUIState(action.result.finalDecision, action.result.internalFlags);
+          setValidationState(freshState);
+          setValidationResult(action.result);
+        } else {
+          setValidationState('error');
+          setValidationResult(null);
+        }
+        validatedUrlRef.current = { url: currentWebsite, state: freshState };
+        gateOutcome = evaluateSubmitGate({
+          currentWebsite,
+          validatedUrl:   currentWebsite,
+          validatedState: freshState,
+        });
+      } catch {
+        // On network error: treat as 'proceed'. #4 is the authoritative gate
+        // and will handle it correctly (DQ or proceed) on the server.
+        gateOutcome = 'proceed';
+      } finally {
+        setIsValidatingForSubmit(false);
+      }
+    }
+
+    if (gateOutcome === 'block-invalid') {
+      // Website is confirmed unreachable for the submitted URL.
+      // Do NOT fire the pixel, do NOT call submitAnalysis.
+      setSubmitError(
+        "We couldn’t verify that website. Please go back to step 1, update your website URL, and try again.",
+      );
+      return;
+    }
+
+    // Gate passed — proceed with submit.
     setIsSubmitting(true);
     setSubmitError(null);
 
     // Generate event_id here so browser and server share the same value for Meta deduplication.
     const eventId = generateEventId();
 
-    // Lead event — fires at submit time, includes PII for pixel matching.
-    // fbq.js hashes em/ph/fn client-side before transmitting.
+    // Lead event — fires AFTER the gate passes, so the pixel only fires for a
+    // validated submit. An invalid_website attempt fires no Lead and creates no record.
     const firstName = (formData.full_name ?? '').trim().split(/\s+/)[0];
     fireBrowserLead(eventId, {
       email:     formData.email,
@@ -299,7 +360,7 @@ export function AnalyzerForm() {
   // ── Derived state ─────────────────────────────────────────────────────────────
 
   const canAdvance =
-    step === 1 ? canAdvanceFromStep1(formData, validationState) :
+    step === 1 ? canAdvanceFromStep1(formData) :
     step === 2 ? canAdvanceFromStep2(formData) :
     step === 3 ? canAdvanceFromStep3(formData) :
     false;
@@ -568,14 +629,18 @@ export function AnalyzerForm() {
           ) : (
             <button
               type="submit"
-              disabled={isSubmitting || !canSubmitStep4(formData)}
+              disabled={isSubmitting || isValidatingForSubmit || !canSubmitStep4(formData)}
               className="cta-pill"
             >
-              {isSubmitting && (
+              {(isSubmitting || isValidatingForSubmit) && (
                 <span className="w-4 h-4 rounded-full border-2 border-white/40 fsiq-spinner" aria-hidden="true" />
               )}
-              {isSubmitting ? 'Submitting…' : 'Get my savings report'}
-              {!isSubmitting && (
+              {isSubmitting
+                ? 'Submitting…'
+                : isValidatingForSubmit
+                  ? 'Verifying your website…'
+                  : 'Get my savings report'}
+              {!isSubmitting && !isValidatingForSubmit && (
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -589,7 +654,7 @@ export function AnalyzerForm() {
               <button
                 type="button"
                 onClick={handleBack}
-                disabled={isSubmitting}
+                disabled={isSubmitting || isValidatingForSubmit}
                 className="btn-ghost"
               >
                 <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">

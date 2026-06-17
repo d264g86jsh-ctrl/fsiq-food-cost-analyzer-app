@@ -1,6 +1,7 @@
 // Client-side form validation for the Phase 4 Analyzer Quiz.
-// Rules: block only on missing required fields, malformed required inputs,
-// invalid_website, and active checking state.
+// Rules: block only on missing required fields. Website validation outcomes
+// (invalid_website, checking) are NOT blocking at step 1 — they are handled
+// at the final submit by the submit gate (evaluateSubmitGate).
 // Never block on eligibility decisions (national_chain, clear_non_fit, non_us, below_threshold).
 
 import type { AnalyzerFormPayload } from './form-types';
@@ -39,16 +40,14 @@ export function normalizePhone(raw: string | null | undefined): string | null {
 
 // ── Step advancement gates ────────────────────────────────────────────────────
 
+// Pure required-field presence check — no validation-state dependency.
+// Website validation outcomes are handled at submit by evaluateSubmitGate.
 export function canAdvanceFromStep1(
   formData: Partial<AnalyzerFormPayload>,
-  validationState: ValidationUIState,
 ): boolean {
   if (!formData.restaurant_name?.trim()) return false;
   if (!formData.website?.trim()) return false;
   if (!formData.us_business_confirmed) return false;
-  // Block on active check (race condition guard) and confirmed invalid website
-  if (validationState === 'checking') return false;
-  if (validationState === 'invalid_website') return false;
   return true;
 }
 
@@ -72,11 +71,41 @@ export function canSubmitStep4(formData: Partial<AnalyzerFormPayload>): boolean 
   return true;
 }
 
+// ── Submit gate ───────────────────────────────────────────────────────────────
+
+// Outcome of the pre-submit website validation gate.
+//   'block-invalid'  — the current URL is confirmed invalid; block submit, show retry.
+//   'proceed'        — a current passing validation exists for this exact URL.
+//   'needs-fresh'    — no current result (idle, stale URL, or in-flight); caller must
+//                      trigger a fresh #1 validation and re-evaluate.
+export type SubmitGateOutcome = 'block-invalid' | 'proceed' | 'needs-fresh';
+
+export function evaluateSubmitGate(params: {
+  currentWebsite: string;
+  validatedUrl: string | null;
+  validatedState: ValidationUIState | null;
+}): SubmitGateOutcome {
+  const { currentWebsite, validatedUrl, validatedState } = params;
+
+  // URL-ref guard: the recorded result must be for the EXACT URL being submitted.
+  if (validatedUrl !== currentWebsite) return 'needs-fresh';
+
+  // Current URL is confirmed invalid — hard block.
+  if (validatedState === 'invalid_website') return 'block-invalid';
+
+  // In-flight or no result — caller must wait for completion.
+  if (validatedState === 'checking' || validatedState === null) return 'needs-fresh';
+
+  // Any other state (verified, plausible, national_chain, non_us, error, idle) passes.
+  // #4 (server-side runValidation) is the authoritative gate for DQ decisions.
+  return 'proceed';
+}
+
 // ── Error message generators ──────────────────────────────────────────────────
 
+// Pure required-field error messages — no validation-state dependency.
 export function getStep1Errors(
   formData: Partial<AnalyzerFormPayload>,
-  validationState: ValidationUIState,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
   if (!formData.restaurant_name?.trim()) {
@@ -84,8 +113,6 @@ export function getStep1Errors(
   }
   if (!formData.website?.trim()) {
     errors.website = 'Website is required.';
-  } else if (validationState === 'invalid_website') {
-    errors.website = 'Please check the website URL and try again.';
   }
   if (!formData.us_business_confirmed) {
     errors.us_business_confirmed = 'Please confirm your business operates in the U.S. to continue.';
