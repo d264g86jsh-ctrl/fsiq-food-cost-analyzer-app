@@ -262,6 +262,9 @@ export function AnalyzerPageV2() {
                 </svg>
               </a>
             </div>
+            <p className="mt-4 text-center text-[11px] leading-relaxed max-w-2xl mx-auto text-[#94a3b8]">
+              Disclaimer: Metrics reflect FoodServiceIQ and affiliated entity engagements. Results vary by client and program participation.
+            </p>
           </footer>
 
         </main>
