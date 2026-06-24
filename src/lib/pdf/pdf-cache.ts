@@ -3,6 +3,7 @@
 // The service role key (not anon key) is needed for storage write operations.
 
 import { createClient } from '@supabase/supabase-js';
+import { debugLog } from '@/lib/debug-log';
 
 const BUCKET = 'pdf-cache';
 
@@ -48,7 +49,7 @@ export async function cachePdfToSupabase(
 
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(storagePath(submissionId));
 
-    console.log(`[PDF Cache] Cached ${submissionId}: ${data.publicUrl}`);
+    debugLog(`[PDF Cache] Cached ${submissionId}: ${data.publicUrl}`);
     return { url: data.publicUrl, cachedAt: new Date() };
   } catch (err) {
     console.error(`[PDF Cache] Unexpected error caching ${submissionId}:`, err);

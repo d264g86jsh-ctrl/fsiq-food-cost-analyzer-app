@@ -274,6 +274,13 @@ Do NOT trigger any email when `fsiq_communication_route` is:
 - `pdf_failure_hold`
 - `no_email_hold`
 
+> ⚠️ **Superseded for `FSIQ Workflow Failed` (verified 2026-06-23).** This section described
+> `workflow_failed` / `FSIQ Workflow Failed` as a no-email hold route. The **live** GHL workflow
+> "Webhook (Analyzer) V3" (confirmed in the workflow builder) **does send an email** on the
+> `FSIQ Workflow Failed` tag — it is branch 8 ("Fail"). The live workflow is authoritative. See
+> `docs/email-templates.md` §1 and `docs/zapier-migration-build-spec.md`. The other hold routes
+> (`manual_review_hold`, `pdf_failure_hold`, `no_email_hold`) are unaffected by this note.
+
 ---
 
 ## DQ Routing Rules
