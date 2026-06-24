@@ -27,7 +27,7 @@ Contents
 9.​ Step 3 — Website Check (Code by Zapier)
 10.​Step 4 — Qualification Logic (Code by Zapier)
 11.​Step 5 — Paths (Split into 4 Branches)
-12.​Steps 6, 8, 10 — DQ Emails (3 Variants)
+12.​Steps 6, 8, 10 — DQ Emails (copy superseded — see docs/email-templates.md)
 13.​Step 13 — Website Info Crawl (Code by Zapier)
 14.​Step 14 — AI Researcher (Anthropic)
 15.​Step 15 — Research Analysis (Code by Zapier)
@@ -1546,160 +1546,35 @@ national_chain
 Do NOT use the old websiteInvalid field — it no longer exists. All path
 conditions use qualified + dqReason only.
 
-12. Steps 6, 8, 10 — DQ Emails (3 Variants)
-Each DQ path ends with a Microsoft Outlook "Send Email" step. Three separate steps, one per
-path.
-Step 6 — Invalid Website DQ Email
-Path: Unqualified — Invalid Website​
-Subject: Quick check on your FoodServiceIQ submission​
-To: {{Step 4 → email}}​
-Body (HTML):
+12. Steps 6, 8, 10 — DQ Emails
 
-<!DOCTYPE html>
-
-<html>
-
-<head><meta charset="UTF-8"></head>
-
-<body style="font-family: Aptos, Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #000000;
-max-width: 600px;">
-
-<p>Hi {{Step 4 → fullName}},</p>
-
-<p>Thanks for using <a href="https://www.foodserviceiq.com/" style="color: #52C275;
-font-weight: bold; text-decoration: none;">FoodServiceIQ</a>'s Food Cost Analyzer. We
-received your submission for <strong>{{Step 4 → restaurantName}}</strong>, but we weren't
-able to reach the website you entered.</p>
-
-<p>Our analysis pulls business context from your website to make the report more accurate, so
-we'd love to give it another shot. Could you double-check the URL and resubmit at <a
-href="https://www.foodserviceiq.com/" style="color: #52C275;">foodserviceiq.com</a>?</p>
-
-
-
-<!-- Page 30 -->
-
-<p>If you'd rather just talk it through, you can also book a quick call directly:</p>
-
-<p style="margin: 20px 0;">
-
-```
-  <a href="https://calendly.com/neil-foodserviceiq/15-minute-meeting-clone-1" style="display:
-```
-
-inline-block; background-color: #143225; color: #ffffff; padding: 14px 28px; text-decoration:
-none; font-weight: bold; font-size: 12pt; border-radius: 4px;">
-
-```
-    Book a 15-Minute Call
-
-  </a>
-
-```
-
-</p>
-
-<p>Thanks,<br>
-
-The FoodServiceIQ Team</p>
-
-</body>
-
-</html>
-
-Step 8 — Below Threshold DQ Email
-Path: Unqualified — Below Threshold​
-Subject: Thanks for using FoodServiceIQ's Food Cost Analyzer​
-To: {{Step 4 → email}}​
-Body (HTML):
-
-<!DOCTYPE html>
-
-<html>
-
-<head><meta charset="UTF-8"></head>
-
-<body style="font-family: Aptos, Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #000000;
-max-width: 600px;">
-
-<p>Hi {{Step 4 → fullName}},</p>
-
-
-
-<!-- Page 31 -->
-
-<p>Thanks for using <a href="https://www.foodserviceiq.com/" style="color: #52C275;
-font-weight: bold; text-decoration: none;">FoodServiceIQ</a>'s Food Cost Analyzer and sharing
-a bit about <strong>{{Step 4 → restaurantName}}</strong>.</p>
-
-<p>Based on what you shared, your operation may not yet be a fit for our cost reduction
-program. It's purpose-built for restaurants spending <strong>$500K or more</strong> annually
-on food, where the savings recoverable through our model are large enough to justify the
-engagement on both sides.</p>
-
-<p>That said, we'd love to stay in touch:</p>
-
-<ul style="margin-left: 20px;">
-
-```
-  <li>If your operation grows into that range, we'd be glad to run a full analysis at that point.</li>
-
-  <li>In the meantime, our free playbook covers procurement strategies that work at any scale:
-```
-
-<a href="https://www.foodserviceiq.com/" style="color: #52C275;">foodserviceiq.com</a></li>
-
-</ul>
-
-<p>Wishing you continued success,<br>
-
-The FoodServiceIQ Team</p>
-
-</body>
-
-</html>
-
-Step 10 — National Chain DQ Email
-Path: Unqualified — National Chain​
-Subject: About your FoodServiceIQ submission​
-To: {{Step 4 → email}}​
-Body (HTML):
-
-<!DOCTYPE html>
-
-<html>
-
-<head><meta charset="UTF-8"></head>
-
-
-
-<!-- Page 32 -->
-
-<body style="font-family: Aptos, Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #000000;
-max-width: 600px;">
-
-<p>Hi {{Step 4 → fullName}},</p>
-
-<p>Thanks for trying <a href="https://www.foodserviceiq.com/" style="color: #52C275;
-font-weight: bold; text-decoration: none;">FoodServiceIQ</a>'s Food Cost Analyzer.</p>
-
-<p>Our program is built specifically for <strong>independent and multi-unit independent
-restaurant groups</strong>. The pricing structures and procurement strategies we negotiate are
-designed to give independents access to the same kind of leverage national chains already
-operate under, so we don't typically work with national chains directly.</p>
-
-<p>If you operate an independent concept under a different brand and would like to explore an
-analysis for that operation, we'd love to hear from you at <a
-href="mailto:hello@foodserviceiq.com" style="color:
-#52C275;">hello@foodserviceiq.com</a>.</p>
-
-<p>Best,<br>
-
-The FoodServiceIQ Team</p>
-
-</body>
-
-</html>
+> ⚠️ SUPERSEDED — the DQ email subjects and HTML bodies that previously appeared here are
+> OUTDATED and have been removed. Current canonical copy is maintained in
+> `docs/email-templates.md` (single source of truth, exact HTML for all emails).
+>
+> Migration note: transactional email is moving from GHL into Zapier, sent via the Microsoft 365 /
+> Outlook mailbox **Robert Ferreira <rob@foodserviceiq.com>**. There are now **7** DQ / failure
+> email variants (not 3). Current copy uses GHL contact merge fields `{{contact.first_name}}` and
+> `{{contact.fsiq_restaurant_name}}` — not the old `{{Step 4 → …}}` step refs.
+>
+> Current DQ / failure email subjects (full HTML in `docs/email-templates.md` §2):
+>
+> | Email | GHL tag written by app | Subject |
+> |---|---|---|
+> | DQ: Invalid Website | `FSIQ DQ Invalid Website` | About your FoodServiceIQ submission |
+> | DQ: Below Threshold | `FSIQ DQ Below Threshold` | Quick check on your FoodServiceIQ submission |
+> | DQ: National Chain | `FSIQ DQ National Chain` | About your FoodServiceIQ submission |
+> | DQ: Clear Non-Fit | `FSIQ DQ Clear Non Fit` | Thanks for using FoodServiceIQ's Food Cost Analyzer |
+> | DQ: Non-US | `FSIQ Non US` | Thanks for your interest in FoodServiceIQ |
+> | Fail | `FSIQ Workflow Failed` | Thanks for using FoodServiceIQ's Food Cost Analyzer |
+> | None | _else branch — no routing tag_ (only `FSIQ Analyzer Submitted`) | Thanks for using FoodServiceIQ's Food Cost Analyzer |
+>
+> Fail/None resolved from the live **"Webhook (Analyzer) V3"** workflow (verified in the builder):
+> Fail = `FSIQ Workflow Failed`; None = else branch. ⚠️ This **overrides** `docs/ghl-email-handoff.md`,
+> which describes `FSIQ Workflow Failed` as a no-email hold route — the live workflow sends an email on
+> it, and the live workflow is authoritative.
+>
+> Authoritative reconciled Tag → Email table (all 9, identical): `docs/email-templates.md` §1.
 
 13. Step 13 — Website Info Crawl (Code by Zapier)
 Purpose: Full website fetch for the qualified path. Extracts logo hints from raw HTML BEFORE
@@ -2666,80 +2541,26 @@ Gives PDFMonkey time to finish rendering before Outlook tries to attach the link
 <!-- Page 51 -->
 
 21. Step 21 — Qualified Email (Microsoft Outlook)
-Subject: Your FoodServiceIQ Food Cost Analysis is ready​
-To: {{Step 4 → email}}​
-Body (HTML):
 
-<!DOCTYPE html>
-
-<html>
-
-<head>
-
-<meta charset="UTF-8">
-
-</head>
-
-<body style="font-family: Aptos, Arial, sans-serif; font-size: 11pt; line-height: 1.6; color: #000000;
-max-width: 600px;">
-
-<p>Hi {{Step 4 → fullName}},</p>
-
-<p>Thanks for using <a href="https://www.foodserviceiq.com/" style="color: #52C275;
-font-weight: bold; text-decoration: none;">FoodServiceIQ</a>'s Food Cost Analyzer. Your
-personalized analysis for <strong>{{Step 4 → restaurantName}}</strong> is ready.</p>
-
-<p style="margin-top: 25px; margin-bottom: 15px;">
-
-```
-  <a href="{{Step 19 → download_url}}" style="display: inline-block; background-color: #143225;
-```
-
-color: #ffffff; padding: 14px 28px; text-decoration: none; font-weight: bold; font-size: 12pt;
-border-radius: 4px;">
-
-```
-    View Your Food Cost Analysis
-
-  </a>
-
-```
-
-</p>
-
-<p style="margin-top: 5px; margin-bottom: 25px;">
-
-```
-  <a href="https://calendly.com/neil-foodserviceiq/15-minute-meeting-clone-1" style="display:
-```
-
-inline-block; background-color: #52C275; color: #143225; padding: 14px 28px; text-decoration:
-none; font-weight: bold; font-size: 12pt; border-radius: 4px;">
-
-
-
-<!-- Page 52 -->
-
-```
-    Book Your Free Analysis Call
-
-  </a>
-
-```
-
-</p>
-
-<p>Once you've reviewed the report, the 30-minute analysis call is where we cross-reference
-your actual invoices and agreements against the same pricing structures used by national
-chains. No commitment, no upfront cost.</p>
-
-<p>Looking forward,<br>
-
-The FoodServiceIQ Team</p>
-
-</body>
-
-</html>
+> ⚠️ SUPERSEDED — the qualified email subject and HTML body that previously appeared here are
+> OUTDATED and have been removed. Current canonical copy is maintained in
+> `docs/email-templates.md` (single source of truth, exact HTML).
+>
+> There are now **2** qualified email variants, both sent via Zapier → Microsoft 365 / Outlook from
+> **Robert Ferreira <rob@foodserviceiq.com>**, both with subject **"Your FoodServiceIQ Food Cost
+> Analysis is ready"**:
+>
+> | Email | GHL tag written by app |
+> |---|---|
+> | Full PDF Ready | `FSIQ Full PDF Ready` |
+> | Conservative PDF Ready | `FSIQ Conservative PDF Ready` |
+>
+> Both link the PDF button to `{{contact.fsiq_pdf_url}}` — the app proxy route `/report/{id}` already
+> present in the GHL payload. This **supersedes** the old behavior that used the PDFMonkey
+> `download_url` regenerated inside Zapier (the former `{{Step 19 → download_url}}`); the Step 19/20
+> PDFMonkey-URL + delay handoff is no longer the source of the email's PDF link. Calendly CTA is now
+> `https://calendly.com/neil-foodserviceiq/30min`. Merge fields: `{{contact.first_name}}`,
+> `{{contact.fsiq_restaurant_name}}`, `{{contact.fsiq_final_pct}}`, `{{contact.fsiq_estimated_savings}}`.
 
 22. PDFMonkey Template HTML
 22a. Sample Data JSON

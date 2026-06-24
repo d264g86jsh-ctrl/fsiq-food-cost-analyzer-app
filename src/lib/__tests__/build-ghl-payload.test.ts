@@ -131,7 +131,9 @@ describe('buildGhlPayload — PDF fields', () => {
   it('includes PDF URL and sets pdfReadyAt when complete', () => {
     const s = makeSubmission();
     const p = buildGhlPayload(s, LEAD_STATUS.QUALIFIED_FULL_PDF_READY, COMMUNICATION_ROUTE.SEND_FULL_REPORT, []);
-    expect(p.fsiq_pdf_url).toBe('/report/sub_test_001');
+    // B1: buildReportUrl now defaults to the prod host when NEXT_PUBLIC_APP_URL is unset
+    // (previously produced a host-less '/report/...'). Test env has no NEXT_PUBLIC_APP_URL set.
+    expect(p.fsiq_pdf_url).toBe('https://app.foodserviceiq.com/report/sub_test_001');
     expect(p.fsiq_pdf_ready_at).toBe(s.updatedAt.toISOString());
     expect(p.fsiq_pdf_mode).toBe('full');
   });

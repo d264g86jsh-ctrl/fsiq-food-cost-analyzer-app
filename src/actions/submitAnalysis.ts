@@ -35,7 +35,8 @@ import type { GeneratePdfResult, GeneratePdfInput } from '@/lib/pdf/pdf-types';
 import type { AiResearchResult, AiNarrativeResult } from '@/lib/ai/ai-types';
 import { assignLeadStatus, needsAiAndPdf, type AssignLeadStatusResult } from '@/lib/crm/assign-lead-status';
 import { buildGhlPayload } from '@/lib/crm/build-ghl-payload';
-import { syncToGhl } from '@/lib/crm/ghl';
+import { syncToGhl, type GhlSyncResult } from '@/lib/crm/ghl';
+import type { GhlHandoffPayload } from '@/lib/crm/ghl-types';
 import { buildLeadEvent, buildQualifiedLeadEvent } from '@/lib/meta/meta-events';
 import { sendToMetaCapi } from '@/lib/meta/meta-capi';
 import { LEAD_STATUS } from '@/lib/crm/lead-status';
@@ -60,6 +61,82 @@ export interface SubmitAnalysisResult {
 }
 
 type WorkflowError = { stage: string; error: string; timestamp: string };
+
+// ── B2: fallback webhook — guarantees no lead is ever silently lost ─────────────
+// Fires ONLY when the normal GHL sync path has failed (sync errored after retries,
+// the record re-fetch was null, the background threw before sync) OR when the
+// pipeline failed before any sync (validation/qualification). Depends on NOTHING
+// that may have already failed — no GHL, no PDFMonkey, no DB read — just an outbound
+// POST of in-memory form data. Fire-and-forget; never throws. Zapier owns the actual
+// emails (lead retry + internal notification). The app's only job here is the POST.
+type FallbackStage = 'validation' | 'qualification' | 'pdf' | 'ghl_sync' | 'background_unexpected';
+
+async function postFallbackWebhook(
+  payload: AnalyzerFormPayload,
+  failureStage: FallbackStage,
+  submissionId: string | null,
+): Promise<void> {
+  try {
+    const url = process.env.FSIQ_FALLBACK_WEBHOOK_URL;
+    if (!url) {
+      console.error(`[FSIQ FALLBACK] FSIQ_FALLBACK_WEBHOOK_URL unset — skipping fallback POST (stage=${failureStage})`);
+      return;
+    }
+    // Derive first/last from full name the same way ghl.ts does, so Zapier mapping is consistent.
+    const nameParts = (payload.full_name ?? '').trim().split(/\s+/).filter(Boolean);
+    const body = {
+      token:           'fsiq-webhook-2026',
+      event:           'submission_failed',
+      email:           payload.email ?? '',
+      first_name:      nameParts[0] ?? '',
+      last_name:       nameParts.slice(1).join(' '),
+      restaurant_name: payload.restaurant_name ?? '',
+      failure_stage:   failureStage,
+      submission_id:   submissionId ?? '',
+      // Tracking / attribution — read straight off the in-memory form payload so a
+      // failed lead carries its full marketing context. Every field is optional on
+      // AnalyzerFormPayload and defaults to '' → reading them can never throw and
+      // never depends on the DB or a completed pipeline. fb_ad_id/fb_click_id use the
+      // GHL custom-field names (minus the fsiq_ prefix) for cross-Zap consistency.
+      // lead_source is intentionally omitted: it is a derived value, not on the payload.
+      phone:            payload.phone ?? '',
+      utm_source:       payload.utm_source ?? '',
+      utm_medium:       payload.utm_medium ?? '',
+      utm_campaign:     payload.utm_campaign ?? '',
+      utm_content:      payload.utm_content ?? '',
+      utm_term:         payload.utm_term ?? '',
+      utm_id:           payload.utm_id ?? '',
+      gclid:            payload.gclid ?? '',
+      fb_ad_id:         payload.fbadid ?? '',
+      fb_click_id:      payload.fbclid ?? '',
+      campaign:         payload.campaign ?? '',
+      creative_name:    payload.creative_name ?? '',
+      creative_id:      payload.creative_id ?? '',
+      referrer:         payload.referrer ?? '',
+      landing_page_url: payload.landing_page_url ?? '',
+    };
+    await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(8_000),
+    });
+  } catch (err) {
+    // A failure to POST the fallback must never throw — log and move on.
+    console.error('[FSIQ FALLBACK] fallback webhook POST failed:', err instanceof Error ? err.message : String(err));
+  }
+}
+
+// Retry GHL sync on transient failure (total attempts incl. the first), short backoff.
+// syncToGhl never throws — it returns crmSyncStatus 'error' — so we retry on that.
+async function syncToGhlWithRetry(payload: GhlHandoffPayload, attempts = 3): Promise<GhlSyncResult> {
+  let result = await syncToGhl(payload);
+  for (let i = 1; i < attempts && result.crmSyncStatus === 'error'; i++) {
+    await new Promise((r) => setTimeout(r, 500 * i)); // 500ms, then 1000ms
+    result = await syncToGhl(payload);
+  }
+  return result;
+}
 
 // ── Main action ───────────────────────────────────────────────────────────────
 
@@ -164,6 +241,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
   } catch (err) {
     console.error('[submitAnalysis] validation failed:', err);
     await patch({ workflowStage: 'failed', workflowStatus: 'failed' as WorkflowStatus, workflowErrors: workflowErrors as unknown as Prisma.InputJsonValue });
+    await postFallbackWebhook(payload, 'validation', submissionId);
     return fail(submissionId, 'Analysis failed. Please try again.');
   }
 
@@ -218,6 +296,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
   } catch (err) {
     console.error('[submitAnalysis] qualification failed:', err);
     await patch({ workflowStage: 'failed', workflowStatus: 'failed' as WorkflowStatus, workflowErrors: workflowErrors as unknown as Prisma.InputJsonValue });
+    await postFallbackWebhook(payload, 'qualification', submissionId);
     return fail(submissionId, 'Analysis failed. Please try again.');
   }
 
@@ -253,6 +332,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       responseDollarEstimate: null,
       trackingContext,
       rawPhone,
+      formPayload: payload,
     });
   }
 
@@ -291,8 +371,8 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
 
   // ── Background: steps 7–10 via waitUntil (runs after response is sent) ────────
   waitUntil((async () => {
+    let leadHandled = false; // B2: true once the lead is synced OR routed to the fallback webhook
     try {
-    console.log('[FSIQ DEBUG] waitUntil background started for submission:', submissionId);
     // ── Step 7: AI Research ────────────────────────────────────────────────────
     let researchResult: AiResearchResult;
     try {
@@ -471,12 +551,21 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     let crmSyncError: string | null = 'Record not found for GHL sync';
 
     if (fresh) {
-      console.log('[FSIQ DEBUG] Starting GHL sync for submission:', submissionId);
       const ghlPayload = buildGhlPayload(fresh, finalStatus.leadStatus, finalStatus.communicationRoute, finalStatus.tags, rawPhone);
-      const crmResult = await syncToGhl(ghlPayload);
+      const crmResult = await syncToGhlWithRetry(ghlPayload);
       crmSyncStatus = crmResult.crmSyncStatus;
       ghlContactId  = crmResult.ghlContactId;
       crmSyncError  = crmResult.crmSyncError;
+    }
+
+    // B2: guarantee the lead is handled — synced, or routed to the fallback webhook.
+    // Covers GHL sync error after retries AND a null re-fetch (fresh === null).
+    // Sets leadHandled so the outer catch won't double-fire the fallback.
+    if (crmSyncStatus === 'synced') {
+      leadHandled = true;
+    } else {
+      await postFallbackWebhook(payload, 'ghl_sync', submissionId);
+      leadHandled = true;
     }
 
     let metaResult: { metaStatus: 'fired' | 'error' | 'skipped'; metaEventIds: string[]; metaError: string | null } = {
@@ -522,6 +611,12 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     }).catch(() => {});
     } catch (unexpectedErr) {
       console.error('[submitAnalysis] background pipeline unexpected error:', unexpectedErr);
+      // B2: if we threw before the lead was synced/handled, route it to the fallback
+      // webhook so it never silently disappears. Guarded by leadHandled so a throw
+      // AFTER a successful sync (or after the fallback already fired) never double-sends.
+      if (!leadHandled) {
+        await postFallbackWebhook(payload, 'background_unexpected', submissionId);
+      }
       await db.submission.update({
         where: { id: submissionId },
         data: { workflowStage: 'complete', workflowStatus: 'partial' as WorkflowStatus },
@@ -555,6 +650,7 @@ async function syncAndReturn({
   responseDollarEstimate,
   trackingContext,
   rawPhone,
+  formPayload,
 }: {
   submissionId: string;
   status: AssignLeadStatusResult;
@@ -564,6 +660,7 @@ async function syncAndReturn({
   responseDollarEstimate: string | null;
   trackingContext: TrackingContext;
   rawPhone: string | null;
+  formPayload: AnalyzerFormPayload;
 }): Promise<SubmitAnalysisResult> {
   // Fetch fresh record for GHL payload builder and CAPI user data
   const fresh = await db.submission.findUnique({ where: { id: submissionId } }).catch(() => null);
@@ -574,10 +671,17 @@ async function syncAndReturn({
 
   if (fresh) {
     const ghlPayload = buildGhlPayload(fresh, status.leadStatus, status.communicationRoute, status.tags, rawPhone);
-    const crmResult = await syncToGhl(ghlPayload);
+    const crmResult = await syncToGhlWithRetry(ghlPayload);
     crmSyncStatus = crmResult.crmSyncStatus;
     ghlContactId  = crmResult.ghlContactId;
     crmSyncError  = crmResult.crmSyncError;
+  }
+
+  // B2: DQ/manual path — if the lead never synced to GHL (sync error after retries,
+  // or fresh === null), route it to the fallback webhook so it still gets an email
+  // instead of silently disappearing.
+  if (crmSyncStatus === 'error') {
+    await postFallbackWebhook(formPayload, 'ghl_sync', submissionId);
   }
 
   // ── Meta CAPI — non-fatal; fires after GHL sync ───────────────────────────

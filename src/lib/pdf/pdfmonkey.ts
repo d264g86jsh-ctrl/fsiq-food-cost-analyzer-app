@@ -7,6 +7,7 @@
 
 import type { PdfPayload, GeneratePdfInput, GeneratePdfResult } from './pdf-types';
 import { buildPdfPayload } from './build-pdf-payload';
+import { debugLog } from '@/lib/debug-log';
 import { patchPdfMonkeyTemplateHtml } from './pdfmonkey-template';
 
 const PDFMONKEY_API_URL = 'https://api.pdfmonkey.io/api/v1/documents';
@@ -42,7 +43,7 @@ async function validateLogoForPdf(url: string | null, isConservative: boolean): 
 
   // Short-circuit: pre-baked data URI from step 7.5 — no validation needed
   if (url?.startsWith('data:image/')) {
-    console.log('[FSIQ PDF LOGO] using pre-processed data URI');
+    debugLog('[FSIQ PDF LOGO] using pre-processed data URI');
     return url;
   }
 
@@ -68,7 +69,7 @@ async function validateLogoForPdf(url: string | null, isConservative: boolean): 
 
     // Rule 3a: Non-OK status
     if (!res.ok) {
-      console.log(`[FSIQ PDF LOGO] HEAD ${res.status} → hasLogo=false: ${url}`);
+      debugLog(`[FSIQ PDF LOGO] HEAD ${res.status} → hasLogo=false: ${url}`);
       return null;
     }
 
@@ -105,7 +106,7 @@ async function validateLogoForPdf(url: string | null, isConservative: boolean): 
 
     // Rule 7: Paper trail
     const timestamp = new Date().toISOString();
-    console.log(`[FSIQ PDF LOGO] validated and embedded at ${timestamp}: ${url}`);
+    debugLog(`[FSIQ PDF LOGO] validated and embedded at ${timestamp}: ${url}`);
     return imageDataUri;
   } catch {
     console.warn(`[FSIQ PDF LOGO] HEAD request failed → hasLogo=false: ${url}`);
@@ -355,7 +356,7 @@ async function ensureTemplateSafe(
     };
   }
 
-  console.log(`[FSIQ PDF TEMPLATE] safety patch applied: ${templateId}`);
+  debugLog(`[FSIQ PDF TEMPLATE] safety patch applied: ${templateId}`);
   patchedTemplateIds.add(patchCacheKey(templateId));
   return { ok: true };
 }

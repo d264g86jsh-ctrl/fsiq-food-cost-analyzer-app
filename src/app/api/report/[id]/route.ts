@@ -11,6 +11,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { debugLog } from '@/lib/debug-log';
 import { cachePdfToSupabase, verifyCachedPdfUrl, fetchAndCache } from '@/lib/pdf/pdf-cache';
 
 const PDFMONKEY_API_KEY  = process.env.PDFMONKEY_API_KEY;
@@ -114,7 +115,7 @@ export async function GET(
     if (validCachedUrl) {
       const res = await streamPdf(validCachedUrl);
       if (res) {
-        console.log(`[PDF Proxy] Served from cache for ${id}`);
+        debugLog(`[PDF Proxy] Served from cache for ${id}`);
         return res;
       }
     }
@@ -124,7 +125,7 @@ export async function GET(
   if (submission.pdfDownloadUrl) {
     const res = await streamPdf(submission.pdfDownloadUrl);
     if (res) {
-      console.log(`[PDF Proxy] Served from stored URL for ${id}`);
+      debugLog(`[PDF Proxy] Served from stored URL for ${id}`);
       return res;
     }
   }

@@ -24,6 +24,7 @@
 // No logo is better than a favicon.
 
 import { extractDomain } from '@/lib/website/normalize-url';
+import { debugLog } from '@/lib/debug-log';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -82,7 +83,7 @@ export async function extractLogoUrl(
 ): Promise<string | null> {
   const domain = extractDomain(websiteUrl);
   if (!domain) {
-    console.log('[FSIQ LOGO] source: null (no domain)');
+    debugLog('[FSIQ LOGO] source: null (no domain)');
     return null;
   }
 
@@ -97,7 +98,7 @@ export async function extractLogoUrl(
     if (jsonLdLogo) {
       const resolved = resolveUrl(jsonLdLogo, websiteUrl);
       if (resolved && await isValidImageUrl(resolved)) {
-        console.log('[FSIQ LOGO] source: json-ld');
+        debugLog('[FSIQ LOGO] source: json-ld');
         return resolved;
       }
     }
@@ -108,7 +109,7 @@ export async function extractLogoUrl(
     if (appleTouchIcon) {
       const resolved = resolveUrl(appleTouchIcon, websiteUrl);
       if (resolved && isAppleTouchIconAcceptable(resolved) && await isValidImageUrl(resolved, undefined, 5_000)) {
-        console.log('[FSIQ LOGO] source: apple-touch-icon');
+        debugLog('[FSIQ LOGO] source: apple-touch-icon');
         return resolved;
       }
     }
@@ -119,7 +120,7 @@ export async function extractLogoUrl(
     if (pngIcon) {
       const resolved = resolveUrl(pngIcon, websiteUrl);
       if (resolved && await isValidImageUrl(resolved, undefined, 5_000)) {
-        console.log('[FSIQ LOGO] source: png-icon');
+        debugLog('[FSIQ LOGO] source: png-icon');
         return resolved;
       }
     }
@@ -129,7 +130,7 @@ export async function extractLogoUrl(
     if (altLogoImage) {
       const resolved = resolveUrl(altLogoImage, websiteUrl);
       if (resolved && await isValidImageUrl(resolved)) {
-        console.log('[FSIQ LOGO] source: alt-img');
+        debugLog('[FSIQ LOGO] source: alt-img');
         return resolved;
       }
     }
@@ -145,7 +146,7 @@ export async function extractLogoUrl(
         isValidImageUrlStructure(resolved) &&
         await isValidImageUrl(resolved, SOCIAL_IMAGE_MAX_BYTES)
       ) {
-        console.log('[FSIQ LOGO] source: og-image');
+        debugLog('[FSIQ LOGO] source: og-image');
         return resolved;
       }
     }
@@ -159,7 +160,7 @@ export async function extractLogoUrl(
         isLogoLikeUrl(resolved) &&
         await isValidImageUrl(resolved, SOCIAL_IMAGE_MAX_BYTES)
       ) {
-        console.log('[FSIQ LOGO] source: twitter-image');
+        debugLog('[FSIQ LOGO] source: twitter-image');
         return resolved;
       }
     }
@@ -171,13 +172,13 @@ export async function extractLogoUrl(
     if (navImage) {
       const resolved = resolveUrl(navImage, websiteUrl);
       if (resolved && isLogoLikeUrl(resolved) && await isValidImageUrl(resolved)) {
-        console.log('[FSIQ LOGO] source: nav-img');
+        debugLog('[FSIQ LOGO] source: nav-img');
         return resolved;
       }
     }
   }
 
-  console.log('[FSIQ LOGO] source: null');
+  debugLog('[FSIQ LOGO] source: null');
   return null;
 }
 

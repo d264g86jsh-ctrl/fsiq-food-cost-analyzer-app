@@ -13,6 +13,7 @@
 // column directly — no reprocessing, no remove.bg calls at render time.
 
 import { PNG } from 'pngjs';
+import { debugLog } from '@/lib/debug-log';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -201,18 +202,18 @@ export function processTransparentLogo(
 
   if (transparency === 'opaque') {
     // Phase 1: opaque logos keep the white-box treatment — no processing
-    console.log(`[FSIQ LOGO] opaque background detected — white-box fallback: ${logoUrl.slice(0, 60)}`);
+    debugLog(`[FSIQ LOGO] opaque background detected — white-box fallback: ${logoUrl.slice(0, 60)}`);
     return null;
   }
 
   if (transparency === 'svg') {
     // SVG recoloring deferred to a future phase
-    console.log(`[FSIQ LOGO] SVG detected — white-box fallback (deferred): ${logoUrl.slice(0, 60)}`);
+    debugLog(`[FSIQ LOGO] SVG detected — white-box fallback (deferred): ${logoUrl.slice(0, 60)}`);
     return null;
   }
 
   if (transparency === 'unknown') {
-    console.log(`[FSIQ LOGO] unknown format — white-box fallback: ${logoUrl.slice(0, 60)}`);
+    debugLog(`[FSIQ LOGO] unknown format — white-box fallback: ${logoUrl.slice(0, 60)}`);
     return null;
   }
 
@@ -226,7 +227,7 @@ export function processTransparentLogo(
   if (isBlobLogo(metrics)) {
     // Badge icon — white-recolor would produce a featureless blob.
     // Fall back to white-box with original colored logo.
-    console.log(
+    debugLog(
       `[FSIQ LOGO] blob-guard fired — white-box fallback ` +
       `(coverage=${(metrics.coverage * 100).toFixed(1)}% ` +
       `bbox_fill=${(metrics.bboxFill * 100).toFixed(1)}%): ${logoUrl.slice(0, 60)}`,
@@ -235,7 +236,7 @@ export function processTransparentLogo(
   }
 
   const dataUri = `data:image/png;base64,${recolored.toString('base64')}`;
-  console.log(
+  debugLog(
     `[FSIQ LOGO] white-recolor applied ` +
     `(${transparency} coverage=${(metrics.coverage * 100).toFixed(1)}%): ${logoUrl.slice(0, 60)}`,
   );
