@@ -230,6 +230,9 @@ export function AnalyzerPageV2() {
                 We never sell your data. See our{' '}
                 <a href="https://www.foodserviceiq.com/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline">Privacy Policy</a>.
               </p>
+              <p className="mt-3 text-center text-[11px] leading-relaxed max-w-2xl mx-auto text-[#94a3b8] italic">
+                *Metrics reflect FoodServiceIQ and affiliated entity engagements. Results vary by client and program participation.
+              </p>
 
             </div>
           </section>
@@ -262,9 +265,6 @@ export function AnalyzerPageV2() {
                 </svg>
               </a>
             </div>
-            <p className="mt-4 text-center text-[11px] leading-relaxed max-w-2xl mx-auto text-[#94a3b8]">
-              Disclaimer: Metrics reflect FoodServiceIQ and affiliated entity engagements. Results vary by client and program participation.
-            </p>
           </footer>
 
         </main>
