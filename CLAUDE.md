@@ -1,3 +1,10 @@
+<!-- BEGIN:token-efficiency-standard -->
+# Token efficiency standard (company-wide)
+
+Always-on rules load from `~/.claude/CLAUDE.md`. Full SOP: `~/fsiq-marketing-os/standards/token-efficiency/TOKEN-EFFICIENCY-SOP.md`.
+Read narrow (grep then Read with offset/limit, never re-read unchanged files). Edit over rewrite, one pass. Answer first, no preamble. Never fabricate paths, IDs, or numbers. Deliverable copy is exempt: brand voice wins over brevity.
+<!-- END:token-efficiency-standard -->
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with this repository.

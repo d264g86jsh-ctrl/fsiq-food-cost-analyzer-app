@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "knowledge": {
+      "command": "node",
+      "args": [
+        "/Users/rodrigoavendano/fsiq-marketing-os/fsiq-marketing-os/scripts/knowledge/knowledge-mcp.mjs"
+      ]
+    }
+  }
+}
