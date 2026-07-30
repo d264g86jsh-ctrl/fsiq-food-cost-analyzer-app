@@ -1,0 +1,6 @@
+# FoodServiceIQ GHL CSS Notes
+
+- I could not find the corrected reference file, `Survey - GHL - Analyzer.html`, in this workspace or elsewhere under `/Users/rodrigoavendano/conductor`, so I could not do the requested pixel comparison against the prototype file. I matched the card, radio-card pattern, footer band, and CTA treatment from the task brief and the local `docs/brand-guidelines.md`.
+- Selectors to verify in GHL DevTools: `#survey-zjVYWsWayj [class*="footer"]`, `#survey-zjVYWsWayj form > div:last-child`, `#survey-zjVYWsWayj [class*="choice-item"]`, and `#survey-zjVYWsWayj [class*="option"]`. These are intentionally broad because GHL class names vary, but `form > div:last-child` could catch the wrong wrapper if GHL nests the submit area differently.
+- I do not have the live GHL DOM, so I cannot confirm whether the Submit control is a `<button>` or an `<a>`. The CSS targets all likely cases: `button[type="submit"]`, `a[class*="submit"]`, and `button:last-of-type`.
+- Pure CSS cannot replace a missing or incorrect logo/trust-badge image asset. If the GHL image elements point to the wrong files, update the image assets in GHL. The included `header-html-snippet.html` is only needed if Inter is not already loaded globally.

@@ -1,6 +1,6 @@
 ════════════════════════════════════════════════════════════════════════
   WEBSITE VALIDATION BENCHMARK REPORT
-  Generated: 2026-05-18T15:49:27.876Z
+  Generated: 2026-05-22T00:36:06.704Z
 ════════════════════════════════════════════════════════════════════════
 
 DATASET
@@ -9,134 +9,136 @@ DATASET
   Total:           1010
 
 PIPELINE ACCURACY
-  Overall accuracy:         50.10%
-  True positive rate:       98.43%  (restaurants correctly qualified)
-  Verified restaurant:      32.94%  (full confidence)
-  Soft miss (plausible):    65.49%  (qualified but not fully verified)
-  FALSE NEGATIVE RATE:       1.57%  *** MOST IMPORTANT — real restaurants lost ***
-  True negative rate:        0.80%  (non-restaurants correctly rejected)
-  False positive rate:      99.20%  (non-restaurants incorrectly qualified)
+  Overall accuracy:         96.53%
+  True positive rate:       98.24%  (restaurants correctly qualified)
+  Verified restaurant:      34.31%  (full confidence)
+  Soft miss (plausible):    63.92%  (qualified but not fully verified)
+  FALSE NEGATIVE RATE:       1.76%  *** MOST IMPORTANT — real restaurants lost ***
+  True negative rate:       94.80%  (non-restaurants correctly rejected)
+  False positive rate:       5.20%  (non-restaurants incorrectly qualified)
 
 FAILURE PATTERNS (false negatives + soft misses)
-   222  cloudflare_or_bot_protection
-    94  low_restaurant_signals
-    18  minimal_html
-     8  invalid_or_dns
+   201  cloudflare_or_bot_protection
+    59  other
+    38  low_restaurant_signals
+    28  minimal_html
+     9  invalid_or_dns
 
 BREAKDOWN BY STATE (top 15 by count)
   State | Total | Verified | Plausible | FalseNeg
-  CA    |    15 |    12    |     2     |     1
-  NY    |    15 |     8    |     7     |     0
+  CA    |    15 |     5    |    10     |     0
+  NY    |    15 |    10    |     5     |     0
   AL    |    10 |     4    |     6     |     0
-  AK    |    10 |     4    |     5     |     1
-  AZ    |    10 |     2    |     8     |     0
+  AK    |    10 |     4    |     6     |     0
+  AZ    |    10 |     3    |     7     |     0
   AR    |    10 |     2    |     8     |     0
-  CO    |    10 |     5    |     4     |     1
-  CT    |    10 |     3    |     7     |     0
-  DE    |    10 |     4    |     6     |     0
+  CO    |    10 |     3    |     7     |     0
+  CT    |    10 |     2    |     8     |     0
+  DE    |    10 |     3    |     7     |     0
   FL    |    10 |     7    |     3     |     0
-  GA    |    10 |     5    |     5     |     0
-  HI    |    10 |     3    |     7     |     0
-  ID    |    10 |     2    |     8     |     0
-  IL    |    10 |     5    |     5     |     0
-  IN    |    10 |     3    |     7     |     0
+  GA    |    10 |     3    |     7     |     0
+  HI    |    10 |     6    |     4     |     0
+  ID    |    10 |     0    |    10     |     0
+  IL    |    10 |     4    |     6     |     0
+  IN    |    10 |     2    |     8     |     0
 
 BREAKDOWN BY CUISINE (top 15)
   Cuisine          | Total | Verified | Plausible | FalseNeg
-  American           |   147 |    46    |    99     |     2
-  Italian            |    40 |    16    |    24     |     0
-  Seafood            |    30 |     9    |    20     |     1
-  BBQ                |    30 |    14    |    16     |     0
-  Fine Dining        |    27 |     8    |    18     |     1
-  French             |    24 |     7    |    15     |     2
-  Mexican            |    21 |     8    |    13     |     0
-  Southern           |    20 |     9    |    11     |     0
-  Pizza              |    20 |     8    |    12     |     0
-  Steak              |    18 |     6    |    12     |     0
-  Mediterranean      |    10 |     3    |     7     |     0
-  Bakery             |     8 |     3    |     5     |     0
-  Farm to Table      |     6 |     2    |     4     |     0
-  Hawaiian           |     6 |     2    |     4     |     0
-  Spanish            |     5 |     3    |     1     |     1
+  American           |   147 |    44    |   103     |     0
+  Italian            |    40 |    15    |    25     |     0
+  BBQ                |    30 |    15    |    14     |     1
+  Seafood            |    30 |    13    |    17     |     0
+  Fine Dining        |    27 |     8    |    17     |     2
+  French             |    24 |     7    |    16     |     1
+  Mexican            |    21 |     6    |    15     |     0
+  Southern           |    20 |     6    |    14     |     0
+  Pizza              |    20 |     7    |    12     |     1
+  Steak              |    18 |     7    |    11     |     0
+  Mediterranean      |    10 |     4    |     6     |     0
+  Bakery             |     8 |     0    |     8     |     0
+  Farm to Table      |     6 |     3    |     2     |     1
+  Hawaiian           |     6 |     3    |     3     |     0
+  Spanish            |     5 |     3    |     2     |     0
 
 BREAKDOWN BY NON-RESTAURANT CATEGORY
   Category         | Total | Rejected | FalsePos
-  saas               |    50 |     1    |    49
-  law_firm           |    50 |     0    |    50
-  retail             |    50 |     0    |    50
-  gym                |    50 |     0    |    50
-  real_estate        |    50 |     1    |    49
-  accounting         |    50 |     1    |    49
-  auto_repair        |    50 |     1    |    49
-  hotel              |    50 |     0    |    50
-  home_services      |    50 |     0    |    50
-  medical_clinic     |    39 |     0    |    39
-  dental             |    11 |     0    |    11
+  saas               |    50 |    49    |     1
+  law_firm           |    50 |    50    |     0
+  retail             |    50 |    47    |     3
+  gym                |    50 |    48    |     2
+  real_estate        |    50 |    49    |     1
+  accounting         |    50 |    47    |     3
+  auto_repair        |    50 |    44    |     6
+  hotel              |    50 |    47    |     3
+  home_services      |    50 |    47    |     3
+  medical_clinic     |    39 |    35    |     4
+  dental             |    11 |    11    |     0
 
 FALSE NEGATIVES (real restaurants DQ'd or invalid)
-  Tracy's King Crab Shack        | https://tracyskingcrab.com               | invalid_website      | score=0 | http=404 | invalid_or_dns
-  Animal                         | https://animalrestaurant.com             | invalid_website      | score=0 | http=404 | invalid_or_dns
-  Acorn                          | https://www.denveracorn.com              | invalid_website      | score=0 | http=404 | invalid_or_dns
-  Hugo's                         | https://www.hugos.net                    | invalid_website      | score=0 | http=404 | invalid_or_dns
-  No. 9 Park                     | https://www.no9park.com                  | invalid_website      | score=0 | http=404 | invalid_or_dns
-  Dario's Brasserie              | https://www.dariosbrasserie.com          | invalid_website      | score=0 | http=404 | invalid_or_dns
-  El Farol                       | https://www.elfarolsantafe.com           | invalid_website      | score=0 | http=404 | invalid_or_dns
-  Langbaan                       | https://www.langbaanpdx.com              | invalid_website      | score=0 | http=404 | invalid_or_dns
+  Coquette                       | https://www.coquette-nola.com            | clear_non_fit        | score=6 | http=200 | low_restaurant_signals
+  Los Poblanos                   | https://www.lospoblanos.com              | clear_non_fit        | score=59 | http=200 | low_restaurant_signals
+  Jeni's Ice Creams              | https://www.jenis.com                    | clear_non_fit        | score=30 | http=200 | low_restaurant_signals
+  Larder                         | https://www.larder-deli.com              | clear_non_fit        | score=0 | http=409 | cloudflare_or_bot_protection
+  Van's Pig Stand                | https://www.vanessen.com                 | clear_non_fit        | score=6 | http=200 | low_restaurant_signals
+  Fireflour Pizza                | https://www.fireflour.com                | clear_non_fit        | score=16 | http=200 | low_restaurant_signals
+  Phillips Avenue Diner          | https://www.phillysf.com                 | clear_non_fit        | score=16 | http=200 | low_restaurant_signals
+  The Inn at Little Washington   | https://www.theinnatlittlewashington.com | clear_non_fit        | score=41 | http=200 | low_restaurant_signals
+  McCrady's                      | https://www.mccrady.com                  | clear_non_fit        | score=0 | http=200 | low_restaurant_signals
 
 SOFT MISSES (plausible_unverified instead of verified_restaurant, top 30)
   Ocean Restaurant               | https://www.oceanrestaurant.net          | score=0 | http=0 | cloudflare_or_bot_protection
   Ole Bay Cafe                   | https://olebaycafe.com                   | score=0 | http=0 | cloudflare_or_bot_protection
   Bottega                        | https://bottegafrombirmingham.com        | score=0 | http=0 | cloudflare_or_bot_protection
-  John's Restaurant              | https://www.johnsrestaurant.com          | score=0 | http=0 | cloudflare_or_bot_protection
-  Saw's BBQ                      | https://sawsbbq.com                      | score=56 | http=200 | low_restaurant_signals
+  Rodney Scott's BBQ             | https://www.rodneyscottsbbq.com          | score=8 | http=200 | minimal_html
   Marx Bros Cafe                 | https://www.marxbroscafe.com             | score=0 | http=0 | cloudflare_or_bot_protection
   Kinley                         | https://www.kinleyrestaurant.com         | score=0 | http=0 | cloudflare_or_bot_protection
-  Big Bob Gibson BBQ             | https://bigbobgibson.com                 | score=57 | http=200 | low_restaurant_signals
   Orso                           | https://www.orsalaska.com                | score=0 | http=0 | cloudflare_or_bot_protection
+  Tracy's King Crab Shack        | https://tracyskingcrab.com               | score=20 | http=404 | invalid_or_dns
+  John's Restaurant              | https://www.johnsrestaurant.com          | score=0 | http=403 | cloudflare_or_bot_protection
   Bear Tooth Theatrepub          | https://www.beartoothmovies.net          | score=0 | http=0 | cloudflare_or_bot_protection
   Pangea Restaurant              | https://www.pangalaska.com               | score=0 | http=0 | cloudflare_or_bot_protection
   LON's at The Hermosa           | https://www.lonsdalefour.com             | score=0 | http=0 | cloudflare_or_bot_protection
+  Cafe Monarch                   | https://www.cafemonarch.com              | score=8 | http=403 | cloudflare_or_bot_protection
   Quelin Taqueria                | https://www.quelintaqueria.com           | score=0 | http=0 | cloudflare_or_bot_protection
+  Saw's BBQ                      | https://sawsbbq.com                      | score=100 | http=200 | other
   Cafe Poca Cosa                 | https://www.cafeportagul.com             | score=0 | http=0 | cloudflare_or_bot_protection
-  El Charro Cafe                 | https://www.elcharro.com                 | score=0 | http=0 | cloudflare_or_bot_protection
   Bink's Midtown                 | https://www.binkscafe.com                | score=0 | http=0 | cloudflare_or_bot_protection
-  Pizzeria Bianco                | https://pizzeriabianco.com               | score=37 | http=200 | low_restaurant_signals
-  Pressroom                      | https://www.pressroombentonville.com     | score=0 | http=0 | cloudflare_or_bot_protection
-  Mojo on Center                 | https://www.mocojackson.com              | score=0 | http=0 | cloudflare_or_bot_protection
   Tarbell's                      | https://www.tarbell.com                  | score=0 | http=200 | minimal_html
+  El Charro Cafe                 | https://www.elcharro.com                 | score=0 | http=0 | cloudflare_or_bot_protection
+  Pressroom                      | https://www.pressroombentonville.com     | score=0 | http=0 | cloudflare_or_bot_protection
   The Capital Hotel Bar          | https://thecappuccinohotel.com           | score=0 | http=0 | cloudflare_or_bot_protection
-  Doe's Eat Place                | https://doeseatplace.com                 | score=51 | http=200 | low_restaurant_signals
+  Mojo on Center                 | https://www.mocojackson.com              | score=0 | http=0 | cloudflare_or_bot_protection
+  The Catfish Hole               | https://www.catfishhole.com              | score=0 | http=200 | minimal_html
   Bruno's Little Italy           | https://www.brunoscafeandgrill.com       | score=0 | http=0 | cloudflare_or_bot_protection
   Tusk Lounge                    | https://www.tusklounge.com               | score=0 | http=0 | cloudflare_or_bot_protection
-  The Catfish Hole               | https://www.catfishhole.com              | score=0 | http=200 | minimal_html
   Herbers HQ                     | https://www.herbershq.com                | score=0 | http=0 | cloudflare_or_bot_protection
-  Toca Madera                    | https://www.tocamadera.com               | score=46 | http=200 | low_restaurant_signals
-  State Bird Provisions          | https://statebirdsf.com                  | score=36 | http=200 | low_restaurant_signals
-  Rioja                          | https://www.riojadenvcer.com             | score=0 | http=0 | cloudflare_or_bot_protection
-  Guard and Grace                | https://www.guardandgrace.com            | score=34 | http=200 | low_restaurant_signals
-  ... and 304 more
+  The Hive                       | https://www.thehivebentonville.com       | score=100 | http=200 | other
+  Bestia                         | https://bestiala.com                     | score=82 | http=200 | other
+  Tartine Bakery                 | https://www.tartinebakery.com            | score=8 | http=200 | minimal_html
+  Nopalito                       | https://www.nopalitosf.com               | score=100 | http=200 | other
+  ... and 296 more
 
 FALSE POSITIVES (non-restaurants that passed, top 20)
-  Datadog                        | https://www.datadoghq.com                | plausible_unverified | restScore=6 negScore=8
-  ServiceNow                     | https://www.servicenow.com               | plausible_unverified | restScore=12 negScore=51
-  Slack                          | https://slack.com                        | plausible_unverified | restScore=0 negScore=46
-  Zendesk                        | https://www.zendesk.com                  | plausible_unverified | restScore=0 negScore=0
-  Box                            | https://www.box.com                      | plausible_unverified | restScore=0 negScore=23
-  Salesforce                     | https://www.salesforce.com               | plausible_unverified | restScore=0 negScore=8
-  Atlassian                      | https://www.atlassian.com                | plausible_unverified | restScore=0 negScore=23
-  Shopify                        | https://www.shopify.com                  | plausible_unverified | restScore=10 negScore=38
-  Monday.com                     | https://monday.com                       | plausible_unverified | restScore=0 negScore=23
-  Asana                          | https://asana.com                        | plausible_unverified | restScore=0 negScore=23
-  Canva                          | https://www.canva.com                    | plausible_unverified | restScore=0 negScore=0
-  HubSpot                        | https://www.hubspot.com                  | plausible_unverified | restScore=6 negScore=43
-  Figma                          | https://www.figma.com                    | plausible_unverified | restScore=0 negScore=23
-  Dropbox                        | https://www.dropbox.com                  | plausible_unverified | restScore=0 negScore=51
-  Notion                         | https://www.notion.so                    | plausible_unverified | restScore=0 negScore=53
-  Intercom                       | https://www.intercom.com                 | plausible_unverified | restScore=0 negScore=50
-  Airtable                       | https://www.airtable.com                 | plausible_unverified | restScore=0 negScore=53
-  Amplitude                      | https://www.amplitude.com                | plausible_unverified | restScore=0 negScore=31
-  Plaid                          | https://plaid.com                        | plausible_unverified | restScore=10 negScore=0
-  Gusto                          | https://www.gusto.com                    | plausible_unverified | restScore=0 negScore=0
-  ... and 476 more
+  Zoom                           | https://www.zoom.us                      | plausible_unverified | restScore=72 negScore=100
+  NYU Langone                    | https://nyulangone.org                   | plausible_unverified | restScore=84 negScore=100
+  Stanford Health Care           | https://stanfordhealthcare.org           | plausible_unverified | restScore=60 negScore=100
+  Geisinger                      | https://www.geisinger.org                | plausible_unverified | restScore=0 negScore=0
+  Rush University Medical Center | https://www.rush.edu                     | plausible_unverified | restScore=84 negScore=80
+  Casper                         | https://casper.com                       | plausible_unverified | restScore=66 negScore=100
+  CB2                            | https://www.cb2.com                      | plausible_unverified | restScore=70 negScore=50
+  Crate & Barrel                 | https://www.crateandbarrel.com           | plausible_unverified | restScore=93 negScore=60
+  Bowflex                        | https://www.bowflex.com                  | plausible_unverified | restScore=66 negScore=40
+  NordicTrack                    | https://www.nordictrack.com              | plausible_unverified | restScore=73 negScore=20
+  HotPads                        | https://www.hotpads.com                  | plausible_unverified | restScore=0 negScore=0
+  CliftonLarsonAllen             | https://www.claconnect.com               | plausible_unverified | restScore=66 negScore=80
+  Weaver                         | https://www.weaver.com                   | plausible_unverified | restScore=66 negScore=100
+  Pep Boys                       | https://www.pepboys.com                  | plausible_unverified | restScore=0 negScore=0
+  TD Ameritrade                  | https://www.tdameritrade.com             | plausible_unverified | restScore=66 negScore=100
+  Cars.com                       | https://www.cars.com                     | plausible_unverified | restScore=0 negScore=0
+  TrueCar                        | https://www.truecar.com                  | plausible_unverified | restScore=0 negScore=0
+  Sixt                           | https://www.sixt.com                     | plausible_unverified | restScore=0 negScore=0
+  Budget                         | https://www.budget.com                   | plausible_unverified | restScore=94 negScore=90
+  Progressive                    | https://www.progressive.com              | plausible_unverified | restScore=75 negScore=50
+  ... and 6 more
 
 ════════════════════════════════════════════════════════════════════════

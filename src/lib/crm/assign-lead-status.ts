@@ -196,7 +196,7 @@ function assignQualifiedStatus(
   return {
     leadStatus: LEAD_STATUS.QUALIFIED_PDF_PENDING,
     communicationRoute: COMMUNICATION_ROUTE.NO_EMAIL_HOLD,
-    tags: [GHL_TAG.ANALYZER_SUBMITTED, GHL_TAG.PDF_FAILED],
+    tags: [GHL_TAG.ANALYZER_SUBMITTED, GHL_TAG.QUALIFIED],
     shouldSyncGhl: true,
   };
 }

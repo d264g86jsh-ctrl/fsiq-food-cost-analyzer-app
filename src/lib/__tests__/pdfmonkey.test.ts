@@ -43,6 +43,7 @@ const successBody = {
     status: 'success',
   },
 };
+const EXPECTED_CALENDLY_URL = 'https://calendly.com/neil-foodserviceiq/30min?utm_source=fsiq_pdf&utm_medium=pdf&utm_campaign=food_cost_analyzer';
 
 const safeTemplateBody = `
 <div class="cover-logos">
@@ -326,14 +327,16 @@ describe('generatePdf — fetch call shape', () => {
 describe('PDFMonkey template safety patch', () => {
   it('injects an idempotent no-logo safety style into template HTML', async () => {
     const { patchPdfMonkeyTemplateHtml } = await import('../pdf/pdfmonkey-template');
-    const first = patchPdfMonkeyTemplateHtml('<html><head></head><body><div class="cover-operator-logo"><img src="{{ logoUrl }}"></div></body></html>');
-    const second = patchPdfMonkeyTemplateHtml(first.html);
+    const first = patchPdfMonkeyTemplateHtml('<html><head></head><body><div class="cover-operator-logo"><img src="{{ logoUrl }}"></div><a href="{{ calendlyUrl }}">Book</a></body></html>', EXPECTED_CALENDLY_URL);
+    const second = patchPdfMonkeyTemplateHtml(first.html, EXPECTED_CALENDLY_URL);
 
     expect(first.changed).toBe(true);
     expect(first.html).toContain('{% unless hasLogo and logoUrl != blank %}');
     expect(first.html).toContain('id="fsiq-app-logo-safety"');
     expect(first.html).toContain('.cover-operator-logo {');
     expect(first.html).toContain('display: none !important;');
+    expect(first.html).toContain(`href="${EXPECTED_CALENDLY_URL}"`);
+    expect(first.html).not.toContain('href="{{ calendlyUrl }}"');
     expect(second.changed).toBe(false);
     expect(second.html.match(/fsiq-app-logo-safety/g)).toHaveLength(1);
   });
@@ -400,7 +403,8 @@ describe('PDFMonkey template safety patch', () => {
     expect(patchedHtml).toContain('.cover-operator-logo {');
     expect(patchedHtml).not.toContain('cover-operator-logo">\n      {% if hasLogo %}');
     expect(patchedHtml).not.toContain('15-minute-meeting-clone-1');
-    expect(patchedHtml).toContain('href="{{ calendlyUrl }}"');
+    expect(patchedHtml).toContain(`href="${EXPECTED_CALENDLY_URL}"`);
+    expect(patchedHtml).not.toContain('href="{{ calendlyUrl }}"');
   });
 
   it('blocks PDF generation when the template safety check fails', async () => {

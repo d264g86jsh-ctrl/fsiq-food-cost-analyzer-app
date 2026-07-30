@@ -362,6 +362,39 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     });
   }
 
+  const hospitalityGroupRescue = detectHospitalityGroupRescue({
+    domain,
+    finalUrl,
+    scores,
+    signals,
+    reachabilityStatus: fetchResult.reachability.status,
+  });
+  if (hospitalityGroupRescue) {
+    reasons.push(hospitalityGroupRescue.reason);
+    const logoUrl = await logoUrlPromise;
+    return buildResult({
+      finalDecision: 'plausible_unverified',
+      normalizedUrl,
+      finalUrl,
+      httpStatus: fetchResult.httpStatus,
+      websiteReachabilityStatus: fetchResult.reachability.status,
+      ...scores,
+      nationalChainScore,
+      websiteRelationshipScore: relationship.websiteRelationshipScore,
+      googlePlacesScore: placesResult.googlePlacesScore,
+      ...eligibility,
+      headlessBrowserUsed,
+      googlePlacesQueried: false,
+      claudeAiUsed: false,
+      websiteLogoHints: signals?.logoHints ?? [],
+      logoUrl,
+      internalFlags: [...internalFlags, hospitalityGroupRescue.flag],
+      reasons,
+      userFacingMessage: buildUserMessage('plausible_unverified'),
+      manualReviewRequired: true,
+    });
+  }
+
   const lowEvidenceNonFit = detectLowEvidenceNonRestaurant({
     restaurantName,
     domain,
@@ -449,6 +482,49 @@ export async function runValidation(input: ValidateWebsiteRequest): Promise<Vali
     userFacingMessage: buildUserMessage(finalDecision),
     manualReviewRequired: manualReview,
   });
+}
+
+function detectHospitalityGroupRescue(options: {
+  domain: string;
+  finalUrl: string;
+  scores: { restaurantSignalScore: number; negativeSignalScore: number };
+  signals: ExtractSignalsResult | null;
+  reachabilityStatus: string;
+}): { reason: string; flag: string } | null {
+  const { domain, finalUrl, scores, signals, reachabilityStatus } = options;
+  if (reachabilityStatus === 'invalid' || reachabilityStatus === 'inaccessible') return null;
+  if (!signals) return null;
+  if (scores.restaurantSignalScore >= 60 || scores.negativeSignalScore >= 35) return null;
+
+  const text = [
+    domain,
+    finalUrl,
+    signals.pageTitle,
+    signals.metaDescription,
+    signals.ogTitle,
+    signals.ogDescription,
+    signals.ogSiteName,
+    ...signals.headingTexts,
+    ...signals.navLinkTexts,
+    ...signals.buttonTexts,
+    ...signals.schemaOrgNames,
+    ...signals.schemaOrgDescriptions,
+    signals.bodyText.slice(0, 12000),
+  ].join(' ').toLowerCase();
+
+  const hasHospitalityGroupLanguage = HOSPITALITY_GROUP_TERMS.some((term) => text.includes(term));
+  if (!hasHospitalityGroupLanguage) return null;
+
+  const hasRestaurantEvidence =
+    signals.hasRestaurantSchema ||
+    signals.hasReservationWidget ||
+    signals.hasOrderingWidget ||
+    signals.hasAddressPhoneBlock ||
+    signals.hasFoodImageAltText ||
+    /(menu|locations|private dining|book a table|our concepts|restaurant)/.test(text);
+
+  if (!hasRestaurantEvidence) return null;
+  return { reason: 'hospitality_group_rescue', flag: 'hospitality_group_rescue' };
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -566,6 +642,17 @@ const CLEAR_NON_RESTAURANT_CONTEXT = [
   'auto repair', 'dealership', 'collision center', 'oil change',
   'hotel rooms', 'guest rooms', 'book your stay', 'amenities',
   'plumbing', 'hvac', 'roofing', 'remodeling', 'contractor',
+];
+
+const HOSPITALITY_GROUP_TERMS = [
+  'hospitality group',
+  'restaurant group',
+  'our concepts',
+  'our restaurants',
+  'culinary group',
+  'hospitality partners',
+  'portfolio of restaurants',
+  'multi-concept',
 ];
 
 const KNOWN_NON_RESTAURANT_DOMAINS = new Set([

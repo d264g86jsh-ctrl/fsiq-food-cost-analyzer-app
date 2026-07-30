@@ -25,11 +25,32 @@ export async function checkWebsite(normalizedUrl: string): Promise<CheckWebsiteR
   let html = '';
 
   try {
-    const response = await fetchWithFallbacks(normalizedUrl);
+    let response = await fetchWithFallbacks(normalizedUrl);
     currentUrl = response.requestUrl;
 
     httpStatus = response.response.status;
     finalUrl = response.response.url || currentUrl;
+
+    // If a deep link is stale (404), retry the domain root before treating it
+    // as unreachable. CRM data frequently contains old /menu or /about URLs.
+    if (httpStatus === 404) {
+      const rootUrl = toDomainRoot(normalizedUrl);
+      if (rootUrl && rootUrl !== normalizedUrl) {
+        try {
+          const rootResponse = await fetchWithFallbacks(rootUrl);
+          const rootStatus = rootResponse.response.status;
+          if (rootStatus >= 200 && rootStatus < 400) {
+            response = rootResponse;
+            currentUrl = response.requestUrl;
+            httpStatus = rootStatus;
+            finalUrl = response.response.url || currentUrl;
+            redirectChain.push(rootUrl);
+          }
+        } catch {
+          // Keep original 404 result.
+        }
+      }
+    }
 
     // Track redirect if URL changed
     if (finalUrl !== currentUrl) {
@@ -81,6 +102,15 @@ export async function checkWebsite(normalizedUrl: string): Promise<CheckWebsiteR
     bodyText,
     signals,
   };
+}
+
+function toDomainRoot(url: string): string | null {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.origin}/`;
+  } catch {
+    return null;
+  }
 }
 
 async function fetchWithFallbacks(url: string): Promise<{ response: Response; requestUrl: string }> {

@@ -1,7 +1,7 @@
 // v2 page wrapper — sage background, hero, glass card, stats, testimonial.
 // AnalyzerForm lives inside the glass card. This component has no client state.
 
-import { AnalyzerForm } from '@/components/analyzer/AnalyzerForm';
+import { AnalyzerFormPage } from '@/components/analyzer/page/AnalyzerFormPage';
 
 /* ── PDF report artifact (CSS mock of the PDF the operator receives) ─────── */
 function ReportArtifact() {
@@ -165,11 +165,7 @@ export function AnalyzerPageV2() {
             </div>
 
             {/* Glass form card */}
-            <div
-              className="mt-9 sm:mt-12 rounded-[28px] p-6 sm:p-8 lg:p-10 glass-card"
-            >
-              <AnalyzerForm />
-            </div>
+            <AnalyzerFormPage />
 
 
           </div>

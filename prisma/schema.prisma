@@ -185,9 +185,20 @@ model Submission {
   // workflowStage tracks current pipeline position for retry and debugging.
   // Values: "submitted" | "validated" | "qualified" | "ai_research" | "ai_narrative"
   //       | "pdf_generation" | "email" | "crm_sync" | "complete"
-  workflowStage  String?
-  workflowStatus WorkflowStatus?
-  workflowErrors Json?           // Array of { stage, error, timestamp } for debugging
+  workflowStage      String?
+  workflowStatus     WorkflowStatus?
+  workflowErrors     Json?           // Array of { stage, error, timestamp } for debugging
+  workflowFailReason String?         // Granular failure reason: "validation_failed" | "qualification_failed" | "ai_research_failed" | "ai_narrative_failed" | "pdf_generation_failed" | "crm_sync_failed" | "meta_capi_failed"
+
+  // ── Stage completion timestamps (for p95 latency tracking) ───────────────
+  aiResearchCompletedAt  DateTime?
+  aiNarrativeCompletedAt DateTime?
+  pdfGeneratedAt         DateTime?
+
+  // ── Idempotency ───────────────────────────────────────────────────────────
+  // Hash of normalized(email) + normalized(website) + 5-min timestamp bucket.
+  // Prevents duplicate submissions from double-clicks or client retries.
+  idempotencyKey String? @unique
 
   // ── Timestamps ────────────────────────────────────────────────────────────
   createdAt DateTime @default(now())

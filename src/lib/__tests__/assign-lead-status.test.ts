@@ -254,7 +254,8 @@ describe('assignLeadStatus — qualified paths', () => {
     expect(r.communicationRoute).toBe(COMMUNICATION_ROUTE.NO_EMAIL_HOLD);
     expect(r.shouldSyncGhl).toBe(true);
     expect(r.tags).toContain(GHL_TAG.ANALYZER_SUBMITTED);
-    expect(r.tags).toContain(GHL_TAG.PDF_FAILED);
+    expect(r.tags).toContain(GHL_TAG.QUALIFIED);
+    expect(r.tags).not.toContain(GHL_TAG.PDF_FAILED);
     expect(r.tags).not.toContain(GHL_TAG.FULL_PDF_READY);
     expect(r.tags).not.toContain(GHL_TAG.CONSERVATIVE_PDF_READY);
   });

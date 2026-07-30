@@ -7,7 +7,8 @@ export interface PdfMonkeyTemplatePatchResult {
   changed: boolean;
 }
 
-const OLD_CALENDLY_URL = 'https://calendly.com/neil-foodserviceiq/15-minute-meeting-clone-1';
+const OLD_CALENDLY_URL_REGEX = /href=(["'])https:\/\/calendly\.com\/neil-foodserviceiq\/15-minute-meeting-clone-1(?:\?[^"']*)?\1/g;
+const CALENDLY_PLACEHOLDER_REGEX = /href=(["'])\s*{{\s*calendlyUrl\s*}}\s*\1/g;
 const SAFETY_STYLE_MARKER = 'fsiq-app-logo-safety';
 
 const SAFE_COVER_LOGO_BLOCK = `<div class="cover-logos">
@@ -23,11 +24,12 @@ const SAFE_COVER_LOGO_BLOCK = `<div class="cover-logos">
  * exists when there is a validated restaurant logo. The FSIQ logo remains in
  * its own existing cover-logo block.
  */
-export function patchPdfMonkeyTemplateHtml(html: string): PdfMonkeyTemplatePatchResult {
+export function patchPdfMonkeyTemplateHtml(html: string, calendlyUrl: string): PdfMonkeyTemplatePatchResult {
   let next = html;
 
   next = injectLogoSafetyStyle(next);
-  next = next.replaceAll(`href="${OLD_CALENDLY_URL}"`, 'href="{{ calendlyUrl }}"');
+  next = next.replace(OLD_CALENDLY_URL_REGEX, `href="${calendlyUrl}"`);
+  next = next.replace(CALENDLY_PLACEHOLDER_REGEX, `href="${calendlyUrl}"`);
 
   next = next.replace(
     /<div class="cover-logos">\s*<div class="cover-operator-logo">[\s\S]*?{%\s*endif\s*%}\s*<\/div>\s*<div class="fsiq-cover-logo">/m,

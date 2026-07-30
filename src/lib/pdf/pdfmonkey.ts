@@ -164,7 +164,7 @@ export async function generatePdf(input: GeneratePdfInput): Promise<GeneratePdfR
   const payload = buildPdfPayload(validatedInput);
 
   try {
-    const templatePatch = await ensureTemplateSafe(apiKey, templateId);
+    const templatePatch = await ensureTemplateSafe(apiKey, templateId, payload.calendlyUrl);
     if (!templatePatch.ok) {
       return {
         pdfStatus: 'error',
@@ -276,6 +276,7 @@ interface PdfMonkeyTemplateResponse {
 async function ensureTemplateSafe(
   apiKey: string,
   templateId: string,
+  calendlyUrl: string,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   if (patchedTemplateIds.has(templateId)) return { ok: true };
 
@@ -302,12 +303,12 @@ async function ensureTemplateSafe(
   const update: { body?: string; body_draft?: string } = {};
 
   if (typeof template.body === 'string') {
-    const patched = patchPdfMonkeyTemplateHtml(template.body);
+    const patched = patchPdfMonkeyTemplateHtml(template.body, calendlyUrl);
     if (patched.changed) update.body = patched.html;
   }
 
   if (typeof template.body_draft === 'string') {
-    const patched = patchPdfMonkeyTemplateHtml(template.body_draft);
+    const patched = patchPdfMonkeyTemplateHtml(template.body_draft, calendlyUrl);
     if (patched.changed) update.body_draft = patched.html;
   }
 

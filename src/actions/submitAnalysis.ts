@@ -31,7 +31,7 @@ import { determinePdfMode } from '@/lib/pdf/pdf-mode';
 import { generatePdf } from '@/lib/pdf/pdfmonkey';
 import type { GeneratePdfResult, GeneratePdfInput } from '@/lib/pdf/pdf-types';
 import type { AiResearchResult, AiNarrativeResult } from '@/lib/ai/ai-types';
-import { assignLeadStatus, needsAiAndPdf, type AssignLeadStatusResult } from '@/lib/crm/assign-lead-status';
+import { assignLeadStatus, needsAiAndPdf } from '@/lib/crm/assign-lead-status';
 import { buildGhlPayload } from '@/lib/crm/build-ghl-payload';
 import { syncToGhl } from '@/lib/crm/ghl';
 import { buildLeadEvent, buildQualifiedLeadEvent } from '@/lib/meta/meta-events';
@@ -39,21 +39,12 @@ import { sendToMetaCapi } from '@/lib/meta/meta-capi';
 import { LEAD_STATUS } from '@/lib/crm/lead-status';
 import type { TrackingContext } from '@/lib/meta/meta-types';
 import type { AnalyzerFormPayload } from '@/lib/analyzer/form-types';
+import { syncAndReturn } from '@/lib/workflow/sync-and-return';
+import { failResult, pipelineLog } from '@/lib/workflow/helpers';
+import { withRetry } from '@/lib/workflow/retry';
+import type { SubmitAnalysisResult, WorkflowError } from '@/lib/workflow/types';
 
-// ── Result type ───────────────────────────────────────────────────────────────
-
-export interface SubmitAnalysisResult {
-  success: boolean;
-  submissionId: string | null;
-  error: string | null;
-  qualified: boolean | null;
-  dqReason: string | null;
-  leadStatus: string | null;
-  dollarEstimateDisplay: string | null;
-  pdfDownloadUrl: string | null;
-}
-
-type WorkflowError = { stage: string; error: string; timestamp: string };
+export type { SubmitAnalysisResult };
 
 // ── Main action ───────────────────────────────────────────────────────────────
 
@@ -78,6 +69,61 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     clientIpAddress: ipAddress,
   };
 
+  // ── Step 1b: Server-side input validation ────────────────────────────────────
+  if (!payload.email?.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(payload.email.trim())) {
+    return fail(null, 'Invalid email address.');
+  }
+  if (!payload.full_name?.trim() || payload.full_name.trim().length > 300) {
+    return fail(null, 'Invalid name.');
+  }
+  if (!payload.restaurant_name?.trim() || payload.restaurant_name.trim().length > 300) {
+    return fail(null, 'Invalid restaurant name.');
+  }
+  if (payload.phone && payload.phone.trim().length > 0 && payload.phone.replace(/\D/g, '').length < 7) {
+    return fail(null, 'Invalid phone number.');
+  }
+  if (!payload.website?.trim()) {
+    return fail(null, 'Website is required.');
+  }
+
+  // ── Step 1c: Idempotency key — deterministic dedup within 5-min bucket ───────
+  // Hash of normalized(email) + normalized(website) + floor(now / 5min).
+  // If a matching key already exists we return the existing submission rather
+  // than creating a duplicate (double-click, client retry, etc.).
+  const idempotencyKey = await (async () => {
+    try {
+      const bucket = Math.floor(Date.now() / (5 * 60 * 1000));
+      const raw = `${payload.email.toLowerCase().trim()}|${payload.website.toLowerCase().trim()}|${bucket}`;
+      const encoded = new TextEncoder().encode(raw);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', encoded);
+      return Array.from(new Uint8Array(hashBuffer)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    } catch {
+      return null;
+    }
+  })();
+
+  if (idempotencyKey) {
+    try {
+      const existing = await db.submission.findUnique({
+        where: { idempotencyKey },
+        select: { id: true, qualified: true, dqReason: true, dollarEstimate: true, pdfDownloadUrl: true },
+      });
+      if (existing) {
+        pipelineLog('info', existing.id, 'idempotency', 'Duplicate submission detected — returning existing');
+        return {
+          success:               true,
+          submissionId:          existing.id,
+          error:                 null,
+          qualified:             existing.qualified,
+          dqReason:              existing.dqReason,
+          leadStatus:            null,
+          dollarEstimateDisplay: existing.dollarEstimate ? `$${Math.round(existing.dollarEstimate).toLocaleString()}` : null,
+          pdfDownloadUrl:        existing.pdfDownloadUrl,
+        };
+      }
+    } catch { /* non-fatal — proceed without dedup if DB check fails */ }
+  }
+
   // ── Step 2: Initial DB save ──────────────────────────────────────────────────
   let submissionId: string;
   try {
@@ -101,6 +147,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
         utmContent:          payload.utm_content ?? null,
         utmTerm:             payload.utm_term ?? null,
         ipAddress,
+        idempotencyKey:      idempotencyKey ?? undefined,
         workflowStage:       'submitted',
         workflowStatus:      'in_progress' as WorkflowStatus,
       },
@@ -108,7 +155,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     });
     submissionId = created.id;
   } catch (err) {
-    console.error('[submitAnalysis] DB create failed:', err);
+    pipelineLog('error', null, 'db_create', 'DB submission create failed', { error: err instanceof Error ? err.message : String(err) });
     return fail(null, 'Failed to save submission. Please try again.');
   }
 
@@ -141,8 +188,8 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       workflowStage:           'validated',
     });
   } catch (err) {
-    console.error('[submitAnalysis] validation failed:', err);
-    await patch({ workflowStage: 'failed', workflowStatus: 'failed' as WorkflowStatus, workflowErrors: workflowErrors as unknown as Prisma.InputJsonValue });
+    pipelineLog('error', submissionId, 'validation', 'Website validation failed', { error: err instanceof Error ? err.message : String(err) });
+    await patch({ workflowStage: 'failed', workflowStatus: 'failed' as WorkflowStatus, workflowFailReason: 'validation_failed', workflowErrors: workflowErrors as unknown as Prisma.InputJsonValue });
     return fail(submissionId, 'Analysis failed. Please try again.');
   }
 
@@ -195,8 +242,8 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       workflowStage:      'qualified',
     });
   } catch (err) {
-    console.error('[submitAnalysis] qualification failed:', err);
-    await patch({ workflowStage: 'failed', workflowStatus: 'failed' as WorkflowStatus, workflowErrors: workflowErrors as unknown as Prisma.InputJsonValue });
+    pipelineLog('error', submissionId, 'qualification', 'Lead qualification failed', { error: err instanceof Error ? err.message : String(err) });
+    await patch({ workflowStage: 'failed', workflowStatus: 'failed' as WorkflowStatus, workflowFailReason: 'qualification_failed', workflowErrors: workflowErrors as unknown as Prisma.InputJsonValue });
     return fail(submissionId, 'Analysis failed. Please try again.');
   }
 
@@ -268,7 +315,7 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
   // ── Background: steps 7–10 via waitUntil (runs after response is sent) ────────
   waitUntil((async () => {
     try {
-    console.log('[FSIQ DEBUG] waitUntil background started for submission:', submissionId);
+    pipelineLog('info', submissionId, 'background_start', 'Background pipeline started');
     // ── Step 7: AI Research ────────────────────────────────────────────────────
     let researchResult: AiResearchResult;
     try {
@@ -278,10 +325,12 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       researchResult = { ...buildFallbackResearch(aiInput), aiUsed: false, aiFallbackUsed: true, aiModel: null, aiError: err instanceof Error ? err.message : String(err), generatedAt: new Date().toISOString() };
     }
     await patch({
-      logoUrl:         researchResult.logoUrl,
-      businessSummary: researchResult.businessSummary,
-      conceptSignals:  researchResult.conceptSignals as Prisma.InputJsonValue,
-      workflowStage:   'ai_research',
+      logoUrl:                researchResult.logoUrl,
+      businessSummary:        researchResult.businessSummary,
+      conceptSignals:         researchResult.conceptSignals as Prisma.InputJsonValue,
+      workflowStage:          'ai_research',
+      aiResearchCompletedAt:  new Date(),
+      ...(researchResult.aiFallbackUsed ? { workflowFailReason: 'ai_research_failed' } : {}),
     });
 
     // 1-second delay between Claude calls (Phase 5 spec: orchestrator's responsibility)
@@ -296,10 +345,12 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       narrativeResult = { ...buildFallbackNarrative(aiInput), aiUsed: false, aiFallbackUsed: true, aiModel: null, aiError: err instanceof Error ? err.message : String(err), generatedAt: new Date().toISOString() };
     }
     await patch({
-      narrativeDistributor: narrativeResult.narrativeDistributor,
-      narrativeProcurement: narrativeResult.narrativeProcurement,
-      narrativeSku:         narrativeResult.narrativeSku,
-      workflowStage:        'ai_narrative',
+      narrativeDistributor:   narrativeResult.narrativeDistributor,
+      narrativeProcurement:   narrativeResult.narrativeProcurement,
+      narrativeSku:           narrativeResult.narrativeSku,
+      workflowStage:          'ai_narrative',
+      aiNarrativeCompletedAt: new Date(),
+      ...(narrativeResult.aiFallbackUsed ? { workflowFailReason: 'ai_narrative_failed' } : {}),
     });
 
     // ── Step 9: PDF generation ─────────────────────────────────────────────────
@@ -351,6 +402,8 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
       pdfError:            pdfResult.pdfError,
       pdfRetryCount:       pdfResult.pdfRetryCount,
       workflowStage:       'pdf_generation',
+      pdfGeneratedAt:      new Date(),
+      ...(pdfResult.pdfStatus === 'error' ? { workflowFailReason: 'pdf_generation_failed' } : {}),
     });
 
     // ── Step 10: Assign final lead status + GHL sync + Meta CAPI ───────────────
@@ -374,9 +427,16 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
     let crmSyncError: string | null = 'Record not found for GHL sync';
 
     if (fresh) {
-      console.log('[FSIQ DEBUG] Starting GHL sync for submission:', submissionId);
+      pipelineLog('info', submissionId, 'crm_sync', 'Starting GHL sync');
       const ghlPayload = buildGhlPayload(fresh, finalStatus.leadStatus, finalStatus.communicationRoute, finalStatus.tags);
-      const crmResult = await syncToGhl(ghlPayload);
+      const crmResult = await withRetry(
+        () => syncToGhl(ghlPayload),
+        {
+          maxAttempts: 3,
+          backoffMs: 1000,
+          onRetry: (attempt, err) => pipelineLog('warn', submissionId, 'crm_sync', `GHL sync retry ${attempt}`, { error: err instanceof Error ? err.message : String(err) }),
+        },
+      );
       crmSyncStatus = crmResult.crmSyncStatus;
       ghlContactId  = crmResult.ghlContactId;
       crmSyncError  = crmResult.crmSyncError;
@@ -397,34 +457,48 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
         capiEvents.push(buildQualifiedLeadEvent(fresh, trackingContext));
       }
 
-      metaResult = await sendToMetaCapi(capiEvents).catch((err) => ({
+      metaResult = await withRetry(
+        () => sendToMetaCapi(capiEvents),
+        {
+          maxAttempts: 3,
+          backoffMs: 500,
+          onRetry: (attempt, err) => pipelineLog('warn', submissionId, 'meta_capi', `Meta CAPI retry ${attempt}`, { error: err instanceof Error ? err.message : String(err) }),
+        },
+      ).catch((err) => ({
         metaStatus:   'error' as const,
         metaEventIds: [],
         metaError:    err instanceof Error ? err.message : String(err),
       }));
     }
 
+    const finalFailReason =
+      crmSyncStatus === 'error' ? 'crm_sync_failed' :
+      metaResult.metaStatus === 'error' ? 'meta_capi_failed' :
+      workflowErrors.length > 0 ? workflowErrors[workflowErrors.length - 1].stage + '_failed' :
+      null;
+
     await db.submission.update({
       where: { id: submissionId },
       data: {
-        crmSyncStatus:  crmSyncStatus as CrmSyncStatus,
+        crmSyncStatus:     crmSyncStatus as CrmSyncStatus,
         ghlContactId,
         crmSyncError,
-        crmTags:        finalStatus.tags as unknown as Prisma.InputJsonValue,
-        metaStatus:     metaResult.metaStatus,
-        metaEventIds:   metaResult.metaEventIds as unknown as Prisma.InputJsonValue,
-        metaError:      metaResult.metaError,
-        workflowStage:  'complete',
-        workflowStatus: (workflowErrors.length > 0 || crmSyncStatus === 'error')
+        crmTags:           finalStatus.tags as unknown as Prisma.InputJsonValue,
+        metaStatus:        metaResult.metaStatus,
+        metaEventIds:      metaResult.metaEventIds as unknown as Prisma.InputJsonValue,
+        metaError:         metaResult.metaError,
+        workflowStage:     'complete',
+        workflowStatus:    (workflowErrors.length > 0 || crmSyncStatus === 'error')
           ? 'partial' as WorkflowStatus
           : 'complete' as WorkflowStatus,
-        workflowErrors: workflowErrors.length > 0
+        workflowFailReason: finalFailReason,
+        workflowErrors:    workflowErrors.length > 0
           ? (workflowErrors as unknown as Prisma.InputJsonValue)
           : undefined,
       },
     }).catch(() => {});
     } catch (unexpectedErr) {
-      console.error('[submitAnalysis] background pipeline unexpected error:', unexpectedErr);
+      pipelineLog('error', submissionId, 'background_pipeline', 'Unexpected error in background pipeline', { error: unexpectedErr instanceof Error ? unexpectedErr.message : String(unexpectedErr) });
       await db.submission.update({
         where: { id: submissionId },
         data: { workflowStage: 'complete', workflowStatus: 'partial' as WorkflowStatus },
@@ -445,97 +519,4 @@ export async function submitAnalysis(payload: AnalyzerFormPayload): Promise<Subm
   };
 }
 
-// ── syncAndReturn: GHL sync + Meta CAPI + final DB update + client response ────
-// Used only by the DQ / manual-review early-exit path (steps 5–6 above).
-
-async function syncAndReturn({
-  submissionId,
-  status,
-  workflowErrors,
-  responseQualified,
-  responseDqReason,
-  responseDollarEstimate,
-  trackingContext,
-}: {
-  submissionId: string;
-  status: AssignLeadStatusResult;
-  workflowErrors: WorkflowError[];
-  responseQualified: boolean;
-  responseDqReason: string | null;
-  responseDollarEstimate: string | null;
-  trackingContext: TrackingContext;
-}): Promise<SubmitAnalysisResult> {
-  // Fetch fresh record for GHL payload builder and CAPI user data
-  const fresh = await db.submission.findUnique({ where: { id: submissionId } }).catch(() => null);
-
-  let crmSyncStatus: 'synced' | 'error' = 'error';
-  let ghlContactId: string | null = null;
-  let crmSyncError: string | null = 'Record not found for GHL sync';
-
-  if (fresh) {
-    const ghlPayload = buildGhlPayload(fresh, status.leadStatus, status.communicationRoute, status.tags);
-    const crmResult = await syncToGhl(ghlPayload);
-    crmSyncStatus = crmResult.crmSyncStatus;
-    ghlContactId  = crmResult.ghlContactId;
-    crmSyncError  = crmResult.crmSyncError;
-  }
-
-  // ── Meta CAPI — non-fatal; fires after GHL sync ───────────────────────────
-  let metaResult: { metaStatus: 'fired' | 'error' | 'skipped'; metaEventIds: string[]; metaError: string | null } = {
-    metaStatus: 'skipped', metaEventIds: [], metaError: 'Record not found for CAPI',
-  };
-
-  if (fresh) {
-    const capiEvents = [buildLeadEvent(fresh, trackingContext)];
-
-    // QualifiedLead fires only for PDF-ready qualified leads — not on the DQ path
-    const isQualifiedPdfReady =
-      status.leadStatus === LEAD_STATUS.QUALIFIED_FULL_PDF_READY ||
-      status.leadStatus === LEAD_STATUS.QUALIFIED_CONSERVATIVE_PDF_READY;
-
-    if (isQualifiedPdfReady) {
-      capiEvents.push(buildQualifiedLeadEvent(fresh, trackingContext));
-    }
-
-    metaResult = await sendToMetaCapi(capiEvents).catch((err) => ({
-      metaStatus:   'error' as const,
-      metaEventIds: [],
-      metaError:    err instanceof Error ? err.message : String(err),
-    }));
-  }
-
-  await db.submission.update({
-    where: { id: submissionId },
-    data: {
-      crmSyncStatus:  crmSyncStatus as CrmSyncStatus,
-      ghlContactId,
-      crmSyncError,
-      crmTags:        status.tags as unknown as Prisma.InputJsonValue,
-      metaStatus:     metaResult.metaStatus,
-      metaEventIds:   metaResult.metaEventIds as unknown as Prisma.InputJsonValue,
-      metaError:      metaResult.metaError,
-      workflowStage:  'complete',
-      workflowStatus: (workflowErrors.length > 0 || crmSyncStatus === 'error')
-        ? 'partial' as WorkflowStatus
-        : 'complete' as WorkflowStatus,
-      workflowErrors: workflowErrors.length > 0
-        ? (workflowErrors as unknown as Prisma.InputJsonValue)
-        : undefined,
-    },
-  }).catch(() => {});
-
-  return {
-    success:               true,
-    submissionId,
-    error:                 null,
-    qualified:             responseQualified,
-    dqReason:              responseDqReason,
-    leadStatus:            status.leadStatus,
-    dollarEstimateDisplay: responseDollarEstimate,
-    pdfDownloadUrl:        null,
-  };
-}
-
-function fail(submissionId: string | null, error: string): SubmitAnalysisResult {
-  return { success: false, submissionId, error, qualified: null, dqReason: null, leadStatus: null, dollarEstimateDisplay: null, pdfDownloadUrl: null };
-}
+const fail = failResult;
