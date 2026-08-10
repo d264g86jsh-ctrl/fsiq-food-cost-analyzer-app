@@ -204,10 +204,9 @@ export function AnalyzerPageV2() {
                   />
                 </svg>
                 <p className="mt-5 text-[20px] sm:text-[24px] font-medium tracking-[-0.01em] leading-snug max-w-3xl text-balance text-[#143225]">
-                  We were paying street pricing across the board and didn&apos;t know it.
-                  FSIQ found{' '}
-                  <span className="text-[#52C275]">$413,000 in annual savings</span>
-                  {' '}in our first invoice review.
+                  We were doing about $10M in annual revenue and we are on pace to do about{' '}
+                  <span className="text-[#52C275]">$30M in revenue</span>
+                  {' '}after working with FoodServiceIQ.
                 </p>
                 <div className="mt-6 flex items-center gap-3">
                   <div
